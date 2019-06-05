@@ -40,8 +40,9 @@ This directory contains the following:
 This directory contains the following:
 * scripts used to model weather effects on drones
 * classes corresponding to each weather effect (e.g., rain, icing (though this might be a function of temperature and humidity- maybe it has a class that checks to see if icing is likely based on other weather characteristics), wind, etc.) that contain the following:
-	* class variables characterizing the weather (e.g., )
-	* methods used to modify the `Power` class
+
+    * class variables characterizing the weather (e.g., )
+    * methods used to modify the `Power` class
 		* these probably take an instance of the `Drone` class as an argument
 * the `Weather` class
 	* class variables describe
@@ -85,7 +86,7 @@ NOTE: the model is based on power consumption to accomodate future development. 
 * an `awesomeModelName_importer.py` module importer script
 	* this script imports the classes and definitions defined above
 	* after this script is run, classes and functions can be accessed and used to start simulations
-* an `exe.py` script 
+* an `awesomeModelName_exe.py` script 
 	* this script is a sample simulation script containing
 		* the module importer script
 		* a sample simulation setup, where the following are specified:
