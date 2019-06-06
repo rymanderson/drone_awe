@@ -1,0 +1,13 @@
+# param file for the DJI Mavic 2 Pro Airframe
+
+params = {
+  'TOW':0.907, #Take-off weight, in kg
+  'max_speed':20, #m/s (near sea level, no wind)
+  'max_alt':6000, #m above sea level
+  'max_t':31, #min (no wind)
+  'max_t_hover':29, #min (no wind)
+  'max_tilt':35, #deg
+  'min_temp':-10, #deg C
+  'max_temp':40, #deg C
+  'power_rating':60 #W
+  }

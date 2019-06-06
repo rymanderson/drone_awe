@@ -1,9 +1,9 @@
-import matplotlib.pyplot as plt
-
 class Plotter:
 	# 'Class used to make plots of simulation results'
 
 	# class variables go here:
+	# tyler: I'm not sure how these will work if the labels change each time. Should we
+	# just have them defined in the init method (see below)?
 	xlabel = "Time [s]"
 	ylabel = "Range [m]"
 	title = "Example Drone"
