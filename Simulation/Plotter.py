@@ -1,24 +1,46 @@
+import datetime
+import matplotlib.pyplot as plt
+
 class Plotter:
 	# 'Class used to make plots of simulation results'
 
 	# class variables go here:
-	# tyler: I'm not sure how these will work if the labels change each time. Should we
-	# just have them defined in the init method (see below)?
-	xlabel = "Time [s]"
-	ylabel = "Range [m]"
-	title = "Example Drone"
+	fig_num = 1
 
 	# methods go here:
-	def __init__(self, axistitle,xlabel,ylabel):
-		self.title = axistitle
+	def __init__(self,x,xlabel,y,ylabel,axistitle):
+		d = datetime.datetime.today()
+		self.title = axistitle + " (" + d.strftime("%b-%d-%Y") + ")"
 		self.xlabel = xlabel
 		self.ylabel = ylabel
+		self.x = x
+		self.y = y
+		# plt.plot(self.x,self.y)
+		# plt.xlabel(self.xlabel)
+		# plt.ylabel(self.ylabel)
+		# plt.title(self.title)
+		# plt.show()
 
-	def plot(self,x,y)
-		plt.plot(x,y)
+	def plot_line(self):
+		fig = plt.figure(Plotter.fig_num)
+		fig.patch.set_facecolor('w')
+		plt.plot(self.x,self.y)
 		plt.xlabel(self.xlabel)
 		plt.ylabel(self.ylabel)
 		plt.title(self.title)
-		plt.show()
+		Plotter.fig_num += 1
+		fig.show()
+		input()
+
+	def plot_scatter(self):
+		fig = plt.figure(Plotter.fig_num)
+		fig.patch.set_facecolor('w')
+		plt.plot(self.x,self.y,'ro')
+		plt.xlabel(self.xlabel)
+		plt.ylabel(self.ylabel)
+		plt.title(self.title)
+		Plotter.fig_num += 1
+		fig.show()
+		input()
 
 print("Successfully imported `Plotter.py`")
