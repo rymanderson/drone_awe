@@ -9,7 +9,7 @@ This section contains instructions for how to run awesomeModelName.py.
 This directory contains the following:
 * the `Drone` class
 	* class variables contain:
-		* data sheet specifications of specific drone models (e.g., the Mavic Pro 4), including 
+		* data sheet specifications of specific drone models (e.g., the Mavic Pro 4), including
 			* battery size
 			* battery type
 			* range under specified conditions
@@ -44,7 +44,7 @@ This directory contains the following:
 		* baseline power consumption
 		* an array of 'correction' objects used to modify the power consumption class variable due to weather or other effects (these could be the weather effect classes, actually)
 		* total power consumption
-	* methods are used to 
+	* methods are used to
 		* update the total power consumption class variable
 		* append `PowerCorrection` objects to `Power` objects using the `addCorrection` method
 		* throw an error if `addCorrection` attempts to append a time-variant `PowerCorrection` object to a time-invariant `Power` object
@@ -93,10 +93,11 @@ NOTE: the model is based on power consumption to accomodate future development. 
 		* y-axis label
 		* other miscellaneous plotting parameters
 	* methods are used to make plots
+	* a test script entitled `test_plotter.py`
 * an `awesomeModelName_importer.py` module importer script
 	* this script imports the classes and definitions defined above
 	* after this script is run, classes and functions can be accessed and used to start simulations
-* an `awesomeModelName_exe.py` script 
+* an `awesomeModelName_exe.py` script
 	* this script is a sample simulation script containing
 		* the module importer script
 		* a sample simulation setup, where the following are specified:
