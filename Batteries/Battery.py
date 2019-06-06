@@ -31,7 +31,7 @@ class Battery:
             return self.capacity * self.voltage_mean / power.power
 
     # time-variant methods go here:
-    def updateLoad(self, power)
+    def updateLoad(self, power):
         self.current    = power.power / self.voltage
 
     def discharge(self, power, timestep):
@@ -44,5 +44,5 @@ class Battery:
 
                 
 
-print("Successfully imported `Power.py`")
+print("Successfully imported `Battery.py`")
 
