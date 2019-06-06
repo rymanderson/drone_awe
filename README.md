@@ -18,6 +18,7 @@ This directory contains the following:
 	* methods calculate certain characteristics based on available information
 * the `params/` directory
 	* contains `.param` text files containing specifications of each drone to be modeled
+* a test script entitled `test_Drones.py`
 
 ### Batteries/
 This directory contains the following:
@@ -36,11 +37,27 @@ This directory contains the following:
 * the `params/` directory
 	* contains `.param` text files containing information about different battery types
 
+### Power/
+This directory contains the following:
+* the `Power` class
+	* class variables describe
+		* baseline power consumption
+		* an array of 'correction' objects used to modify the power consumption class variable due to weather or other effects (these could be the weather effect classes, actually)
+		* total power consumption
+	* methods are used to 
+		* update the total power consumption class variable
+		* append `PowerCorrection` objects to `Power` objects using the `addCorrection` method
+		* throw an error if `addCorrection` attempts to append a time-variant `PowerCorrection` object to a time-invariant `Power` object
+* the `PowerCorrection` class
+	* class variables desribe
+		* adjustments to the baseline power requirements of the drone
+		* whether the simulation is time-variant or time-invariant
+	* methods perform miscellaneous book-keeping functions
+
 ### Weather/
 This directory contains the following:
 * scripts used to model weather effects on drones
 * classes corresponding to each weather effect (e.g., rain, icing (though this might be a function of temperature and humidity- maybe it has a class that checks to see if icing is likely based on other weather characteristics), wind, etc.) that contain the following:
-
     * class variables characterizing the weather (e.g., )
     * methods used to modify the `Power` class
 		* these probably take an instance of the `Drone` class as an argument
@@ -54,13 +71,6 @@ This directory contains the following:
 ### Simulation/
 This directory contains the following:
 * scripts used to model the range of a particular drone
-* the `Power` class
-	* class variables describe
-		* baseline power consumption
-		* an array of 'correction' objects used to modify the power consumption class variable due to weather or other effects (these could be the weather effect classes, actually)
-		* total power consumption
-	* class methods are used to update the total power consumption class variable
-	* class variables may be constant (for speed and simplicity) or vary with time in simulation
 * the `Simulation` class
 	* class variables describe
 		* start time
