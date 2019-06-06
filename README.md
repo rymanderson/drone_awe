@@ -142,6 +142,7 @@ NOTE: the model is based on power consumption to accomodate future development. 
 		* other miscellaneous plotting parameters
 
 	* methods are used to make plots
+	* a test script entitled `test_plotter.py`
 
 * an `awesomeModelName_importer.py` module importer script
 
