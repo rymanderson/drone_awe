@@ -172,7 +172,7 @@ Properties and their respective units include:
 * Capacity: _milliamp-hours [mAh]_
 * Voltage: _Volts [V]_
 * Current: _Amperes [A]_
-* Resistance: _Ohms [$\Omega$]_
+* Resistance: _Ohms [&Omega;]_
 * Velocity/Speed: _meters per second [m/s]_
 * Power: _Watts [W]_
 * Endurance or Flight time: _minutes [min]_
