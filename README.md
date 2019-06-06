@@ -16,7 +16,7 @@ This directory contains the following:
 
 	* class variables contain:
 
-		* data sheet specifications of specific drone models (e.g., the Mavic Pro 4), including 
+		* data sheet specifications of specific drone models (e.g., the Mavic Pro 4), including
 
 			* battery size
 			* battery type
@@ -71,7 +71,7 @@ This directory contains the following:
 		* an array of 'correction' objects used to modify the power consumption class variable due to weather or other effects (these could be the weather effect classes, actually)
 		* total power consumption
 
-	* methods are used to 
+	* methods are used to
 
 		* update the total power consumption class variable
 		* append `PowerCorrection` objects to `Power` objects using the `addCorrection` method
@@ -142,6 +142,9 @@ NOTE: the model is based on power consumption to accomodate future development. 
 		* other miscellaneous plotting parameters
 
 	* methods are used to make plots
+		* line plot
+		* scatter plot
+		* others to be decided (subplots, multiple plots per figure, etc.)
 	* a test script entitled `test_plotter.py`
 
 * an `awesomeModelName_importer.py` module importer script
@@ -149,7 +152,7 @@ NOTE: the model is based on power consumption to accomodate future development. 
 	* this script imports the classes and definitions defined above
 	* after this script is run, classes and functions can be accessed and used to start simulations
 
-* an `awesomeModelName_exe.py` script 
+* an `awesomeModelName_exe.py` script
 
 	* this script is a sample simulation script containing
 
@@ -166,12 +169,15 @@ NOTE: `awesomeModelName_importer.py` and `awesomeModelName_exe.py` should be sim
 
 Properties and their respective units include:
 
-* Capacity: _Ampere-hours (A-hrs)_
-* Voltage: _Volts (V)_
-* Current: _Amperes (A)_
-* Resistance: _Ohms (&Omega)_
-* Velocity/Speed: _meters per second (m/s)_
-* Power: _Watts (W)_
+* Capacity: _milliamp-hours [mAh]_
+* Voltage: _Volts [V]_
+* Current: _Amperes [A]_
+* Resistance: _Ohms [$\Omega$]_
+* Velocity/Speed: _meters per second [m/s]_
+* Power: _Watts [W]_
+* Endurance or Flight time: _minutes [min]_
+* Altitude: _meters [m]_
+* Temperature: _degrees Celcius [&deg;C]_
 
 ## Classes
 
