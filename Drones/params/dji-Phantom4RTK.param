@@ -1,0 +1,19 @@
+wingtype rotary
+diagonal 0.350
+TOW 1.391
+max_alt 6000
+max_speed 16.0934
+min_temp 0
+max_temp 40
+max_t 30
+batt_type LiPo
+batt_mass 0.468
+batt_cells 4
+batt_voltage 15.2
+batt_capacity 5870
+batt_energy 89.2
+props 9450s Quick Release
+batt_rechargetime 60
+num_rotors 4
+
+Note https://www.dji.com/phantom-4-rtk/info#specs

@@ -1,0 +1,17 @@
+wingtype rotor
+num_rotors 8
+max_TOW 2.3
+max_payload 0.8
+max_t 22
+max_speed 15
+wind_resistance 12
+batt_type LiPo
+batt_cells 3
+batt_capacity 6250
+batt_mass 0.426
+min_temp -5
+max_temp 35
+num_rotors 8
+rotor_diam 0.2
+
+Note http://www.asctec.de/en/uav-uas-drones-rpas-roav/asctec-falcon-8/#pane-0-1

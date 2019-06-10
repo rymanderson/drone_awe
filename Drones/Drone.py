@@ -1,4 +1,5 @@
 import csv
+import os
 
 class Drone:
 	# 'Class used to store key drone characteristics'
@@ -14,19 +15,22 @@ class Drone:
 			'wingtype':None,
 			'TOW':None,
 			'max_speed':None,
+			'cruise_speed':None,
 			'max_alt':None,
 			'max_t':None,
 			'max_t_hover':None,
-			'max_tilt':None,
-			'min_temp':None,
-			'max_temp':None,
-			'power_rating':None,	
+			'min_temp':0,
+			'max_temp':40,
+			'power_rating':None,
 			'batt_type':None,
 			'batt_capacity':None,
 			'batt_voltage':None,
 			'batt_cells':None,
 			'batt_energy':None,
-			'batt_mass':None
+			'batt_mass':None,
+			'waterprrof':'no',
+			'batt_rechargetime':None,
+			'max_payload':None
 			}
 
 	# methods go here:
@@ -35,8 +39,8 @@ class Drone:
 
 	def getparams(self):
 		# find name.param in the params/ directory
-		with open("paramlist.param","r") as paramlist:
-			with open(self.name + ".param", "r") as paramfile:
+		with open(os.path.join('./params', 'paramlist.param'),'r') as paramlist:
+			with open(os.path.join('./params', self.name + ".param"),'r') as paramfile:
 				paramlist = paramlist.readlines()
 				paramfile = paramfile.readlines() #open file with read privilege
 

@@ -1,0 +1,16 @@
+wingtype rotary
+num_rotors 4
+max_speed 13.89
+max_t 35
+max_payload 2.0
+max_alt 4572
+wind_resistance 19.44
+min_temp -20
+max_temp 50
+waterproof yes
+TOW 4.5
+num_batteries 4
+
+Note https://www.aeryon.com/skyranger/r70/
+Note https://bssholland.com/products/skyranger-r70/
+Note https://www.aeryon.com/skyranger/r60/#

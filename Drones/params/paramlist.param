@@ -1,10 +1,10 @@
 wingtype
 TOW
 max_speed
+cruise_speed
 max_alt
 max_t
 max_t_hover
-max_tilt
 min_temp
 max_temp
 power_rating
@@ -14,3 +14,6 @@ batt_voltage
 batt_cells
 batt_energy
 batt_mass
+batt_rechargetime
+wind_resistance
+waterproof
