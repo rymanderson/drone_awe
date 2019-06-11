@@ -8,7 +8,7 @@ This section contains instructions for how to run awesomeModelName.py.
 
 ## Directories Overview
 
-### Drones/
+### Drone/
 
 This directory contains the following:
 
@@ -16,7 +16,7 @@ This directory contains the following:
 
 	* class variables contain:
 
-		* data sheet specifications of specific drone models (e.g., the Mavic Pro 4), including
+		* data sheet specifications of specific drone models (e.g., the Mavic 2 Pro), including
 
 			* battery size
 			* battery type
