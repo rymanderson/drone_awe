@@ -146,6 +146,8 @@ NOTE: the model is based on power consumption to accomodate future development. 
 		* scatter plot
 		* others to be decided (subplots, multiple plots per figure, etc.)
 	* a test script entitled `test_plotter.py`
+	* to use this you need to install matplotlib:
+		* 'pip install matplotlib' (in the terminal)
 
 * an `awesomeModelName_importer.py` module importer script
 
