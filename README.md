@@ -178,6 +178,8 @@ Properties and their respective units include:
 * Endurance or Flight time: _minutes [min]_
 * Altitude: _meters [m]_
 * Temperature: _degrees Celcius [&deg;C]_
+* Wind Resistance: _meters per second [m/s]_ (referring to the maximum wind speed the drone can resist)
+* Battery re-charge time: _minutes [min]_
 
 ## Classes
 

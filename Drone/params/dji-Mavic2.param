@@ -19,5 +19,4 @@ waterproof no
 wind_resistance 10.8
 batt_rechargetime 90
 num_rotors 4
-
-Note https://www.dji.com/mavic-2/info#specs
+rotor_diam 0.2

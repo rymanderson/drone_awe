@@ -13,5 +13,3 @@ min_temp -5
 max_temp 35
 num_rotors 8
 rotor_diam 0.2
-
-Note http://www.asctec.de/en/uav-uas-drones-rpas-roav/asctec-falcon-8/#pane-0-1

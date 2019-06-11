@@ -14,5 +14,3 @@ motor_max_power_peak 950
 min_temp -20
 max_temp 45
 thrust_ratio_at_max_TOW 1.85:1
-
-Note https://freeflysystems.com/alta-8/specs

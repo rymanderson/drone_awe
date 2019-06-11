@@ -10,7 +10,7 @@ class Drone:
     # wingtype    = "rotary"
 	# battery     = {'type':'LiPo', 'capacity':0.0, 'voltage':0.0}
 
-	name = "Mavic2"
+	name = "dji-Mavic2"
 	params = {
 			'wingtype':None,
 			'TOW':None,
@@ -22,7 +22,7 @@ class Drone:
 			'min_temp':0,
 			'max_temp':40,
 			'power_rating':None,
-			'batt_type':None,
+			'batt_type':'LiPo',
 			'batt_capacity':None,
 			'batt_voltage':None,
 			'batt_cells':None,
@@ -30,7 +30,8 @@ class Drone:
 			'batt_mass':None,
 			'waterprrof':'no',
 			'batt_rechargetime':None,
-			'max_payload':None
+			'max_payload':None,
+			'rotor_diam':0.2
 			}
 
 	# methods go here:
@@ -55,7 +56,7 @@ class Drone:
 					line = line.strip() #gets rid of quotation marks when comparing strings
 					for spec in specs:
 						if line == spec:
-							if spec == "wingtype" or spec == "batt_type":
+							if spec == "wingtype" or spec == "batt_type" or spec == 'waterproof' or spec == 'VTOL':
 								self.params[spec] = values[specs.index(spec)]
 							else:
 								self.params[spec] = float(values[specs.index(spec)])
