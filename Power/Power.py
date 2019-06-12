@@ -1,6 +1,7 @@
 import sys
 sys.path.append('../')
-import Drone
+sys.path.append('../Drone/')
+from Drone import Drone
 
 class Power:
         # 'Class used to predict the drone\'s power requirement'
@@ -15,19 +16,19 @@ class Power:
         density = 1.225 #kg/m3
 
         # methods go here:
-        def __init__(self,name,altitude):
+        def __init__(self,name,drone,weather):
                 self.name = name
-                self.drone = Drone.Drone(name)
-                self.drone.getParams()
-                self.Op1 = Weather.Weather(altitude)
-                self.density = Op1.density
-                self.mass = self.drone.params[TOW]
+                # drone = Drone(name)
+                drone.getParams()
+                # self.Op1 = Weather.Weather(altitude)
+                self.density = weather.density
+                self.mass = drone.params[TOW]
                 if drone.params['wingtype'] == 'rotary':
-                        self.Nr = self.drone.params[num_rotors]
-                        self.L_D = 3
+                        self.Nr = drone.params[num_rotors]
+                        self.L_D = 3 #may need to change
                         Power.getpower_rotor1()
                 elif drone.params['wingtype'] == 'fixed':
-                        self.L_D = 10
+                        self.L_D = 10 #may need to change
                         self.power = 0
 
         def getpower_rotor1(self): #super simple estimate for power

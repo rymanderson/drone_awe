@@ -31,4 +31,4 @@ class Weather:
         def gettemperature(self):
                 return 0
 
-        print("Successfully imported `Weather.py`")
+print("Successfully imported `Weather.py`")
