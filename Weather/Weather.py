@@ -22,13 +22,26 @@ class Weather:
                 # eqns 1.21 - 1.22 in Dr. Ning's book
 
         # methods go here:
-        def __init__(self, altitude): # keeping it simple to begin with
-                self.altitude = altitude        
+        def __init__(self, altitude,temperature_sl): # keeping it simple to begin with
+                self.altitude = altitude       
+                self.temperature_sl = temperature_sl 
                 self.temperature = self.temperature_sl - 71.5 + 2*np.log(1 + np.exp(35.75 - 3.25*self.altitude) + np.exp(-3 + 0.0003 * self.altitude**3))
                 self.pressure = self.pressure_sl * np.exp(-0.118 * self.altitude - (0.0015*self.altitude**2) / (1 - 0.018*self.altitude + 0.0011 * self.altitude**2))
 
+        def update_temp(self,new_temp):
+                test = PowerCorrection('temp',new_temp)
 
-        def gettemperature(self):
-                return 0
+        def update_wind(self,velocity,heading):
+                wind_vars = [velocity, heading]
+                test = PowerCorrection('temp',wind_vars)
+
+        def update_rain(self,LWC):
+                test = PowerCorrection('temp',LWC)
+
+        def update_humidity(self,rel_hum):
+                test = PowerCorrection('temp',rel_hum)
+
+        def update_icing(self)
+                test = PowerCorrection('temp',new_temp) 
 
 print("Successfully imported `Weather.py`")
