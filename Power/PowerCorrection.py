@@ -25,10 +25,10 @@ class PowerCorrection:
                 print("Error: Value for 'sink' is not recognized.")
         
         def altitude(self,new_alt):
-            
+            pass
 
         def rain(self,LWC):
-
+            pass
 
         def temp(self,new_temp):
             del_temp = new_temp / old_temp
@@ -46,12 +46,13 @@ class PowerCorrection:
 
         def payload(self,new_payload):
             #simple model - add more weight and recalculate power
+            pass
 
         def humidity(self,rel_hum):
             #we will want to create a best-fit line from Table 2 based on temperature and relative humidity
             
             #super simple version for now (assume 25 deg)
-            if rel_hum < 25
+            if rel_hum < 25:
                 del_power = 0.34 #percent
             elif rel_hum < 50:
                 del_power = 0.59

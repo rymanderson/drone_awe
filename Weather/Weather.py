@@ -1,3 +1,7 @@
+import sys
+sys.path.append('../')
+sys.path.append('../Power/')
+from PowerCorrection import PowerCorrection
 import numpy as np
 
 class Weather:
@@ -17,9 +21,11 @@ class Weather:
         humidity = 0
 
         #need to figure out how to access current or at least average weather
-                #data based on lattitude, longitude
+                #data based on lattitude, longitude, altitude?
         #then calculate pressure, temp, and density based on altitude (see
                 # eqns 1.21 - 1.22 in Dr. Ning's book
+        #or do above with average values of temperature/pressure/density for a given location
+        #or none of the above - we vary temperature and assume either constant pressure or density (likely pressure)
 
         # methods go here:
         def __init__(self, altitude,temperature_sl): # keeping it simple to begin with
@@ -41,7 +47,7 @@ class Weather:
         def update_humidity(self,rel_hum):
                 test = PowerCorrection('temp',rel_hum)
 
-        def update_icing(self)
+        def update_icing(self):
                 test = PowerCorrection('temp',new_temp) 
 
 print("Successfully imported `Weather.py`")

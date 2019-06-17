@@ -6,13 +6,13 @@ class Drone:
 
 	# class variables go here:
 
-	# name        = "Mavic2" # must match the .param file in the params/ directory
+	# name        = "dji-Mavic2" # must match the .param file in the params/ directory
     # wingtype    = "rotary"
 	# battery     = {'type':'LiPo', 'capacity':0.0, 'voltage':0.0}
 
 	name = "dji-Mavic2"
 	params = {
-			'wingtype':None,
+			'wingtype':'rotary', # some of these are default values, but otherwise the key is empty
 			'TOW':None,
 			'max_speed':None,
 			'cruise_speed':None,
