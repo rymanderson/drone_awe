@@ -1,0 +1,17 @@
+drone true
+dronename dji-Mavic2
+rain false
+dropsize
+LWC
+timestep
+plot
+xlabel
+ylabel 
+title 
+
+
+##time invariant plots: select two parameters from list: (this will need to be in the README, otherwise will throw an error)
+        ### range payload endurance …
+        #### example:
+        #### range	payload
+        plot range payload

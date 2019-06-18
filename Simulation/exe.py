@@ -1,9 +1,10 @@
-import awesomeModelName_importer
+import importer
 
 # Dronename = 'dji-Mavic2'
 # SoH = 90
 
-with open('textfile.txt','r') as fp
+with open('settings.txt','r') as fp:
+    #instantiate drone
     drone = readline()
     if drone == true:
         dronename = fp.readline()
@@ -15,7 +16,8 @@ with open('textfile.txt','r') as fp
     battery = Battery(drone)
 
     #get class initialization info
-        fp.readline()
+        rainlength = 2 #for now
+        rain = fp.readline()
         if rain == true:
             Dropsize = readline
             WVC = readline
@@ -27,19 +29,12 @@ with open('textfile.txt','r') as fp
 
         #simulation variables
         Timestep = fp.readline()
-        …
+        
         #plot settings
         ##time plots
         Totalpower	true
         Rainintensity false
-        …
-        # VVV In text file itself VVV
-        # ##time invariant plots: select two parameters from list:
-        # ### range payload endurance …
-        # #### example:
-        # #### range	payload
-        # plot range payload
-        # ^^^ 		         ^^^
+
         while eof == false:
         nextline = readline()
         if nextline == plot:

@@ -1,1 +1,18 @@
-drone
+drone True
+dronename dji-Mavic2
+rain False
+dropsize
+LWC
+temperature False
+new_temp
+wind False
+speed
+direction
+humidity False
+rel_hum
+icing False
+timestep 1
+plot
+xlabel range
+ylabel payload
+title First_test
