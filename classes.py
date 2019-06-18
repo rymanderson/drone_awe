@@ -63,14 +63,14 @@ class Power:
         'Class used to predict the drone\'s power requirement'
 
         # class variables go here:
-        basepower           = 0.0   # watts
-        mass                = 1 #kg
-        propulsive_eta      = 0.8 #propulsive efficiency
-        radius              = .1 #m
-        g                   = 9.806655 #m/s2
-        Nr                  = 4 #number of rotors
-        density             = 1.225 #kg/m3
-        power               = None
+        basepower           = 0.0       # watts
+        mass                = 1         # kg
+        propulsive_eta      = 0.8       # propulsive efficiency
+        radius              = None      # m
+        g                   = 9.81      # m/s2
+        Nr                  = 4         # number of rotors
+        density             = None      # kg/m3
+        power               = None      # watts
 
     # methods go here:
         def __init__(self,name,drone,weather):
@@ -105,7 +105,7 @@ class Weather:
         # miscellaneous weather   
         weatherlist     = [] # a list of weather objects (e.g., rain, icing, humidity, etc.)
 
-        # ambient air quality (assumes )
+        # ambient air quality
         density = 1.225 #kg/m^3
         gravity = 9.806655 #m/s^2
         altitude = 100 #m
