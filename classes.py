@@ -65,35 +65,42 @@ class Power:
         # class variables go here:
         basepower           = 0.0       # watts
         mass                = 1         # kg
-        propulsive_eta      = 0.8       # propulsive efficiency
+        eta_propulsive      = 0.8       # propulsive efficiency
         radius              = None      # m
         g                   = 9.81      # m/s2
-        Nr                  = 4         # number of rotors
+        Nr                  = None      # number of rotors
         density             = None      # kg/m3
         power               = None      # watts
 
-    # methods go here:
-        def __init__(self,name,drone,weather):
-                self.name = name
-                # drone = Drone(name)
+        # from Weather class
+        rhoair
+        
+        
+        # parameters
+        g
+
+
+
+        # methods go here:
+        def __init__(self,params,drone,weather):
+                self.name       = name
                 drone.getParams()
-                # self.Op1 = Weather.Weather(altitude)
-                self.density = weather.density
-                self.mass = drone.params[TOW]
+                self.density    = weather.density
+                self.mass       = drone.params[TOW]
                 if drone.params['wingtype'] == 'rotary':
-                        self.Nr = drone.params[num_rotors]
-                        self.L_D = 3 #may need to change
+                        self.Nr         = drone.params[num_rotors]
+                        self.L_D        = 3 #may need to change
                         Power.getpower_rotor1()
                 elif drone.params['wingtype'] == 'fixed':
-                        self.L_D = 10 #may need to change
-                        self.power = 0
+                        self.L_D        = 10 #may need to change
+                        self.power      = 0
 
         def getpower_rotor1(self): #super simple estimate for power
-                power_elec = 0.1 #kW, estimate from paper
-                self.power = self.mass * self.drone.param[cruise_speed] / (370 * self.propulsive_eta * self.L_D) - power_elec
+                power_elec = 0.1 #kW, estimate from paper ??? Which paper? What is this parameter ???
+                self.power = self.mass * self.drone.param[cruise_speed] / (370 * self.eta_propulsive * self.L_D) - power_elec
 
         def getpower_rotor2(self): #slightly more complicated estimate for power
-                self.power = self.mass * 1 / (self.propulsive_eta * self.drone.params[prop_diameter]/2.0) * np.sqrt(self.g**3 / (2 * self.Nr * self.density * np.pi))
+                self.power = self.mass * 1 / (self.eta_propulsive * self.drone.params[prop_diameter]/2.0) * np.sqrt(self.g**3 / (2 * self.Nr * self.density * np.pi))
 
 
 print("Successfully imported `Power` class")
