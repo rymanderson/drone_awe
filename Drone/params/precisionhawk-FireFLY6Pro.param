@@ -1,8 +1,0 @@
-wingtype fixed
-span 1.524
-TOW 4.5
-max_t 59
-max_payload 0.7
-cruise_speed 18
-VTOL yes
-batt_type LiHV
