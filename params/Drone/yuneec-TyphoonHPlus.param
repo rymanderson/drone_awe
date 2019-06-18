@@ -1,0 +1,13 @@
+wingtype rotor
+diagonal 0.520
+num_rotors 6
+TOW 1.645
+max_t 28
+max_speed 13.4112
+max_alt 500
+batt_type LiPo
+batt_cells 4
+batt_voltage 14.8
+batt_capacity 5400
+min_temp 0
+max_temp 40
