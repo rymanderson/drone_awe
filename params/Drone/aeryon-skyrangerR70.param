@@ -1,12 +1,12 @@
 wingtype rotary
-rotorsnumber 4
+rotorquantity 4
 speedmax 13.89
 endurancemax 35
 max_payload 2.0
 altitudemax 4572
 windspeedmax 19.44
 temperaturemin -20
-endurancemaxemp 50
+temperaturemax 50
 waterproof yes
 takeoffweight 4.5
 num_batteries 4

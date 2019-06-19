@@ -4,7 +4,7 @@ takeoffweight 1.391
 altitudemax 6000
 speedmax 16.0934
 temperaturemin 0
-endurancemaxemp 40
+temperaturemax 40
 endurancemax 30
 batterytype LiPo
 batterymass 0.468
@@ -14,4 +14,4 @@ batterycapacity 5870
 batteryenergy 89.2
 props 9450s Quick Release
 batteryrechargetime 60
-rotorsnumber 4
+rotorquantity 4

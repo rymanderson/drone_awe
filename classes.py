@@ -1,5 +1,6 @@
 import datetime
 import matplotlib.pyplot as plt
+import numpy as np
 
 #insert classes here
 
@@ -15,9 +16,18 @@ class Drone:
                 return
 
         def getEfficiencyPropulsive(self):
-                poweractual     = batteryenergy/endurancemaxhover
-                powerideal      = thrust * np.sqrt(thrust/(2*rotorarea*airdensity))
-                efficiency      = powerideal/poweractual
+                thrust                  = self.params['takeoffweight'] * 9.8                    # hard coded gravitation constant at 9.8 m/s2
+                batteryenergy           = self.params['batteryenergy']
+                endurancemaxhover       = self.params['endurancemaxhover']
+                rotorarea               = self.params['rotordiameter']**2/4*np.pi
+                airdensity              = 1.225                                                 # assuming air density is equal to 1.225 kg/m3
+                poweractual             = batteryenergy/endurancemaxhover/60.0                  # convert endurance units from minutes to seconds
+                powerideal              = thrust * np.sqrt(thrust/(2*rotorarea*airdensity))
+                efficiency              = powerideal/poweractual
+
+                print("actual power is ", poweractual)
+                print("ideal power is ", powerideal)
+                
                 self.params['efficiencypropulsive'] = efficiency
                 return
 

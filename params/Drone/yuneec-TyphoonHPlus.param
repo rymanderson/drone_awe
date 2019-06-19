@@ -1,6 +1,6 @@
 wingtype rotor
 diagonal 0.520
-rotorsnumber 6
+rotorquantity 6
 takeoffweight 1.645
 endurancemax 28
 speedmax 13.4112
@@ -10,4 +10,4 @@ batterycells 4
 batteryvoltage 14.8
 batterycapacity 5400
 temperaturemin 0
-endurancemaxemp 40
+temperaturemax 40

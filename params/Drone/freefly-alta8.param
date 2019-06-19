@@ -1,5 +1,5 @@
 wingtype rotary
-rotorsnumber 8
+rotorquantity 8
 diagonal 1.325
 batterycells 6
 batteryvoltage 22.2
@@ -12,5 +12,5 @@ props 18x6_Folding
 motor_max_power_continuous 350
 motor_max_power_peak 950
 temperaturemin -20
-endurancemaxemp 45
+temperaturemax 45
 thrust_ratio_at_max_takeoffweight 1.85:1

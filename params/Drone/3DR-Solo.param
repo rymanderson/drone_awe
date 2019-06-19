@@ -1,5 +1,5 @@
 wingtype rotary
-rotorsnumber 4
+rotorquantity 4
 takeoffweight 1.5
 batterytype LiPo
 batterycapacity 5200
@@ -12,7 +12,7 @@ speedmax 25.5
 cruise_speed 2.5
 windspeedmax 11
 temperaturemin 0
-endurancemaxemp 45
+temperaturemax 45
 max_humidity 85
 props 10x4.5
-rotorsnumber 4
+rotorquantity 4

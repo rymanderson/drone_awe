@@ -1,5 +1,5 @@
 wingtype rotor
-rotorsnumber 8
+rotorquantity 8
 max_takeoffweight 2.3
 max_payload 0.8
 endurancemax 22
@@ -10,6 +10,6 @@ batterycells 3
 batterycapacity 6250
 batterymass 0.426
 temperaturemin -5
-endurancemaxemp 35
-rotorsnumber 8
-rotorsdiameter 0.2
+temperaturemax 35
+rotorquantity 8
+rotordiameter 0.2
