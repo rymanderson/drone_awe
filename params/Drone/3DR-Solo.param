@@ -1,6 +1,6 @@
 wingtype rotary
 rotorsnumber 4
-TOW 1.5
+takeoffweight 1.5
 batterytype LiPo
 batterycapacity 5200
 batteryvoltage 14.8

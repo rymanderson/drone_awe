@@ -1,6 +1,6 @@
 wingtype rotor
 rotorsnumber 8
-max_TOW 2.3
+max_takeoffweight 2.3
 max_payload 0.8
 endurancemax 22
 speedmax 15

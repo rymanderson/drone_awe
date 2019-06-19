@@ -1,6 +1,6 @@
 wingtype fixed
 span 1.16
-TOW 1.4
+takeoffweight 1.4
 speedmax 30
 endurancemax 90
 batterytype LiPo

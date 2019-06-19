@@ -1,7 +1,7 @@
 wingtype rotor
 diagonal 0.520
 rotorsnumber 6
-TOW 1.645
+takeoffweight 1.645
 endurancemax 28
 speedmax 13.4112
 altitudemax 500

@@ -1,6 +1,6 @@
 wingtype rotary
 diagonal 0.354
-TOW 0.907
+takeoffweight 0.907
 speedmax 20
 altitudemax 6000
 endurancemax 31

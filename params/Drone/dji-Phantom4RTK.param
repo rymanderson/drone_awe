@@ -1,6 +1,6 @@
 wingtype rotary
 diagonal 0.350
-TOW 1.391
+takeoffweight 1.391
 altitudemax 6000
 speedmax 16.0934
 temperaturemin 0

@@ -8,5 +8,5 @@ windspeedmax 19.44
 temperaturemin -20
 endurancemaxemp 50
 waterproof yes
-TOW 4.5
+takeoffweight 4.5
 num_batteries 4
