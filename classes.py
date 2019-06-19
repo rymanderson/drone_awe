@@ -12,9 +12,14 @@ class Drone:
         def __init__(self, name, params):
                 self.name       = name
                 self.params     = params
-        
+                return
+
         def getEfficiencyPropulsive(self):
-                
+                poweractual     = batteryenergy/endurancemaxhover
+                powerideal      = thrust * np.sqrt(thrust/(2*rotorarea*airdensity))
+                efficiency      = powerideal/poweractual
+                self.params['efficiencypropulsive'] = efficiency
+                return
 
 print("Successfully imported `Drone` class")
 
@@ -38,9 +43,9 @@ class Battery:
         # constructor
         def __init__(self, drone, soh = 90.0, startsoc = 100.0): # default value for soh is based on the assumption that batteries are retired at a soh of 80%
                 # import parameters from drone object
-                self.batterytype = drone.params['batt_type']
-                self.voltagemean = drone.params['batt_voltage']
-                self.capacity    = drone.params['batt_capacity']
+                self.batterytype = drone.params['batterytype']
+                self.voltagemean = drone.params['batteryvoltage']
+                self.capacity    = drone.params['batterycapacity']
 
                 # update parameters
                 self.updateBattery()
@@ -79,8 +84,6 @@ class Power:
                 elif drone.params['wingtype'] == 'fixed':
                         self.L_D        = 10 #may need to change
                         self.power      = 0
-
-        def getEtaPropulsive(self,drone)
 
         def getPowerRotor1(self): #super simple estimate for power
                 power_elec = 0.1 #kW, estimate from paper ??? Which paper? What is this parameter ???

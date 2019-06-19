@@ -118,14 +118,22 @@ NOTE: the model is based on power consumption to accomodate future development. 
 
 Properties and their respective units include:
 
+<!-- These could probably be better organized -->
+### Electricity
 * Capacity: _milliamp-hours [mAh]_
 * Voltage: _Volts [V]_
 * Current: _Amperes [A]_
 * Resistance: _Ohms [&Omega;]_
+
+### Mechanics
+
 * Velocity/Speed: _meters per second [m/s]_
-* Power: _Watts [W]_
+* Power: _watts [W]_
 * Endurance or Flight time: _minutes [min]_
 * Altitude: _meters [m]_
+* Weight: _kilograms [kg]_ <!-- I feel weird quoting a weight in mass units, but I put this here because the .param files seem to use kg. Which may be fine. Let me know if you have any thoughts. :) -->
+
+### Miscellaneous
 * Temperature: _degrees Celcius [&deg;C]_
 * Wind Resistance: _meters per second [m/s]_ (referring to the maximum wind speed the drone can resist)
 * Battery re-charge time: _minutes [min]_
@@ -173,7 +181,7 @@ Similar to the Drone `.param` files, battery `.param` files exist for each type 
 	* test_drone.py
 	* test_plotter.py
 
-<!---
+<!--
 ## Directories Overview
 
 ### Drone/
