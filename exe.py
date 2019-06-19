@@ -1,78 +1,81 @@
-import importer
+import matplotlib.pyplot as plt
+import numpy as np
+import datetime
+import csv
+import os
+import classes as classes
+import functions as fun
 
-# Dronename = 'dji-Mavic2'
-# SoH = 90
-
-sim_params = functions.getParams('Simulation','settings_list.txt','settings.txt'," ")
-weather_list = []
+simulationparams = fun.getParams('Simulation','settings_list.txt','settings.txt'," ")
+weatherlist = []
     
 #instantiate drone
-if sim_params['drone'] == True:
-    dronename = sim_params['dronename']
-    drone_params = functions.getPArams('Drone','paramlist.param',dronename + '.param',' ')
-    drone = classes.Drone(dronename,drone_params)
+if simulationparams['drone'] == True:
+    dronename = simulationparams['dronename']
+    droneparams = fun.getParams('Drone','paramlist.param',dronename + '.param',' ')
+    drone = classes.Drone(dronename,droneparams)
 else:
     raise Exception('Must specify drone name')
 
 # instantiate battery
-soh = sim_params['soh']
-start_soc = sim_params['start_soc']
-battery = classes.Battery(drone,soh,start_soc)
+soh = simulationparams['soh']
+startstateofcharge = simulationparams['start_soc']
+battery = classes.Battery(drone,soh,startstateofcharge)
 
 #get class initialization info
 # rainlength = 2 #for now
-rain_test = sim_params['rain']
-if rain_test == True:
-    weather_list.append('rain')
-    dropsize = sim_params['rain_dropsize']
-    LWC = sim_params['rain_LWC']
+raintest = simulationparams['rain']
+if raintest == True:
+    weatherlist.append('rain')
+    dropsize = simulationparams['rain_dropsize']
+    LWC = simulationparams['rain_LWC']
     # …
     rain = classes.Rain(dropsize,LWC)
 # else:
 #     for i = 1:rainlength:
 #         fp.readline()
 
-temp_test = sim_params['temperature']
-if temp_test == True:
-    weather_list.append('temperature')
-    new_temp = sim_params['new_temp']
-    temperature = classes.Temperature(new_temp)
+temperaturetest = simulationparams['temperature']
+if temperaturetest == True:
+    weatherlist.append('temperature')
+    newtemperature = simulationparams['new_temp']
+    temperature = classes.Temperature(newtemperature)
 
-wind_test = sim_params['wind']
-if wind_test == True:
-    weather_list.append('wind')
-    speed = sim_params['wind_speed']
-    direction = sim_params['wind_direction']
+windtest = simulationparams['wind']
+if windtest == True:
+    weatherlist.append('wind')
+    speed = simulationparams['wind_speed']
+    direction = simulationparams['wind_direction']
     direction = classes.Temperature(direction)
 
-humid_test = sim_params['humidity']
-if humid_test == True:
-    weather_list.append('humidity')
-    rel_hum = sim_params['rel_hum']
-    direction = classes.Humidity(rel_hum)
+humiditytest = simulationparams['humidity']
+if humiditytest == True:
+    weatherlist.append('humidity')
+    relativehumidity = simulationparams['rel_hum']
+    direction = classes.Humidity(relativehumidity)
 
-icing_test = sim_params['icing']
-if icing_test == True:
-    weather_list.append('icing')
+icingtest = simulationparams['icing']
+if icingtest == True:
+    weatherlist.append('icing')
     icing = classes.Icing()
 
 print("Weather parameters are: ")
-print(str(weather_list)[1:-1]) 
+print(str(weatherlist)[1:-1]) 
 
-weather = classes.Weather(weather_list)
+weather = classes.Weather(weatherlist)
 
 #simulation variables
-timestep = sim_params['timestep']
+timestep = simulationparams['timestep']
 
 power = classes.Power(drone,battery,weather)
 
 simulation = classes.Simulation(drone,battery,weather,power,timestep)
 simulation.run()
 
-if sim_params['plot'] == True:
-    xlabel = sim_params['xlabel']
-    ylabel = sim_params['ylabel']
-    axistitle = sim_params['title']
+if simulationparams['plot'] == True:
+    xlabel = simulationparams['xlabel']
+    ylabel = simulationparams['ylabel']
+    axistitle = simulationparams['title']
     plotter = classes.Plotter(simulation.x,xlabel,simulation.y,ylabel,axistitle)
     plotter.plot_line()
 
