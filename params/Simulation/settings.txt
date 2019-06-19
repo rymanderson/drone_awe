@@ -1,20 +1,21 @@
 drone True
 dronename dji-Mavic2
-soh 90
-start_soc 100
+stateofhealth 90
+startstateofcharge 100
 rain False
-dropsize
-LWC
+dropsize 1
+liquidwatercontent 1
 temperature False
-new_temp
+newtemperature 15
 wind False
-speed
-direction
+speed 10
+direction 0
 humidity False
-rel_hum
+relativehumidity 0
 icing False
 timestep 1
-plot
-xlabel range
-ylabel payload
+plot True
+xlabel payload
+ylabel range
 title First_test
+simulationtype simple

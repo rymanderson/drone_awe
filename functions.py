@@ -4,6 +4,7 @@ import os
 def getParams(classname,listname,filename,delimiter):
 	# initialize `params` dictionary
 	params = {}
+	stringlist = ['wingtype','batt_type','waterproof','VTOL','drone','dronename','rain','temperature','wind','humidity','icing','plot','xlabel','ylabel','title','simulationtype']
 	# find name.param in the params/ directory
 	with open(os.path.join('params', classname, listname), 'r') as paramlist:
 		with open(os.path.join('params', classname, filename), 'r') as paramfile:
@@ -21,8 +22,13 @@ def getParams(classname,listname,filename,delimiter):
 				line = line.strip().split(delimiter) #gets rid of quotation marks when comparing strings
 				for spec in specs:
 					if line[0] == spec:
-						if spec == "wingtype" or spec == "batt_type" or spec == 'waterproof' or spec == 'VTOL':
-							params[spec] = values[specs.index(spec)]
+						if spec in stringlist:
+							if values[specs.index(spec)] == 'True' or values[specs.index(spec)] == 'true':
+								params[spec] = True
+							elif values[specs.index(spec)] == 'False' or values[specs.index(spec)] == 'false':
+								params[spec] = False
+							else:
+								params[spec] = values[specs.index(spec)]
 						else:
 							params[spec] = float(values[specs.index(spec)])
 			if len(paramlist) > len(params):
