@@ -8,7 +8,7 @@ endurancemaxhover 29
 tiltanglemax 35
 temperaturemin -10
 endurancemax 40
-powerrating 60
+chargerpowerrating 60
 batterytype LiPo
 batterycapacity 3850
 batteryvoltage 15.4
@@ -19,4 +19,4 @@ waterproof no
 windspeedmax 10.8
 batteryrechargetime 90
 rotorquantity 4
-rotordiameter 0.2
+rotordiameter 0.22

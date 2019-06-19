@@ -6,77 +6,78 @@ import os
 import classes as classes
 import functions as fun
 
-simulationparams = fun.getParams('Simulation','settings_list.txt','settings.txt'," ")
-weatherlist = []
+simulationparams    = fun.getParams('Simulation','settings_list.txt','settings.txt'," ")
+weatherlist         = []
     
 #instantiate drone
 if simulationparams['drone'] == True:
-    dronename = simulationparams['dronename']
-    droneparams = fun.getParams('Drone','paramlist.param',dronename + '.param',' ')
-    drone = classes.Drone(dronename,droneparams)
+    dronename           = simulationparams['dronename']
+    droneparams         = fun.getParams('Drone','paramlist.param',dronename + '.param',' ')
+    droneconversions    = fun.getParams('Drone','paramlist.param','conversions.param',' ')
+    drone               = classes.Drone(dronename,droneparams,droneconversions)
 else:
     raise Exception('Must specify drone name')
 
 # instantiate battery
-stateofhealth = simulationparams['stateofhealth']
-startstateofcharge = simulationparams['startstateofcharge']
-battery = classes.Battery(drone,stateofhealth,startstateofcharge)
+stateofhealth       = simulationparams['stateofhealth']
+startstateofcharge  = simulationparams['startstateofcharge']
+battery             = classes.Battery(drone,stateofhealth,startstateofcharge)
 
 #get class initialization info
 # rainlength = 2 #for now
 raintest = simulationparams['rain']
 if raintest == True:
     weatherlist.append('rain')
-    dropsize = simulationparams['dropsize']
-    liquidwatercontent = simulationparams['liquidwatercontent']
+    dropsize            = simulationparams['dropsize']
+    liquidwatercontent  = simulationparams['liquidwatercontent']
     # …
-    rain = classes.Rain(dropsize,liquidwatercontent)
+    rain                = classes.Rain(dropsize,liquidwatercontent)
 
 temperaturetest = simulationparams['temperature']
 if temperaturetest == True:
     weatherlist.append('temperature')
-    newtemperature = simulationparams['newtemperature']
-    temperature = classes.Temperature(newtemperature)
+    newtemperature  = simulationparams['newtemperature']
+    temperature     = classes.Temperature(newtemperature)
 
 windtest = simulationparams['wind']
 if windtest == True:
     weatherlist.append('wind')
-    speed = simulationparams['windspeed']
-    direction = simulationparams['winddirection']
-    wind = classes.Wind(speed,direction)
+    speed       = simulationparams['windspeed']
+    direction   = simulationparams['winddirection']
+    wind        = classes.Wind(speed,direction)
 
 humiditytest = simulationparams['humidity']
 if humiditytest == True:
     weatherlist.append('humidity')
-    relativehumidity = simulationparams['relativehumidity']
-    direction = classes.Humidity(relativehumidity)
+    relativehumidity    = simulationparams['relativehumidity']
+    direction           = classes.Humidity(relativehumidity)
 
 icingtest = simulationparams['icing']
 if icingtest == True:
     weatherlist.append('icing')
-    icing = classes.Icing()
+    icing   = classes.Icing()
 
 print("Weather parameters are: ")
 print(str(weatherlist)[1:-1]) 
 
-weather = classes.Weather(weatherlist)
+weather             = classes.Weather(weatherlist)
 
 #simulation variables
-timestep = simulationparams['timestep']
+timestep            = simulationparams['timestep']
 
-power = classes.Power(drone,battery,weather)
+power               = classes.Power(drone,battery,weather)
 
-simulationtype = simulationparams['simulationtype']
-desiredresult = simulationparams['ylabel']
+simulationtype      = simulationparams['simulationtype']
+desiredresult       = simulationparams['ylabel']
 
-simulation = classes.Simulation(timestep,simulationtype,desiredresult)
+simulation          = classes.Simulation(timestep,simulationtype,desiredresult)
 simulation.run(drone,battery,weather,power)
 
 if simulationparams['plot'] == True:
-    xlabel = simulationparams['xlabel']
-    ylabel = desiredresult
-    axistitle = simulationparams['title']
-    plotter = classes.Plotter(simulation.x,xlabel,simulation.y,ylabel,axistitle)
+    xlabel      = simulationparams['xlabel']
+    ylabel      = desiredresult
+    axistitle   = simulationparams['title']
+    plotter     = classes.Plotter(simulation.x,xlabel,simulation.y,ylabel,axistitle)
     plotter.plot_line()
 
 # with open('textfile.txt','r') as fp:

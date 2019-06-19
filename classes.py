@@ -7,12 +7,14 @@ import numpy as np
 class Drone:
         'Class used to store key drone characteristics'
 
-        name    = None
-        params  = None
+        name            = None
+        params          = None
+        conversions     = None
 
-        def __init__(self, name, params):
+        def __init__(self, name, params, conversions):
                 self.name       = name
                 self.params     = params
+                self.conversions= conversions
 
         def getEfficiencyPropulsive(self):
                 thrust                  = self.params['takeoffweight'] * 9.8                   # hard coded gravitation constant at 9.8 m/s2

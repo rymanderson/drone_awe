@@ -7,7 +7,7 @@ endurancemax
 endurancemaxhover
 temperaturemin
 temperaturemax
-powerrating
+chargerpowerrating
 batterytype
 batterycapacity
 batteryvoltage
@@ -15,7 +15,7 @@ batterycells
 batteryenergy
 batterymass
 batteryrechargetime
-windresistance
+windspeedmax
 waterproof
 rotorquantity
 rotordiameter
