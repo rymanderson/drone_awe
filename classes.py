@@ -198,7 +198,7 @@ class Wind:
 
         def __init__(self,speed,heading):
                 self.speed = speed
-                self.heading = heading
+                self.direction = direction
 
 print("Successfully imported `Wind` class")
 
@@ -223,20 +223,48 @@ class Simulation:
                 'counter':0,            # tracks the iteration number (0-indexed)
                 }
 
+        #Notes from call with Ryan:
+                # Simulation init sets up variables
+                # run.Simulation would have if statements based on a simulationtype variable that would then call other class methods. It would also have class instances as inputs, which would then be inputs to the called class methods.
+
         # methods go here:
-        def __init__(self, drone, weather, power):
+        def __init__(self,timestep,simulationtype,desiredresult):
                 # get parameters from `settings.txt`
                 print("still working on simulation class constructor")
+                self.simulationtype = simulationtype
+                self.desiredresult = desiredresult
 
-        # time-invariant methods go here (indicated by suffix *_ti):
-        def getEndurance_ti(self, power):
-                # check that objects are time-invariant
-                if power.timevariant == True:
-                        print("")
-                        sys.exit("ERR: attempted to run a time-invariant simulation with a time-variant `Power` object")
+        def run(self,drone,battery,power,weather):
+                if self.simulationtype == 'simple':
+                        #insert simple model here
+                        self.runSimpleModel(drone,battery,power,weather)
+                elif self.simulationmodel == 'complicated': # we'll need to define a list of these terms in the README
+                        #insert another model here
+                        pass 
                 else:
-                        # calculate endurance
-                        return self.capacity * self.voltage_mean / power.power
+                        #insert another model here
+                        pass
+        def runSimpleModel(self,drone,battery,power,weather):
+                if self.desiredresult == 'Endurance' or 'endurance':
+                        return battery.capacity * battery.voltagemean / power.power # simple endurance model
+                elif self.desiredresult == 'Range' or 'range':
+                        return drone.params['cruisespeed'] * battery.capacity * battery.voltagemean / power.power # multiplies endurance by cruise speed to get range
+
+        def model2(self,drone, battery,power,weather):
+                print('Model 2 is still in development')
+        
+        def model3(self,drone, battery,power,weather):
+                print('Model 3 is still in development')
+
+        # # time-invariant methods go here (indicated by suffix *_ti):
+        # def getEndurance_ti(self, power):
+        #         # check that objects are time-invariant
+        #         if power.timevariant == True:
+        #                 print("")
+        #                 sys.exit("ERR: attempted to run a time-invariant simulation with a time-variant `Power` object")
+        #         else:
+        #                 # calculate endurance
+        #                 return self.capacity * self.voltage_mean / power.power
 
 
 print("Successfully imported `Simulation` class")

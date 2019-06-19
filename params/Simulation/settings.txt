@@ -8,8 +8,8 @@ liquidwatercontent 1
 temperature False
 newtemperature 15
 wind False
-speed 10
-direction 0
+windspeed 10
+winddirection 0
 humidity False
 relativehumidity 0
 icing False

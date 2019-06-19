@@ -8,8 +8,8 @@ liquidwatercontent
 temperature
 newtemperature
 wind
-speed
-direction
+windspeed
+winddirection
 humidity
 relativehumidity
 icing

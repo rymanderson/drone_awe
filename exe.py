@@ -18,40 +18,37 @@ else:
     raise Exception('Must specify drone name')
 
 # instantiate battery
-soh = simulationparams['soh']
-startstateofcharge = simulationparams['start_soc']
-battery = classes.Battery(drone,soh,startstateofcharge)
+stateofhealth = simulationparams['stateofhealth']
+startstateofcharge = simulationparams['startstateofcharge']
+battery = classes.Battery(drone,stateofhealth,startstateofcharge)
 
 #get class initialization info
 # rainlength = 2 #for now
 raintest = simulationparams['rain']
 if raintest == True:
     weatherlist.append('rain')
-    dropsize = simulationparams['rain_dropsize']
-    LWC = simulationparams['rain_LWC']
+    dropsize = simulationparams['dropsize']
+    liquidwatercontent = simulationparams['liquidwatercontent']
     # …
-    rain = classes.Rain(dropsize,LWC)
-# else:
-#     for i = 1:rainlength:
-#         fp.readline()
+    rain = classes.Rain(dropsize,liquidwatercontent)
 
 temperaturetest = simulationparams['temperature']
 if temperaturetest == True:
     weatherlist.append('temperature')
-    newtemperature = simulationparams['new_temp']
+    newtemperature = simulationparams['newtemperature']
     temperature = classes.Temperature(newtemperature)
 
 windtest = simulationparams['wind']
 if windtest == True:
     weatherlist.append('wind')
-    speed = simulationparams['wind_speed']
-    direction = simulationparams['wind_direction']
-    direction = classes.Temperature(direction)
+    speed = simulationparams['windspeed']
+    direction = simulationparams['winddirection']
+    wind = classes.Wind(speed,direction)
 
 humiditytest = simulationparams['humidity']
 if humiditytest == True:
     weatherlist.append('humidity')
-    relativehumidity = simulationparams['rel_hum']
+    relativehumidity = simulationparams['relativehumidity']
     direction = classes.Humidity(relativehumidity)
 
 icingtest = simulationparams['icing']
@@ -69,12 +66,15 @@ timestep = simulationparams['timestep']
 
 power = classes.Power(drone,battery,weather)
 
-simulation = classes.Simulation(drone,battery,weather,power,timestep)
-simulation.run()
+simulationtype = simulationparams['simulationtype']
+desiredresult = simulationparams['ylabel']
+
+simulation = classes.Simulation(timestep,simulationtype,desiredresult)
+simulation.run(drone,battery,weather,power)
 
 if simulationparams['plot'] == True:
     xlabel = simulationparams['xlabel']
-    ylabel = simulationparams['ylabel']
+    ylabel = desiredresult
     axistitle = simulationparams['title']
     plotter = classes.Plotter(simulation.x,xlabel,simulation.y,ylabel,axistitle)
     plotter.plot_line()
