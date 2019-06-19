@@ -1,6 +1,6 @@
 wingtype fixed
-max_t 150
+endurancemax 150
 TOW 6.8
 span 2.8
-max_alt 152
-batt_type LE
+altitudemax 152
+batterytype LE

@@ -1,8 +1,8 @@
 wingtype rotary
-num_rotors 8
+rotorsnumber 8
 diagonal 1.325
-batt_cells 6
-batt_voltage 22.2
+batterycells 6
+batteryvoltage 22.2
 num_batteries 2
 max_TOW 18.1
 empty_weight 6.2
@@ -11,6 +11,6 @@ specific_power 145
 props 18x6_Folding
 motor_max_power_continuous 350
 motor_max_power_peak 950
-min_temp -20
-max_temp 45
+temperaturemin -20
+endurancemaxemp 45
 thrust_ratio_at_max_TOW 1.85:1
