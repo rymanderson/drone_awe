@@ -3,8 +3,8 @@ import numpy as np
 import datetime
 import csv
 import os
-import Classes
-from functions import getParams
+import classes
+import functions as fun
 
 # list = ['Drone','Battery','Power','Weather','Plotter']
 # for class in list:

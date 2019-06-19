@@ -1,5 +1,6 @@
 drone True
 dronename dji-Mavic2
+SoH 
 rain False
 dropsize
 LWC

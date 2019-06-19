@@ -1,17 +1,20 @@
-drone true
+drone True
 dronename dji-Mavic2
-rain false
+soh 90
+start_soc 100
+rain False
 dropsize
 LWC
-timestep
+temperature False
+new_temp
+wind False
+speed
+direction
+humidity False
+rel_hum
+icing False
+timestep 1
 plot
-xlabel
-ylabel 
-title 
-
-
-##time invariant plots: select two parameters from list: (this will need to be in the README, otherwise will throw an error)
-        ### range payload endurance …
-        #### example:
-        #### range	payload
-        plot range payload
+xlabel range
+ylabel payload
+title First_test

@@ -1,1 +1,21 @@
+drone
+dronename
+soh
+start_soc
+rain
+dropsize
+LWC
+temperature
+new_temp
+wind
+speed
+direction
+humidity
+rel_hum
+icing
+timestep
+plot
+xlabel
+ylabel
+title
 

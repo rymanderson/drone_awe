@@ -3,73 +3,77 @@ import importer
 # Dronename = 'dji-Mavic2'
 # SoH = 90
 
-params = functions.getParams('Simulation','settings_list.txt','settings'," ")
+sim_params = functions.getParams('Simulation','settings_list.txt','settings.txt'," ")
 weather_list = []
     
 #instantiate drone
-drone = params['drone']
-if params[drone] == True:
-    dronename = params['dronename']
-    drone = Classes.Drone(dronename)
+if sim_params['drone'] == True:
+    dronename = sim_params['dronename']
+    drone_params = functions.getPArams('Drone','paramlist.param',dronename + '.param',' ')
+    drone = classes.Drone(dronename,drone_params)
 else:
     raise Exception('Must specify drone name')
 
 # instantiate battery
-battery = Classes.Battery(drone)
+soh = sim_params['soh']
+start_soc = sim_params['start_soc']
+battery = classes.Battery(drone,soh,start_soc)
 
 #get class initialization info
 # rainlength = 2 #for now
-rain_test = params['rain']
+rain_test = sim_params['rain']
 if rain_test == True:
     weather_list.append('rain')
-    dropsize = params['rain_dropsize']
-    LWC = params['rain_LWC']
+    dropsize = sim_params['rain_dropsize']
+    LWC = sim_params['rain_LWC']
     # …
-    rain = Classes.Rain(dropsize,LWC)
+    rain = classes.Rain(dropsize,LWC)
 # else:
 #     for i = 1:rainlength:
 #         fp.readline()
 
-temp_test = params['temperature']
+temp_test = sim_params['temperature']
 if temp_test == True:
     weather_list.append('temperature')
-    new_temp = params['new_temp']
-    temperature = Classes.Temperature(new_temp)
+    new_temp = sim_params['new_temp']
+    temperature = classes.Temperature(new_temp)
 
-wind_test = params['wind']
+wind_test = sim_params['wind']
 if wind_test == True:
     weather_list.append('wind')
-    speed = params['wind_speed']
-    direction = params['wind_direction']
-    direction = Classes.Temperature(direction)
+    speed = sim_params['wind_speed']
+    direction = sim_params['wind_direction']
+    direction = classes.Temperature(direction)
 
-humid_test = params['humidity']
+humid_test = sim_params['humidity']
 if humid_test == True:
     weather_list.append('humidity')
-    rel_hum = params['rel_hum']
-    direction = Classes.Humidity(rel_hum)
+    rel_hum = sim_params['rel_hum']
+    direction = classes.Humidity(rel_hum)
 
-icing_test = params['icing']
+icing_test = sim_params['icing']
 if icing_test == True:
     weather_list.append('icing')
-    icing = Classes.Icing()
+    icing = classes.Icing()
 
 print("Weather parameters are: ")
 print(str(weather_list)[1:-1]) 
 
-weather = Classes.Weather(weather_list)
+weather = classes.Weather(weather_list)
 
 #simulation variables
-timestep = params['timestep']
+timestep = sim_params['timestep']
 
-simulation = Classes.Simulation(drone,battery,weather,power,timestep)
+power = classes.Power(drone,battery,weather)
+
+simulation = classes.Simulation(drone,battery,weather,power,timestep)
 simulation.run()
 
-if params['plot'] == True:
-    xlabel = params['xlabel']
-    ylabel = params['ylabel']
-    axistitle = params['title']
-    plotter = Classes.Plotter(simulation.x,xlabel,simulation.y,ylabel,axistitle)
+if sim_params['plot'] == True:
+    xlabel = sim_params['xlabel']
+    ylabel = sim_params['ylabel']
+    axistitle = sim_params['title']
+    plotter = classes.Plotter(simulation.x,xlabel,simulation.y,ylabel,axistitle)
     plotter.plot_line()
 
 # with open('textfile.txt','r') as fp:
