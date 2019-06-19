@@ -7,6 +7,7 @@ import classes as classes
 import functions as fun
 
 simulationparams = fun.getParams('Simulation','settings_list.txt','settings.txt'," ")
+print(simulationparams)
 weatherlist = []
     
 #instantiate drone

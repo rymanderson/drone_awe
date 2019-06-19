@@ -13,15 +13,14 @@ class Drone:
         def __init__(self, name, params):
                 self.name       = name
                 self.params     = params
-                return
 
         def getEfficiencyPropulsive(self):
-                thrust                  = self.params['takeoffweight'] * 9.8                    # hard coded gravitation constant at 9.8 m/s2
+                thrust                  = self.params['takeoffweight'] * 9.8                   # hard coded gravitation constant at 9.8 m/s2
                 batteryenergy           = self.params['batteryenergy']
                 endurancemaxhover       = self.params['endurancemaxhover']
                 rotorarea               = self.params['rotordiameter']**2/4*np.pi
-                airdensity              = 1.225                                                 # assuming air density is equal to 1.225 kg/m3
-                poweractual             = batteryenergy/endurancemaxhover/60.0                  # convert endurance units from minutes to seconds
+                airdensity              = 1.225                                                # assuming air density is equal to 1.225 kg/m3
+                poweractual             = batteryenergy*3600.0/endurancemaxhover/60.0          # convert energy units from W-hrs to J and endurance units from minutes to seconds
                 powerideal              = thrust * np.sqrt(thrust/(2*rotorarea*airdensity))
                 efficiency              = powerideal/poweractual
 
@@ -29,7 +28,6 @@ class Drone:
                 print("ideal power is ", powerideal)
                 
                 self.params['efficiencypropulsive'] = efficiency
-                return
 
 print("Successfully imported `Drone` class")
 

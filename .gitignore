@@ -1,3 +1,4 @@
 Weather/ARPACK/
 Simulation/ARPACK/
 *.pyc
+__pycache__/
