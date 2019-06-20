@@ -3,7 +3,7 @@ import numpy as np
 import datetime
 import csv
 import os
-import classes as classes
+import classes
 import functions as fun
 
 simulationparams    = fun.getParams('Simulation','settings_list.txt','settings.txt'," ")
@@ -11,6 +11,7 @@ weatherlist         = []
     
 #instantiate drone
 if simulationparams['drone'] == True:
+    conversions = fun.getParams('Drone','paramlist.param','conversions.param'," ")
     dronename           = simulationparams['dronename']
     droneparams         = fun.getParams('Drone','paramlist.param',dronename + '.param',' ')
     droneconversions    = fun.getParams('Drone','paramlist.param','conversions.param',' ')
@@ -23,112 +24,73 @@ stateofhealth       = simulationparams['stateofhealth']
 startstateofcharge  = simulationparams['startstateofcharge']
 battery             = classes.Battery(drone,stateofhealth,startstateofcharge)
 
-# get class initialization info
-# rainlength = 2 #for now
-raintest = simulationparams['rain']
-if raintest == True:
-    weatherlist.append('rain')
-    dropsize            = simulationparams['dropsize']
-    liquidwatercontent  = simulationparams['liquidwatercontent']
-    # …
-    rain                = classes.Rain(dropsize,liquidwatercontent)
+# Lines 29 - 62 can be un-commented later when Weather is ready to test
+# #get class initialization info 
+# raintest = simulationparams['rain']
+# if raintest == True:
+#     weatherlist.append('rain')
+#     dropsize            = simulationparams['dropsize']
+#     liquidwatercontent  = simulationparams['liquidwatercontent']
+#     # …
+#     rain                = classes.Rain(dropsize,liquidwatercontent)
 
-temperaturetest = simulationparams['temperature']
-if temperaturetest == True:
-    weatherlist.append('temperature')
-    newtemperature  = simulationparams['newtemperature']
-    temperature     = classes.Temperature(newtemperature)
+# temperaturetest = simulationparams['temperature']
+# if temperaturetest == True:
+#     weatherlist.append('temperature')
+#     newtemperature  = simulationparams['newtemperature']
+#     temperature     = classes.Temperature(newtemperature)
 
-windtest = simulationparams['wind']
-if windtest == True:
-    weatherlist.append('wind')
-    speed       = simulationparams['windspeed']
-    direction   = simulationparams['winddirection']
-    wind        = classes.Wind(speed,direction)
+# windtest = simulationparams['wind']
+# if windtest == True:
+#     weatherlist.append('wind')
+#     speed       = simulationparams['windspeed']
+#     direction   = simulationparams['winddirection']
+#     wind        = classes.Wind(speed,direction)
 
-humiditytest = simulationparams['humidity']
-if humiditytest == True:
-    weatherlist.append('humidity')
-    relativehumidity    = simulationparams['relativehumidity']
-    direction           = classes.Humidity(relativehumidity)
+# humiditytest = simulationparams['humidity']
+# if humiditytest == True:
+#     weatherlist.append('humidity')
+#     relativehumidity    = simulationparams['relativehumidity']
+#     direction           = classes.Humidity(relativehumidity)
 
-icingtest = simulationparams['icing']
-if icingtest == True:
-    weatherlist.append('icing')
-    icing   = classes.Icing()
+# icingtest = simulationparams['icing']
+# if icingtest == True:
+#     weatherlist.append('icing')
+#     icing   = classes.Icing()
 
-print("Weather parameters are: ")
-print(str(weatherlist)[1:-1]) 
+# print("Weather parameters are: ")
+# print(str(weatherlist)[1:-1]) 
 
-weather             = classes.Weather(weatherlist)
+weather = classes.Weather(simulationparams['altitude'],simulationparams['temperaturesealevel'])
+power = classes.Power(drone,weather)
 
 #simulation variables
-timestep            = simulationparams['timestep']
+timestep = simulationparams['timestep'] # more relevant later
+simulationtype = simulationparams['simulationtype']
+desiredresult = simulationparams['ylabel']
+xbegin = simulationparams['xbegin']
+xend = simulationparams['xend']
+xincrement = simulationparams['xincrement']
+numsimulations = (xend - xbegin) / xincrement + 1
 
-power               = classes.Power(drone,battery,weather)
+simulation = classes.Simulation(timestep,simulationtype,desiredresult)
+# x = [z*xincrement for z in range(2*xbegin, 2*xend+1)] #initialize x based on beginng, ending, and increment for payload
+x = np.linspace(xbegin,xend,numsimulations)
+y = []
 
-simulationtype      = simulationparams['simulationtype']
-desiredresult       = simulationparams['ylabel']
+#vvvvvStill needs testing:vvvvvv
 
-simulation          = classes.Simulation(timestep,simulationtype,desiredresult)
-simulation.run(drone,battery,weather,power)
+for payload in x:
+    drone.updatePayload(payload)
+    power.updatePower(drone,weather,simulationparams['model'])
+    ynext = simulation.run(drone,weather,power)
+    y.append(ynext)
 
 if simulationparams['plot'] == True:
-    xlabel      = simulationparams['xlabel']
-    ylabel      = desiredresult
-    axistitle   = simulationparams['title']
-    plotter     = classes.Plotter(simulation.x,xlabel,simulation.y,ylabel,axistitle)
+    xlabel = simulationparams['xlabel']
+    ylabel = desiredresult
+    axistitle = simulationparams['title']
+    plotter = classes.Plotter(x,xlabel,y,ylabel,axistitle)
     plotter.plot_line()
-
-# with open('textfile.txt','r') as fp:
-#     #instantiate drone
-#     drone = readline()
-#     if drone == true:
-#         dronename = fp.readline()
-#         drone = Drone(dronename)
-#     else:
-#         raise Exception('Must specify drone name')
-
-#     # instantiate battery
-#     battery = Battery(drone)
-
-#     #get class initialization info
-#         rainlength = 2 #for now
-#         rain = fp.readline()
-#         if rain == true:
-#             Dropsize = fp.readline()
-#             WVC = fp.readline()
-#             # …
-#             rain = Rain(dropsize,WVC,...)
-#         else:
-#             for i = 1:rainlength:
-#                 fp.readline()
-
-#         #simulation variables
-#         Timestep = fp.readline()
-#         # …
-#         #plot settings
-#         ##time plots
-#         Totalpower	true
-#         Rainintensity false
-#         …
-#         # VVV In text file itself VVV
-#         # ##time invariant plots: select two parameters from list:
-#         # ### range payload endurance …
-#         # #### example:
-#         # #### range	payload
-#         # plot range payload
-#         # ^^^ 		         ^^^
-#         while eof == false:
-#         nextline = readline()
-#         if nextline == plot:
-#             plotx.push(fp.readline())
-#             ploty.push(fp.readline())
-#         else:
-#             raise Exception('Invalid plot syntax')
-
-# simulation = Simulation(drone,weather,power,...timestep,...)
-# simulation.run()
-
-# plotter = Plotter(inputs….)
-# plotter.plot()
+else: 
+    print('No plot functionality has been defined.')
