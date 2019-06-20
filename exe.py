@@ -23,7 +23,7 @@ stateofhealth       = simulationparams['stateofhealth']
 startstateofcharge  = simulationparams['startstateofcharge']
 battery             = classes.Battery(drone,stateofhealth,startstateofcharge)
 
-#get class initialization info
+# get class initialization info
 # rainlength = 2 #for now
 raintest = simulationparams['rain']
 if raintest == True:

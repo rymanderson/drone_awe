@@ -21,7 +21,7 @@ class Drone:
                 self.__convertUnits()
                 self.__getEfficiencyPropulsive()
         
-        def updatePayload(self,payload)
+        def updatePayload(self,payload):
                 self.payload = payload
 
         def __convertUnits(self):
@@ -91,6 +91,9 @@ class Battery:
 
 print("Successfully imported `Battery` class")
 
+class MissingModel(Exception):
+        
+
 
 class Power:
         'Class used to predict the drone\'s power requirement'
@@ -116,10 +119,13 @@ class Power:
                         __getPowerDandrea(drone,weather)
                 elif model == 'abdilla':
                         __getPowerAbdilla(drone,weather)
+                else:
+                        # raise Exception(f"~~~~~ ERROR: model { model } not available ~~~~~") # 
+                        raise Exception("~~~~~ ERROR: model '" + model + "' not available ~~~~~")
 
         def __getPowerDandrea(self,drone,weather): #super simple estimate for power from D'Andrea `Can Drones Deliver`
                 powerelectronics        = 0.1          # kW, estimate from paper
-                L_D                     = 3.0          # quick estimate for initial functionality
+                L_D                     = 3.0          # quick estimate for initial functionality TODO: Change this to something more scientific
                 self.power              = (drone.param['takeoffweight'] + drone.payload) * drone.param['endurancemaxspeed'] / (370.0 * drone.params['efficiencypropulsive'] * L_D) - powerelectronics
 
         def __getPowerAbdilla(self,drone,weather): #slightly more complicated estimate for power
@@ -165,7 +171,7 @@ class Weather:
                 self.temperature = self.temperature_sl - 71.5 + 2*np.log(1 + np.exp(35.75 - 3.25*self.altitude) + np.exp(-3 + 0.0003 * self.altitude**3))
                 self.pressure = self.pressure_sl * np.exp(-0.118 * self.altitude - (0.0015*self.altitude**2) / (1 - 0.018*self.altitude + 0.0011 * self.altitude**2))
 
-        def calculateAtmosphere(self,altitude)
+        def calculateStandardAtmosphere(self,altitude):
                 '''This function currently assumes STP conditions at sea level and should probably be adjusted to use ground level conditions as a baseline'''
 
                 # set sea level parameters
@@ -178,13 +184,14 @@ class Weather:
                 beta                            = 1.458e-6             # kg/(smK^1/2)
 
                 # compute parameters at altitude
-                pressure                        = pressuresealevel * 
-                                                  np.exp( -0.118 * altitude/1000.0 - 
-                                                                (0.0015 * altitude**2) / 
-                                                                (1 - 0.018 * altitude + 0.0011 * altitude**2)
+                altitude                        = altitude / 1000.0    # convert to kilometers
+                pressure                        = pressuresealevel *\
+                                                  np.exp( -0.118 * altitude -\
+                                                                (0.0015 * altitude**2) /\
+                                                                (1 - 0.018 * altitude + 0.0011 * altitude**2)\
                                                         )
-                temperature                     = temperaturesealevel - 71.5 + 2 * 
-                                                  np.log( 1 + exp(35.75 - 3.25 * h) + np.exp(-3 + 0.0003 * h.^3) )
+                temperature                     = temperaturesealevel - 71.5 + 2 * \
+                                                  np.log( 1 + exp(35.75 - 3.25 * h) + np.exp(-3 + 0.0003 * altitude**3) )
                 airdensity                      = pressure / (airgasconstant * temperature)
                 speedsound                      = np.sqrt(specificheatratio * airgasconstant * temperature)
                 dynamicviscocity                = beta * temperature**1.5 / (temperature + S)
@@ -196,11 +203,14 @@ print("Successfully imported `Weather` class")
 class Rain:
         'Class used to define rain characteristics'
         #class variables go here:
-        LWC             = None
-        dropsize        = None
-        WVC             = None
+        liquidwatercontent             = None
+        dropsize                       = None
+        watervaporcontent              = None
 
         def __init__(self,liquidwatercontent,dropsize,watervaporcontent)
+                self.liquidwatercontent = liquidwatercontent
+                self.dropsize           = dropsize
+                self.watervaporcontent  = watervaporcontent
 
 print("Successfully imported `Rain` class")
 
@@ -338,7 +348,7 @@ class Plotter:
 	fig_num = 1
 
 	# methods go here:
-	def __init__(self,x,xlabel,y,ylabel,axistitle):
+	def __init__(self,x,xlabel: string,y,ylabel,axistitle) -> None:
 		d = datetime.datetime.today()
 		self.title      = axistitle + " (" + d.strftime("%b-%d-%Y") + ")"
 		self.xlabel     = xlabel
