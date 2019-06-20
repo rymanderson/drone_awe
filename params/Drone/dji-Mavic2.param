@@ -4,6 +4,7 @@ takeoffweight 0.907
 speedmax 20
 altitudemax 6000
 endurancemax 31
+endurancemaxspeed 6.944
 endurancemaxhover 29
 tiltanglemax 35
 temperaturemin -10
@@ -19,4 +20,4 @@ waterproof no
 windspeedmax 10.8
 batteryrechargetime 90
 rotorquantity 4
-rotordiameter 0.22
+rotordiameter 0.2

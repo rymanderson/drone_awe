@@ -43,7 +43,7 @@ def getParams(classname,listname,filename,delimiter):
 								params[spec] = values[specs.index(spec)]
 
 			if len(paramlist) > len(params):
-				print("~~~~~ WARNING: ", str(len(paramlist)-len(params)), " parameter(s) missing from parameters file ~~~~~")
+				print("~~~~~ WARNING: ", str(len(paramlist)-len(params)), " parameter(s) missing from '",filename,"' parameters file ~~~~~")
 	return params
 
 # def getParams(classname,listname,filename,delimiter):

@@ -10,25 +10,37 @@ class Drone:
         name            = None
         params          = None
         conversions     = None
+        correctunits    = False
+
+        payload         = 0.0
 
         def __init__(self, name, params, conversions):
                 self.name       = name
                 self.params     = params
-                self.conversions= conversions
+                self.conversions= conversions # this input is obtained using functions.getParams() in exe.py
+                self.__convertUnits()
+                self.__getEfficiencyPropulsive()
 
-        def getEfficiencyPropulsive(self):
-                thrust                  = self.params['takeoffweight'] * 9.8                   # hard coded gravitation constant at 9.8 m/s2
+        def __convertUnits(self):
+                if not self.correctunits:
+                        for spec in self.conversions:
+                                self.params[spec] = self.params[spec] * self.conversions[spec]
+                        self.correctunits    = True
+                else:
+                        print("~~~~~ WARNING: problem converting units: skipping ~~~~~")
+
+        def __getEfficiencyPropulsive(self):
+                thrust                  = self.params['takeoffweight']
                 batteryenergy           = self.params['batteryenergy']
                 endurancemaxhover       = self.params['endurancemaxhover']
                 rotorarea               = self.params['rotordiameter']**2/4*np.pi
-                airdensity              = 1.225                                                # assuming air density is equal to 1.225 kg/m3
-                poweractual             = batteryenergy*3600.0/endurancemaxhover/60.0          # convert energy units from W-hrs to J and endurance units from minutes to seconds
+                airdensity              = 1.225                                                # assuming air density was equal to 1.225 kg/m3 during drone testing
+                poweractual             = batteryenergy/endurancemaxhover
                 powerideal              = thrust * np.sqrt(thrust/(2*rotorarea*airdensity))
                 efficiency              = powerideal/poweractual
+                # prediction based on momentum theory for hover case
+                # slides from https://fenix.tecnico.ulisboa.pt/downloadFile/282093452028191/3-Momentum%20Theory%20in%20hover.pdf
 
-                print("actual power is ", poweractual)
-                print("ideal power is ", powerideal)
-                
                 self.params['efficiencypropulsive'] = efficiency
 
 print("Successfully imported `Drone` class")
@@ -85,26 +97,31 @@ class Power:
 
         # methods go here:
         def __init__(self,params,drone,weather):
-                self.density    = weather.density
-                self.mass       = drone.params[TOW]
-                if drone.params['wingtype'] == 'rotary':
-                        self.Nrotors    = drone.params[num_rotors]
-                        self.L_D        = 3 #may need to change
-                        Power.getPowerRotor1()
-                elif drone.params['wingtype'] == 'fixed':
-                        self.L_D        = 10 #may need to change
-                        self.power      = 0
+                # self.density    = weather.density
+                # self.mass       = drone.params[TOW]
+                # if drone.params['wingtype'] == 'rotary':
+                #         self.Nrotors    = drone.params[num_rotors]
+                #         self.L_D        = 3 #may need to change
+                #         Power.getPowerRotor1()
+                # elif drone.params['wingtype'] == 'fixed':
+                #         self.L_D        = 10 #may need to change
+                #         self.power      = 0
+                pass
 
-        def getPowerRotor1(self): #super simple estimate for power
-                power_elec = 0.1 #kW, estimate from paper ??? Which paper? What is this parameter ???
-                self.power = self.mass * self.drone.param[cruise_speed] / (370 * self.eta_propulsive * self.L_D) - power_elec
+        def updatePower(self,drone,weather,model):
+                if model == 'dandrea':
+                        __getPowerDandrea(drone,weather)
+                elif model == 'abdilla':
+                        __getPowerAbdilla(drone,weather)
 
-        def getPowerRotor2(self): #slightly more complicated estimate for power
-                self.power = self.mass * 1 / (self.eta_propulsive * self.drone.params[prop_diameter]/2.0) * np.sqrt(self.g**3 / (2 * self.Nr * self.density * np.pi))
+        def __getPowerDandrea(self,drone,weather): #super simple estimate for power from D'Andrea `Can Drones Deliver`
+                power_elec = 0.1 #kW, estimate from paper
+                self.power = (drone.param['takeoffweight'] + drone.payload) * drone.param['endurancemaxspeed'] / (370 * drone.params['efficiencypropulsive'] * self.L_D) - power_elec
 
+        def __getPowerAbdilla(self,drone,weather): #slightly more complicated estimate for power
+                self.power = (drone.param['takeoffweight'] + drone.payload) / (drone.params['efficiencypropulsive'] * drone.params['rotordiameter'] / 2.0) * np.sqrt(weather.params['gravitationconstant']**3 / (2 * drone.params['rotorquantity'] * weather.params['airdensity'] * np.pi))
 
 print("Successfully imported `Power` class")
-
 
 class Weather:
         'Class describing ambient weather conditions and is used to predict the drone\'s power requirement'
@@ -113,17 +130,22 @@ class Weather:
         weatherlist     = [] # a list of weather objects (e.g., rain, icing, humidity, etc.)
 
         # ambient air quality
-        density = 1.225 #kg/m^3
-        gravity = 9.806655 #m/s^2
-        altitude = 100 #m
-        temperature_sl = 15
-        temperature = 15
-        pressure_sl = 1
-        pressure = 101300 #Pa
-        rain = 'False'
-        ice = 'False'
-        wind = 0
-        humidity = 0
+        params          = {
+                        'airdensity':1.225,
+                        'gravitationconstant':9.807
+                          }
+        
+        # airdensity      = 1.225 #kg/m^3
+        # gravity         = 9.806655 #m/s^2
+        # altitude = 100 #m
+        # temperature_sl = 15
+        # temperature = 15
+        # pressure_sl = 1
+        # pressure = 101300 #Pa
+        # rain = 'False'
+        # ice = 'False'
+        # wind = 0
+        # humidity = 0
 
         #need to figure out how to access current or at least average weather
                 #data based on lattitude, longitude, altitude?
@@ -162,9 +184,9 @@ print("Successfully imported `Weather` class")
 class Rain:
         'Class used to define rain characteristics'
         #class variables go here:
-        LWC = None
-        dropsize = None
-        WVC = None
+        LWC             = None
+        dropsize        = None
+        WVC             = None
 
 print("Successfully imported `Rain` class")
 
@@ -193,8 +215,8 @@ print("Successfully imported `Humidity` class")
 class Wind:
         'Class used to define wind characteristics'
         #class variables go here:
-        speed = None
-        heading = 0 #degrees from north maybe?
+        speed   = None
+        heading = 0 #degrees from north maybe? We could simply use a vector in North-east-down directions. Do we want to worry about up/downdrafts?
 
         def __init__(self,speed,heading):
                 self.speed = speed
@@ -244,6 +266,7 @@ class Simulation:
                 else:
                         #insert another model here
                         pass
+
         def runSimpleModel(self,drone,battery,power,weather):
                 if self.desiredresult == 'Endurance' or 'endurance':
                         return battery.capacity * battery.voltagemean / power.power # simple endurance model

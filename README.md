@@ -181,6 +181,12 @@ Similar to the Drone `.param` files, battery `.param` files exist for each type 
 	* test_drone.py
 	* test_plotter.py
 
+## Future Work
+
+This section is to be used to record ideas for future development that cannot be immediately implemented due to time constraints.
+
+	* calculate propulsive efficiency at max range and max endurance and interpolate between the two
+
 <!--
 ## Directories Overview
 
