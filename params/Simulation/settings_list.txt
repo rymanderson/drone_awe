@@ -2,6 +2,8 @@ drone
 dronename
 stateofhealth
 startstateofcharge
+altitude
+temperaturesealevel
 rain
 dropsize
 liquidwatercontent
@@ -19,3 +21,7 @@ xlabel
 ylabel
 title
 simulationtype
+model
+xbegin
+xend
+xincrement

@@ -21,7 +21,7 @@ class Drone:
                 self.__convertUnits()
                 self.__getEfficiencyPropulsive()
         
-        def updatePayload(self,payload)
+        def updatePayload(self,payload):
                 self.payload = payload
 
         def __convertUnits(self):
@@ -159,13 +159,14 @@ class Weather:
         #or none of the above - we vary temperature and assume either constant pressure or density (likely pressure)
 
         # methods go here:
-        def __init__(self, altitude,temperature_sl): # keeping it simple to begin with
-                self.altitude = altitude       
-                self.temperature_sl = temperature_sl 
-                self.temperature = self.temperature_sl - 71.5 + 2*np.log(1 + np.exp(35.75 - 3.25*self.altitude) + np.exp(-3 + 0.0003 * self.altitude**3))
-                self.pressure = self.pressure_sl * np.exp(-0.118 * self.altitude - (0.0015*self.altitude**2) / (1 - 0.018*self.altitude + 0.0011 * self.altitude**2))
+        def __init__(self, altitude,temperaturesealevel): # keeping it simple to begin with
+                pass
+                # self.altitude = altitude       
+                # self.temperaturesealevel = temperaturesealevel
+                # self.temperature = self.temperaturesealevel - 71.5 + 2*np.log(1 + np.exp(35.75 - 3.25*self.altitude) + np.exp(-3 + 0.0003 * self.altitude**3))
+                # self.pressure = self.pressure_sl * np.exp(-0.118 * self.altitude - (0.0015*self.altitude**2) / (1 - 0.018*self.altitude + 0.0011 * self.altitude**2))
 
-        def calculateAtmosphere(self,altitude)
+        def calculateAtmosphere(self,altitude):
                 '''This function currently assumes STP conditions at sea level and should probably be adjusted to use ground level conditions as a baseline'''
 
                 # set sea level parameters
@@ -177,17 +178,17 @@ class Weather:
                 S                               = 110.4                # K
                 beta                            = 1.458e-6             # kg/(smK^1/2)
 
-                # compute parameters at altitude
-                pressure                        = pressuresealevel * 
-                                                  np.exp( -0.118 * altitude/1000.0 - 
-                                                                (0.0015 * altitude**2) / 
-                                                                (1 - 0.018 * altitude + 0.0011 * altitude**2)
-                                                        )
-                temperature                     = temperaturesealevel - 71.5 + 2 * 
-                                                  np.log( 1 + exp(35.75 - 3.25 * h) + np.exp(-3 + 0.0003 * h.^3) )
-                airdensity                      = pressure / (airgasconstant * temperature)
-                speedsound                      = np.sqrt(specificheatratio * airgasconstant * temperature)
-                dynamicviscocity                = beta * temperature**1.5 / (temperature + S)
+                # # compute parameters at altitude
+                # pressure                        = pressuresealevel * \
+                #                                         np.exp( -0.118 * altitude/1000.0 - \
+                #                                                 (0.0015 * altitude**2) / \
+                #                                                 (1 - 0.018 * altitude + 0.0011 * altitude**2)\
+                #                                         )
+                # temperature                     = temperaturesealevel - 71.5 + 2 * \
+                #                                   np.log( 1 + exp(35.75 - 3.25 * altitude) + np.exp(-3 + 0.0003 * altitude**3) )
+                # airdensity                      = pressure / (airgasconstant * temperature)
+                # speedsound                      = np.sqrt(specificheatratio * airgasconstant * temperature)
+                # dynamicviscocity                = beta * temperature**1.5 / (temperature + S)
 
                 return (pressure, temperature, airdensity, speedsound, dynamicviscocity)
 
@@ -200,7 +201,8 @@ class Rain:
         dropsize        = None
         WVC             = None
 
-        def __init__(self,liquidwatercontent,dropsize,watervaporcontent)
+        def __init__(self,liquidwatercontent,dropsize,watervaporcontent):
+                pass
 
 print("Successfully imported `Rain` class")
 
@@ -253,11 +255,11 @@ print("Successfully imported `Wind` class")
 class Gust:
         'Class used to define gust characteristics'
         # class variables go here:
-        params  = {
-                   'amplititude':[0.0,0.0,0.0]          # in North-East-down coordinates
-                   'frequency':[0.0,0.0,0.0]            # frequency of oscillation in each axis direction
-                  }
-        def __init__(self,amplititude,frequency)
+        # params  = {
+        #            'amplititude':[0.0,0.0,0.0]          # in North-East-down coordinates
+        #            'frequency':[0.0,0.0,0.0]            # frequency of oscillation in each axis direction
+        #           }
+        def __init__(self,amplititude,frequency):
                 self.params['amplitude'] = amplititude
                 self.params['frequency'] = frequency
 
@@ -297,8 +299,9 @@ class Simulation:
         def run(self,drone,battery,power,weather):
                 if self.simulationtype == 'simple':
                         #insert simple model here
-                        self.runSimpleModel(drone,battery,power,weather)
-                elif self.simulationmodel == 'complicated': # we'll need to define a list of these terms in the README
+                        out = self.runSimpleModel(drone,battery,power,weather)
+                        return out
+                elif self.simulationtype == 'complicated': # we'll need to define a list of these terms in the README
                         #insert another model here
                         pass 
                 else:
@@ -307,9 +310,12 @@ class Simulation:
 
         def runSimpleModel(self,drone,battery,power,weather):
                 if self.desiredresult == 'Endurance' or 'endurance':
-                        return battery.capacity * battery.voltagemean / power.power # simple endurance model
+                        endurance = battery.capacity * battery.voltagemean / power.power # simple endurance model
+                        return endurance
                 elif self.desiredresult == 'Range' or 'range':
-                        return drone.params['cruisespeed'] * battery.capacity * battery.voltagemean / power.power # multiplies endurance by cruise speed to get range
+                        endurance = battery.capacity * battery.voltagemean / power.power # simple endurance model
+                        rangevar = endurance * drone.params['cruisespeed'] # range = endurance * cruise speed
+                        return rangevar
 
         def model2(self,drone, battery,power,weather):
                 print('Model 2 is still in development')

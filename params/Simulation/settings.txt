@@ -2,6 +2,8 @@ drone True
 dronename dji-Mavic2
 stateofhealth 90
 startstateofcharge 100
+altitude 100
+temperaturesealevel 15
 rain False
 dropsize 1
 liquidwatercontent 1
@@ -19,3 +21,7 @@ xlabel payload
 ylabel range
 title First_test
 simulationtype simple
+model dandrea
+xbegin 0
+xend 10 
+xincrement 1
