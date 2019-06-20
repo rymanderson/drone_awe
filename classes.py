@@ -20,6 +20,9 @@ class Drone:
                 self.conversions= conversions # this input is obtained using functions.getParams() in exe.py
                 self.__convertUnits()
                 self.__getEfficiencyPropulsive()
+        
+        def updatePayload(self,payload)
+                self.payload = payload
 
         def __convertUnits(self):
                 if not self.correctunits:
