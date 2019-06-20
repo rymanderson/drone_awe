@@ -106,7 +106,7 @@ class Power:
                 # elif drone.params['wingtype'] == 'fixed':
                 #         self.L_D        = 10 #may need to change
                 #         self.power      = 0
-                pass
+                pass # what parameters does the power class really need to store? I don't like double-storing, but it might increase speed, in which case it could be worth it
 
         def updatePower(self,drone,weather,model):
                 if model == 'dandrea':
@@ -115,8 +115,9 @@ class Power:
                         __getPowerAbdilla(drone,weather)
 
         def __getPowerDandrea(self,drone,weather): #super simple estimate for power from D'Andrea `Can Drones Deliver`
-                power_elec = 0.1 #kW, estimate from paper
-                self.power = (drone.param['takeoffweight'] + drone.payload) * drone.param['endurancemaxspeed'] / (370 * drone.params['efficiencypropulsive'] * self.L_D) - power_elec
+                powerelectronics        = 0.1          # kW, estimate from paper
+                L_D                     = 3.0          # quick estimate for initial functionality
+                self.power              = (drone.param['takeoffweight'] + drone.payload) * drone.param['endurancemaxspeed'] / (370.0 * drone.params['efficiencypropulsive'] * L_D) - powerelectronics
 
         def __getPowerAbdilla(self,drone,weather): #slightly more complicated estimate for power
                 self.power = (drone.param['takeoffweight'] + drone.payload) / (drone.params['efficiencypropulsive'] * drone.params['rotordiameter'] / 2.0) * np.sqrt(weather.params['gravitationconstant']**3 / (2 * drone.params['rotorquantity'] * weather.params['airdensity'] * np.pi))
@@ -160,6 +161,25 @@ class Weather:
                 self.temperature_sl = temperature_sl 
                 self.temperature = self.temperature_sl - 71.5 + 2*np.log(1 + np.exp(35.75 - 3.25*self.altitude) + np.exp(-3 + 0.0003 * self.altitude**3))
                 self.pressure = self.pressure_sl * np.exp(-0.118 * self.altitude - (0.0015*self.altitude**2) / (1 - 0.018*self.altitude + 0.0011 * self.altitude**2))
+
+        def calculateAtmosphere(self,altitude)
+                temperaturesealevel             = 288.15               # Kelvin
+                pressuresealevel                = 1.01325e5            # Pascals
+                gravitationconstantsealevel     = 9.80665              # m/s2
+                specificheatratio               = 1.4
+                airgasconstant                  = 287.053              # J/(kg-K)
+S = 110.4; %K
+beta = 1.458e-6; %kg/(smK^1/2)
+
+p = psl * exp( -0.118 * h - (0.0015 * h.^2)./(1 - 0.018 * h + 0.0011 * h.^2) );
+
+T = Tsl - 71.5 + 2 * log( 1 + exp(35.75 - 3.25 * h) + exp(-3 + 0.0003 * h.^3) );
+
+rho = p ./ ( R .* T );
+
+a = sqrt( gamma .* R .* T );
+
+mu = beta * T.^(3/2) ./ ( T + S );
 
         def update_temp(self,new_temp):
                 test = PowerCorrection('temp',new_temp)
