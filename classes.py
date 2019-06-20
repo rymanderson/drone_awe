@@ -99,7 +99,7 @@ class Power:
         power           = None      # watts
 
         # methods go here:
-        def __init__(self,params,drone,weather):
+        def __init__(self,drone,weather):
                 # self.density    = weather.density
                 # self.mass       = drone.params[TOW]
                 # if drone.params['wingtype'] == 'rotary':
@@ -166,43 +166,32 @@ class Weather:
                 self.pressure = self.pressure_sl * np.exp(-0.118 * self.altitude - (0.0015*self.altitude**2) / (1 - 0.018*self.altitude + 0.0011 * self.altitude**2))
 
         def calculateAtmosphere(self,altitude)
+                '''This function currently assumes STP conditions at sea level and should probably be adjusted to use ground level conditions as a baseline'''
+
+                # set sea level parameters
                 temperaturesealevel             = 288.15               # Kelvin
                 pressuresealevel                = 1.01325e5            # Pascals
                 gravitationconstantsealevel     = 9.80665              # m/s2
                 specificheatratio               = 1.4
                 airgasconstant                  = 287.053              # J/(kg-K)
-S = 110.4; %K
-beta = 1.458e-6; %kg/(smK^1/2)
+                S                               = 110.4                # K
+                beta                            = 1.458e-6             # kg/(smK^1/2)
 
-p = psl * exp( -0.118 * h - (0.0015 * h.^2)./(1 - 0.018 * h + 0.0011 * h.^2) );
+                # compute parameters at altitude
+                pressure                        = pressuresealevel * 
+                                                  np.exp( -0.118 * altitude/1000.0 - 
+                                                                (0.0015 * altitude**2) / 
+                                                                (1 - 0.018 * altitude + 0.0011 * altitude**2)
+                                                        )
+                temperature                     = temperaturesealevel - 71.5 + 2 * 
+                                                  np.log( 1 + exp(35.75 - 3.25 * h) + np.exp(-3 + 0.0003 * h.^3) )
+                airdensity                      = pressure / (airgasconstant * temperature)
+                speedsound                      = np.sqrt(specificheatratio * airgasconstant * temperature)
+                dynamicviscocity                = beta * temperature**1.5 / (temperature + S)
 
-T = Tsl - 71.5 + 2 * log( 1 + exp(35.75 - 3.25 * h) + exp(-3 + 0.0003 * h.^3) );
-
-rho = p ./ ( R .* T );
-
-a = sqrt( gamma .* R .* T );
-
-mu = beta * T.^(3/2) ./ ( T + S );
-
-        def update_temp(self,new_temp):
-                test = PowerCorrection('temp',new_temp)
-
-        def update_wind(self,velocity,heading):
-                wind_vars = [velocity, heading]
-                test = PowerCorrection('temp',wind_vars)
-
-        def update_rain(self,LWC):
-                test = PowerCorrection('temp',LWC)
-
-        def update_humidity(self,rel_hum):
-                test = PowerCorrection('temp',rel_hum)
-
-        def update_icing(self):
-                test = PowerCorrection('temp',new_temp) 
+                return (pressure, temperature, airdensity, speedsound, dynamicviscocity)
 
 print("Successfully imported `Weather` class")
-
-# Add other weather classes: rain, temp, humid, wind, etc.
 
 class Rain:
         'Class used to define rain characteristics'
@@ -211,42 +200,68 @@ class Rain:
         dropsize        = None
         WVC             = None
 
+        def __init__(self,liquidwatercontent,dropsize,watervaporcontent)
+
 print("Successfully imported `Rain` class")
 
 
 class Temperature:
         'Class used to define temperature characteristics'
         #class variables go here:
-        temperature = None
+        params  = {'temperature':None}
 
-        def __init__(self,temp):
-                self.temperature = temp
+        def __init__(self,temperature):
+                self.params['temperature'] = temperature
 
 print("Successfully imported `Temperature` class")
-
 
 class Humidity:
         'Class used to define humidity characteristics'
         #class variables go here:
+        params  = {'humidityrelative':None,
+                   'humidityabsolute':None
+                  }
     
-        def __init__(self,rel_hum):
-                self.rel_hum = rel_hum
+        def __init__(self,humidityrelative,humidityabsolute):
+                self.params['humidityrelative'] = humidityrelative
+                self.params['humidityabsolute'] = humidityabsolute
 
 print("Successfully imported `Humidity` class")
-
 
 class Wind:
         'Class used to define wind characteristics'
         #class variables go here:
-        speed   = None
-        heading = 0 #degrees from north maybe? We could simply use a vector in North-east-down directions. Do we want to worry about up/downdrafts?
+        params  = {
+                   'velocityvector':[0.0,0.0,0.0]       # m/s in North-East-down reference frame
+                  }
+        # speed   = None
+        # heading = 0 #degrees from north maybe? We could simply use a vector in North-east-down directions. Do we want to worry about up/downdrafts?
 
-        def __init__(self,speed,heading):
-                self.speed = speed
-                self.direction = direction
+        def __init__(self,speed,heading,downdraftspeed=0.0):         # note that for heading North corresponds to 0deg, East to 90deg; for pitch 0deg refers to no up/downdraft and positive pitch angles are below the horizon
+                velocity        = [speed,0.0,downdraftspeed]
+                heading         = heading*np.pi/180.0                   # convert to radians
+                rotationmatrix  = np.array(
+                                  [[np.cos(theta),-np.sin(theta),0.0],
+                                   [np.sin(theta),np.cos(theta),0.0],
+                                   [0.0,0.0,0.0]]
+                                  )
+                
+                self.params['velocityvector']   = np.dot(rotationmatrix,velocityvector)
 
 print("Successfully imported `Wind` class")
 
+class Gust:
+        'Class used to define gust characteristics'
+        # class variables go here:
+        params  = {
+                   'amplititude':[0.0,0.0,0.0]          # in North-East-down coordinates
+                   'frequency':[0.0,0.0,0.0]            # frequency of oscillation in each axis direction
+                  }
+        def __init__(self,amplititude,frequency)
+                self.params['amplitude'] = amplititude
+                self.params['frequency'] = frequency
+
+print("Successfully imported `Gust` class")
 
 class Ice:
         'Class used to define icing characteristics'
