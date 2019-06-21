@@ -78,8 +78,6 @@ simulation      = classes.Simulation(timestep,simulationtype,desiredresult)
 x               = np.linspace(xbegin,xend,numsimulations)
 y               = []
 
-#vvvvvStill needs testing:vvvvvv
-
 for payload in x:
     drone.updatePayload(payload)
     power.updatePower(drone,weather,simulationparams['model'])

@@ -121,7 +121,7 @@ class Power:
                         # raise Exception(f"~~~~~ ERROR: model { model } not available ~~~~~") # 
                         raise Exception("~~~~~ ERROR: model '" + model + "' not available ~~~~~")
 
-        def __getPowerDandrea(self,drone,weather): #super simple estimate for power from D'Andrea `Can Drones Deliver`
+        def __getPowerDandrea(self,drone,weather): #super simple estimate for power from D'Andrea `Can Drones Deliver` *****Doesn't work well*******
                 powerelectronics        = 0.1          # kW, estimate from paper
                 L_D                     = 3.0          # quick estimate for initial functionality TODO: Change this to something more scientific
                 self.power              = (drone.params['takeoffweight'] + drone.payload) * drone.params['endurancemaxspeed'] / (370.0 * drone.params['efficiencypropulsive'] * L_D) - powerelectronics
@@ -324,21 +324,13 @@ class Simulation:
                         pass
 
         def runSimpleModel(self,drone,battery,power,weather):
-                print("PreLogic         Desired Result is ", self.desiredresult)
-                if self.desiredresult == 'endurance':
-                        print("         Endurance logic: ",self.desiredresult == 'endurance')
-                        print("Rabbit!")
+                if self.desiredresult == 'Endurance' or self.desiredresult == 'endurance':
                         endurance = battery.capacity * battery.voltagemean / power.power # simple endurance model
-                        print("         Endurance is ",endurance)
                         return endurance
-                elif self.desiredresult == 'range':
-                        print("         Range logic: ",self.desiredresult == 'range')
-                        print("===Right function at least!===")
-                        endurance       = battery.capacity * battery.voltagemean / power.power # simple endurance model
-                        print("         Endurance is ",endurance)
-                        print("         Speed is     ",drone.params['endurancemaxspeed'])
-                        rangevar        = endurance * drone.params['endurancemaxspeed'] # range = endurance * cruise speed
-                        print("         Range is     ",rangevar)
+                elif self.desiredresult == 'Range' or self.desiredresult == 'range':
+                        endurance = battery.capacity * battery.voltagemean / power.power # simple endurance model
+                        cruisespeed = drone.params["cruisespeed"]
+                        rangevar = endurance * cruisespeed 
                         return rangevar
 
         def model2(self,drone, battery,power,weather):
