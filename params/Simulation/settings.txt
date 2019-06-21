@@ -25,3 +25,5 @@ model abdilla
 xbegin 0
 xend 0.5 
 xincrement 0.05
+mission True
+speed 25.0

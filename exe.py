@@ -24,6 +24,10 @@ stateofhealth       = simulationparams['stateofhealth']
 startstateofcharge  = simulationparams['startstateofcharge']
 battery             = classes.Battery(drone,stateofhealth,startstateofcharge)
 
+# instantiate mission
+missionparams       = fun.getParams('Mission','list.mission','simple.mission'," ")
+mission             = classes.Mission(missionparams)
+
 # Lines 29 - 62 can be un-commented later when Weather is ready to test
 # #get class initialization info 
 # raintest = simulationparams['rain']
@@ -80,6 +84,7 @@ y               = []
 
 for payload in x:
     drone.updatePayload(payload)
+    drone.updateEfficiencyPropulsive(mission)
     power.updatePower(drone,weather,simulationparams['model'])
     ynext = simulation.run(drone,battery,power,weather)
     y.append(ynext)

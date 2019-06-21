@@ -19,10 +19,20 @@ class Drone:
                 self.params     = params
                 self.conversions= conversions # this input is obtained using functions.getParams() in exe.py
                 self.__convertUnits()
-                self.__getEfficiencyPropulsive()
         
         def updatePayload(self,payload):
                 self.payload = payload
+
+        def updateEfficiencyPropulsive(self,mission)
+                # get efficiency at max endurance conditions
+                etamaxendurance = self.__getEfficiencyPropulsive(self.params['endurancemax'])
+                vmaxendurance   = self.params['endurancemaxspeed']
+                # get efficiency at max range conditions
+                etamaxrange     = self.__getEfficiencyPropulsive(self.params['rangemax']/self.params['rangemaxspeed'])
+                vmaxrange       = self.params['rangemaxspeed']
+                # interpolate for the current velocity
+                self.efficiencypropulsive = etamaxendurance - (vmaxendurance - mission.params['speed']) / \
+                                       (vmaxendurance - vmaxrange) * (etamaxendurance - etamaxrange)
 
         def __convertUnits(self):
                 if not self.correctunits:
@@ -32,21 +42,21 @@ class Drone:
                 else:
                         print("~~~~~ WARNING: problem converting units: skipping ~~~~~")
 
-        def __getEfficiencyPropulsive(self):
+        def __getEfficiencyPropulsive(self,endurance):
                 # Analyzing a single propeller
                 thrust                  = self.params['takeoffweight']/self.params['rotorquantity']
                 batteryenergy           = self.params['batteryenergy']/self.params['rotorquantity']
-                endurancemaxhover       = self.params['endurancemaxhover']
+                # endurancemaxhover       = self.params['endurancemaxhover']
                 rotorarea               = self.params['rotordiameter']**2/4*np.pi
                 airdensity              = 1.225  # assuming air density was equal to 1.225 kg/m3 during drone testing
 
-                poweractual             = batteryenergy/endurancemaxhover
+                poweractual             = batteryenergy/endurance
                 powerideal              = thrust * np.sqrt(thrust/(2*rotorarea*airdensity))
                 efficiency              = powerideal/poweractual
                 # prediction based on momentum theory for hover case
                 # slides from https://fenix.tecnico.ulisboa.pt/downloadFile/282093452028191/3-Momentum%20Theory%20in%20hover.pdf
 
-                self.params['efficiencypropulsive'] = efficiency
+                return efficiency
 
 print("Successfully imported `Drone` class")
 
@@ -277,15 +287,28 @@ class Gust:
 
 print("Successfully imported `Gust` class")
 
+
 class Ice:
         'Class used to define icing characteristics'
         #class variables go here:
         def __init__(self):
                 print("Too complicated. Stop now while you can!") # Hah! I laugh in the face of impending complexity and assured coding madness.
 
+
 print("Successfully imported `Rain` class")
 
 
+class Mission
+        'Class used to define the mission, including flight trajectory, maneuvers, etc.'
+
+        params = {
+                 'speed':None,
+                 'velocity':None,
+                 'climb':None
+                 }
+        
+        def __init__(self,params)
+                self.params = params
 
 class Simulation:
         'Class used to run simulations'
@@ -307,14 +330,14 @@ class Simulation:
         def __init__(self,timestep,simulationtype,desiredresult):
                 # get parameters from `settings.txt`
                 print("still working on simulation class constructor")
-                self.simulationtype = simulationtype
-                self.desiredresult = desiredresult
+                self.simulationtype     = simulationtype
+                self.desiredresult      = desiredresult
                 print("Desired Result is        ",self.desiredresult)
 
-        def run(self,drone,battery,power,weather):
+        def run(self,drone,battery,power,weather,mission):
                 if self.simulationtype == 'simple':
                         #insert simple model here
-                        out = self.runSimpleModel(drone,battery,power,weather)
+                        out = self.__runSimpleModel(drone,battery,power,weather,mission)
                         return out
                 elif self.simulationtype == 'complicated': # we'll need to define a list of these terms in the README
                         #insert another model here
@@ -323,14 +346,14 @@ class Simulation:
                         #insert another model here
                         pass
 
-        def runSimpleModel(self,drone,battery,power,weather):
+        def __runSimpleModel(self,drone,battery,power,weather,mission):
                 if self.desiredresult == 'Endurance' or self.desiredresult == 'endurance':
-                        endurance = battery.capacity * battery.voltagemean / power.power # simple endurance model
+                        endurance       = battery.capacity * battery.voltagemean / power.power # simple endurance model
                         return endurance
                 elif self.desiredresult == 'Range' or self.desiredresult == 'range':
-                        endurance = battery.capacity * battery.voltagemean / power.power # simple endurance model
-                        cruisespeed = drone.params["cruisespeed"]
-                        rangevar = endurance * cruisespeed 
+                        endurance       = battery.capacity * battery.voltagemean / power.power # simple endurance model
+                        cruisespeed     = mission.params["speed"]
+                        rangevar        = endurance * cruisespeed 
                         return rangevar
 
         def model2(self,drone, battery,power,weather):

@@ -25,3 +25,5 @@ model
 xbegin
 xend
 xincrement
+mission
+speed

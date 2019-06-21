@@ -6,6 +6,8 @@ altitudemax
 endurancemax
 endurancemaxspeed
 endurancemaxhover
+rangemax
+rangemaxspeed
 temperaturemin
 temperaturemax
 chargerpowerrating

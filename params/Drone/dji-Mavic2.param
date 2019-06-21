@@ -6,6 +6,8 @@ altitudemax 6000
 endurancemax 31
 endurancemaxspeed 6.944
 endurancemaxhover 29
+rangemax 18000
+rangemaxspeed 13.889
 tiltanglemax 35
 temperaturemin -10
 endurancemax 40
