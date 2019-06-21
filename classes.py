@@ -33,11 +33,13 @@ class Drone:
                         print("~~~~~ WARNING: problem converting units: skipping ~~~~~")
 
         def __getEfficiencyPropulsive(self):
-                thrust                  = self.params['takeoffweight']
-                batteryenergy           = self.params['batteryenergy']
+                # Analyzing a single propeller
+                thrust                  = self.params['takeoffweight']/self.params['rotorquantity']
+                batteryenergy           = self.params['batteryenergy']/self.params['rotorquantity']
                 endurancemaxhover       = self.params['endurancemaxhover']
                 rotorarea               = self.params['rotordiameter']**2/4*np.pi
-                airdensity              = 1.225                                                # assuming air density was equal to 1.225 kg/m3 during drone testing
+                airdensity              = 1.225  # assuming air density was equal to 1.225 kg/m3 during drone testing
+
                 poweractual             = batteryenergy/endurancemaxhover
                 powerideal              = thrust * np.sqrt(thrust/(2*rotorarea*airdensity))
                 efficiency              = powerideal/poweractual
@@ -91,10 +93,6 @@ class Battery:
 
 print("Successfully imported `Battery` class")
 
-class MissingModel(Exception):
-        
-
-
 class Power:
         'Class used to predict the drone\'s power requirement'
 
@@ -116,9 +114,9 @@ class Power:
 
         def updatePower(self,drone,weather,model):
                 if model == 'dandrea':
-                        __getPowerDandrea(drone,weather)
+                        self.__getPowerDandrea(drone,weather)
                 elif model == 'abdilla':
-                        __getPowerAbdilla(drone,weather)
+                        self.__getPowerAbdilla(drone,weather)
                 else:
                         # raise Exception(f"~~~~~ ERROR: model { model } not available ~~~~~") # 
                         raise Exception("~~~~~ ERROR: model '" + model + "' not available ~~~~~")
@@ -126,10 +124,15 @@ class Power:
         def __getPowerDandrea(self,drone,weather): #super simple estimate for power from D'Andrea `Can Drones Deliver`
                 powerelectronics        = 0.1          # kW, estimate from paper
                 L_D                     = 3.0          # quick estimate for initial functionality TODO: Change this to something more scientific
-                self.power              = (drone.param['takeoffweight'] + drone.payload) * drone.param['endurancemaxspeed'] / (370.0 * drone.params['efficiencypropulsive'] * L_D) - powerelectronics
+                self.power              = (drone.params['takeoffweight'] + drone.payload) * drone.params['endurancemaxspeed'] / (370.0 * drone.params['efficiencypropulsive'] * L_D) - powerelectronics
 
         def __getPowerAbdilla(self,drone,weather): #slightly more complicated estimate for power
-                self.power = (drone.param['takeoffweight'] + drone.payload) / (drone.params['efficiencypropulsive'] * drone.params['rotordiameter'] / 2.0) * np.sqrt(weather.params['gravitationconstant']**3 / (2 * drone.params['rotorquantity'] * weather.params['airdensity'] * np.pi))
+                self.power = (drone.params['takeoffweight']/weather.params['gravitationconstant'] + drone.payload)**1.5 / \
+                             (drone.params['efficiencypropulsive'] * drone.params['rotordiameter'] / 2.0) * \
+                             weather.params['gravitationconstant']**1.5 / \
+                             np.sqrt(2 * drone.params['rotorquantity'] * \
+                             weather.params['airdensity'] * np.pi) + \
+                             0.0 # Camera power consumption estimate
 
 print("Successfully imported `Power` class")
 
@@ -288,6 +291,8 @@ class Simulation:
         'Class used to run simulations'
 
         # class variables go here:
+        simulationtype  = None
+        desiredresult   = None
         params = {
                 'timestep':None,        # in seconds
                 'clock':0.0,            # tracks the current time
@@ -304,6 +309,7 @@ class Simulation:
                 print("still working on simulation class constructor")
                 self.simulationtype = simulationtype
                 self.desiredresult = desiredresult
+                print("Desired Result is        ",self.desiredresult)
 
         def run(self,drone,battery,power,weather):
                 if self.simulationtype == 'simple':
@@ -318,12 +324,21 @@ class Simulation:
                         pass
 
         def runSimpleModel(self,drone,battery,power,weather):
-                if self.desiredresult == 'Endurance' or 'endurance':
+                print("PreLogic         Desired Result is ", self.desiredresult)
+                if self.desiredresult == 'endurance':
+                        print("         Endurance logic: ",self.desiredresult == 'endurance')
+                        print("Rabbit!")
                         endurance = battery.capacity * battery.voltagemean / power.power # simple endurance model
+                        print("         Endurance is ",endurance)
                         return endurance
-                elif self.desiredresult == 'Range' or 'range':
-                        endurance = battery.capacity * battery.voltagemean / power.power # simple endurance model
-                        rangevar = endurance * drone.params['cruisespeed'] # range = endurance * cruise speed
+                elif self.desiredresult == 'range':
+                        print("         Range logic: ",self.desiredresult == 'range')
+                        print("===Right function at least!===")
+                        endurance       = battery.capacity * battery.voltagemean / power.power # simple endurance model
+                        print("         Endurance is ",endurance)
+                        print("         Speed is     ",drone.params['endurancemaxspeed'])
+                        rangevar        = endurance * drone.params['endurancemaxspeed'] # range = endurance * cruise speed
+                        print("         Range is     ",rangevar)
                         return rangevar
 
         def model2(self,drone, battery,power,weather):
@@ -353,7 +368,7 @@ class Plotter:
 	fig_num = 1
 
 	# methods go here:
-	def __init__(self,x,xlabel: string,y,ylabel,axistitle) -> None:
+	def __init__(self,x,xlabel,y,ylabel,axistitle): # def __init__(self,x,xlabel: string,y,ylabel,axistitle) -> None: 
 		d = datetime.datetime.today()
 		self.title      = axistitle + " (" + d.strftime("%b-%d-%Y") + ")"
 		self.xlabel     = xlabel

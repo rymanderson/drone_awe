@@ -18,10 +18,10 @@ icing False
 timestep 1
 plot True
 xlabel payload
-ylabel range
+ylabel endurance
 title First_test
 simulationtype simple
-model dandrea
+model abdilla
 xbegin 0
-xend 10 
-xincrement 1
+xend 0.5 
+xincrement 0.05

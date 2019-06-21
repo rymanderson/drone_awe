@@ -61,29 +61,29 @@ battery             = classes.Battery(drone,stateofhealth,startstateofcharge)
 # print("Weather parameters are: ")
 # print(str(weatherlist)[1:-1]) 
 
-weather = classes.Weather(simulationparams['altitude'],simulationparams['temperaturesealevel'])
-power = classes.Power(drone,weather)
+weather         = classes.Weather(simulationparams['altitude'],simulationparams['temperaturesealevel'])
+power           = classes.Power(drone,weather)
 
 #simulation variables
-timestep = simulationparams['timestep'] # more relevant later
-simulationtype = simulationparams['simulationtype']
-desiredresult = simulationparams['ylabel']
-xbegin = simulationparams['xbegin']
-xend = simulationparams['xend']
-xincrement = simulationparams['xincrement']
-numsimulations = (xend - xbegin) / xincrement + 1
-
-simulation = classes.Simulation(timestep,simulationtype,desiredresult)
+timestep        = simulationparams['timestep'] # more relevant later
+simulationtype  = simulationparams['simulationtype']
+desiredresult   = simulationparams['ylabel']
+xbegin          = simulationparams['xbegin']
+xend            = simulationparams['xend']
+xincrement      = simulationparams['xincrement']
+numsimulations  = (xend - xbegin) / xincrement + 1
+print("EXE.py:      Desired Result is ",desiredresult)
+simulation      = classes.Simulation(timestep,simulationtype,desiredresult)
 # x = [z*xincrement for z in range(2*xbegin, 2*xend+1)] #initialize x based on beginng, ending, and increment for payload
-x = np.linspace(xbegin,xend,numsimulations)
-y = []
+x               = np.linspace(xbegin,xend,numsimulations)
+y               = []
 
 #vvvvvStill needs testing:vvvvvv
 
 for payload in x:
     drone.updatePayload(payload)
     power.updatePower(drone,weather,simulationparams['model'])
-    ynext = simulation.run(drone,weather,power)
+    ynext = simulation.run(drone,battery,power,weather)
     y.append(ynext)
 
 if simulationparams['plot'] == True:
