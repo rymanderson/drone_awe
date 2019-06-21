@@ -2,3 +2,4 @@ Weather/ARPACK/
 Simulation/ARPACK/
 *.pyc
 __pycache__/
+.vscode/
