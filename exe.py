@@ -7,6 +7,25 @@ import classes
 import functions as fun
 
 simulationparams    = fun.getParams('Simulation','settings_list.txt','settings.txt'," ")
+xlabel              = simulationparams['xlabel']
+# ensure xlabel is an independent variable
+independentvariables = [
+                        "startstateofcharge",
+                        "altitude",
+                        "temperaturesealevel",
+                        "dropsize",
+                        "liquidwatercontent",
+                        "newtemperature",
+                        "windspeed",
+                        "winddirection",
+                        "relativehumidity",
+                        "payload",
+                        "missionspeed",
+                        "model"
+                        ]
+if xlabel not in independentvariables:
+    raise(Exception("~~~~~ ERROR: desired x variable is not independent ~~~~~"))
+
 weatherlist         = []
     
 #instantiate drone
@@ -74,20 +93,42 @@ simulationtype  = simulationparams['simulationtype']
 desiredresult   = simulationparams['ylabel']
 xbegin          = simulationparams['xbegin']
 xend            = simulationparams['xend']
-xincrement      = simulationparams['xincrement']
-numsimulations  = (xend - xbegin) / xincrement + 1
-print("EXE.py:      Desired Result is ",desiredresult)
+numsimulations  = simulationparams['xnumber']
+
+print("EXE.py:      Independent variable is ",xlabel)
+print("EXE.py:      Desired Result is       ",desiredresult)
+
 simulation      = classes.Simulation(timestep,simulationtype,desiredresult)
-# x = [z*xincrement for z in range(2*xbegin, 2*xend+1)] #initialize x based on beginng, ending, and increment for payload
 x               = np.linspace(xbegin,xend,numsimulations)
 y               = []
 
-for payload in x:
-    drone.updatePayload(payload)
-    drone.updateEfficiencyPropulsive(mission)
-    power.updatePower(drone,weather,simulationparams['model'])
+for xvalue in x:
+# update value
+    ## determine x location
+    if xlabel in drone.params:
+        drone.params[xlabel] = xvalue
+        power.update(drone,weather,simulationparams['model'],mission)
+        battery.update()
+    elif xlabel in weather.params:
+        weather.params[xlabel] = xvalue
+        power.update(drone,weather,simulationparams['model'],mission)
+        battery.update()
+    elif xlabel in mission.params:
+        mission.params[xlabel] = xvalue
+        power.update(drone,weather,simulationparams['model'],mission)
+        battery.update()
+    elif xlabel in simulationparams:
+        simulationparams[xlabel] = xvalue
+        power.update(drone,weather,simulationparams['model'],mission)
+        battery.update()
+    else:
+        raise(Exception("~~~~~ ERROR: desired x variable not set ~~~~~"))
+
     ynext = simulation.run(drone,battery,power,weather,mission)
     y.append(ynext)
+
+print("x data includes:    ",x)
+print("y data includes:    ",y)
 
 if simulationparams['plot'] == True:
     xlabel = simulationparams['xlabel']

@@ -17,13 +17,11 @@ relativehumidity 0.0
 icing False
 timestep 1
 plot True
-xlabel payload
+xlabel missionspeed
 ylabel endurance
 title First_test
 simulationtype simple
 model abdilla
 xbegin 0
 xend 0.5 
-xincrement 0.05
-mission True
-speed 25.0
+xnumber 10

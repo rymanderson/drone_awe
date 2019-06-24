@@ -24,6 +24,6 @@ simulationtype
 model
 xbegin
 xend
-xincrement
+xnumber
 mission
 speed
