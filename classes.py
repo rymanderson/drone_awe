@@ -23,7 +23,7 @@ class Drone:
         def updatePayload(self,payload):
                 self.payload = payload
 
-        def updateEfficiencyPropulsive(self,mission)
+        def updateEfficiencyPropulsive(self,mission):
                 # get efficiency at max endurance conditions
                 etamaxendurance = self.__getEfficiencyPropulsive(self.params['endurancemax'])
                 vmaxendurance   = self.params['endurancemaxspeed']
@@ -31,8 +31,16 @@ class Drone:
                 etamaxrange     = self.__getEfficiencyPropulsive(self.params['rangemax']/self.params['rangemaxspeed'])
                 vmaxrange       = self.params['rangemaxspeed']
                 # interpolate for the current velocity
-                self.efficiencypropulsive = etamaxendurance - (vmaxendurance - mission.params['speed']) / \
+                self.params['efficiencypropulsive'] = etamaxendurance - (vmaxendurance - mission.params['speed']) / \
                                        (vmaxendurance - vmaxrange) * (etamaxendurance - etamaxrange)
+                # print("Drone:           etamaxendurance is ",etamaxendurance)
+                # print("Drone:           etamaxrange is     ",etamaxrange)
+                # print("Mission:         mission speed is   ",mission.params['speed'])
+                # print("Drone:           etamission is      ",self.params['efficiencypropulsive'])
+                # print("Drone:           vmaxendurance is   ",vmaxendurance)
+                # print("Drone:           vmaxrange is       ",vmaxrange)
+                # print("")
+                # print("")
 
         def __convertUnits(self):
                 if not self.correctunits:
@@ -137,6 +145,7 @@ class Power:
                 self.power              = (drone.params['takeoffweight'] + drone.payload) * drone.params['endurancemaxspeed'] / (370.0 * drone.params['efficiencypropulsive'] * L_D) - powerelectronics
 
         def __getPowerAbdilla(self,drone,weather): #slightly more complicated estimate for power
+
                 self.power = (drone.params['takeoffweight']/weather.params['gravitationconstant'] + drone.payload)**1.5 / \
                              (drone.params['efficiencypropulsive'] * drone.params['rotordiameter'] / 2.0) * \
                              weather.params['gravitationconstant']**1.5 / \
@@ -298,7 +307,7 @@ class Ice:
 print("Successfully imported `Rain` class")
 
 
-class Mission
+class Mission:
         'Class used to define the mission, including flight trajectory, maneuvers, etc.'
 
         params = {
@@ -307,7 +316,7 @@ class Mission
                  'climb':None
                  }
         
-        def __init__(self,params)
+        def __init__(self,params):
                 self.params = params
 
 class Simulation:

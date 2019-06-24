@@ -86,7 +86,7 @@ for payload in x:
     drone.updatePayload(payload)
     drone.updateEfficiencyPropulsive(mission)
     power.updatePower(drone,weather,simulationparams['model'])
-    ynext = simulation.run(drone,battery,power,weather)
+    ynext = simulation.run(drone,battery,power,weather,mission)
     y.append(ynext)
 
 if simulationparams['plot'] == True:
