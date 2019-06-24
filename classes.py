@@ -23,7 +23,11 @@ class Drone:
     def __convertUnits(self):
         if not self.correctunits:
             for spec in self.conversions:
-                self.params[spec] = self.params[spec] * self.conversions[spec]
+                if spec in self.params:
+                    self.params[spec] = self.params[spec] * \
+                        self.conversions[spec]
+                else:
+                    print("Tried to convert:", spec, "- skipping for now.")
             self.correctunits = True
         else:
             print("~~~~~ WARNING: problem converting units: skipping ~~~~~")
@@ -127,25 +131,29 @@ class Power:
             0.0  # Camera power consumption estimate
 
     def __updateEfficiencyPropulsive(self, drone, mission):
-        # get efficiency at max endurance conditions
-        etamaxendurance = self.__getEfficiencyPropulsive(
-            drone, drone.params['endurancemax'])
-        vmaxendurance = drone.params['endurancemaxspeed']
-        # get efficiency at max range conditions
-        etamaxrange = self.__getEfficiencyPropulsive(
-            drone, drone.params['rangemax']/drone.params['rangemaxspeed'])
-        vmaxrange = drone.params['rangemaxspeed']
-        # interpolate for the current velocity
-        self.params['efficiencypropulsive'] = etamaxendurance - (vmaxendurance - mission.params['missionspeed']) / \
-            (vmaxendurance - vmaxrange) * (etamaxendurance - etamaxrange)
-        # print("Drone:           etamaxendurance is ",etamaxendurance)
-        # print("Drone:           etamaxrange is     ",etamaxrange)
-        # print("Mission:         mission speed is   ",mission.params['speed'])
-        # print("Drone:           etamission is      ",self.params['efficiencypropulsive'])
-        # print("Drone:           vmaxendurance is   ",vmaxendurance)
-        # print("Drone:           vmaxrange is       ",vmaxrange)
-        # print("")
-        # print("")
+        # default value:
+        if 'endurancemax' not in drone.params or 'endurancemaxspeed' not in drone.params:
+            self.params['efficiencypropulsive'] = 0.4
+        else:
+            # get efficiency at max endurance conditions
+            etamaxendurance = self.__getEfficiencyPropulsive(
+                drone, drone.params['endurancemax'])
+            vmaxendurance = drone.params['endurancemaxspeed']
+            # get efficiency at max range conditions
+            etamaxrange = self.__getEfficiencyPropulsive(
+                drone, drone.params['rangemax']/drone.params['rangemaxspeed'])
+            vmaxrange = drone.params['rangemaxspeed']
+            # interpolate for the current velocity
+            self.params['efficiencypropulsive'] = etamaxendurance - (vmaxendurance - mission.params['missionspeed']) / \
+                (vmaxendurance - vmaxrange) * (etamaxendurance - etamaxrange)
+            # print("Drone:           etamaxendurance is ",etamaxendurance)
+            # print("Drone:           etamaxrange is     ",etamaxrange)
+            # print("Mission:         mission speed is   ",mission.params['speed'])
+            # print("Drone:           etamission is      ",self.params['efficiencypropulsive'])
+            # print("Drone:           vmaxendurance is   ",vmaxendurance)
+            # print("Drone:           vmaxrange is       ",vmaxrange)
+            # print("")
+            # print("")
 
     def __getEfficiencyPropulsive(self, drone, endurance):
         # Analyzing a single propeller
@@ -428,6 +436,8 @@ class Simulation:
             cruisespeed = mission.params["missionfspeed"]
             rangevar = endurance * cruisespeed
             return rangevar
+        elif self.params['desiredresult'] == 'Power' or self.params['desiredresult'] == 'power':
+            return power.power
 
     def model2(self, drone, battery, power, weather):
         print('Model 2 is still in development')
@@ -492,5 +502,16 @@ class Plotter:
         fig.show()
         input()
 
+    def plot_validation(self, xvalid, yvalid):
+        fig = plt.figure(Plotter.fig_num)
+        fig.patch.set_facecolor('w')
+        plt.plot(self.x, self.y)
+        plt.plot(xvalid, yvalid, 'ko')
+        plt.xlabel(self.xlabel)
+        plt.ylabel(self.ylabel)
+        plt.title(self.title)
+        Plotter.fig_num += 1
+        fig.show()
+        input()
 
 print("Successfully imported `Plotter` class")

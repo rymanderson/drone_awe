@@ -7,6 +7,14 @@ import classes
 import functions as fun
 
 simulationparams    = fun.getParams('Simulation','settings_list.txt','settings.txt'," ")
+
+if simulationparams['validation'] == True: #validation == True
+    validation = True
+    validationcase = simulationparams['validationcase']
+    simulationparams = fun.getParams('Validation/' + validationcase,'settings_list.txt','settings.txt'," ","params/Simulation") #specifies settings_list is in separate path
+else:
+    validation == False
+
 xlabel              = simulationparams['xlabel']
 # ensure xlabel is an independent variable
 independentvariables = [
@@ -23,6 +31,7 @@ independentvariables = [
                         "missionspeed",
                         "model"
                         ]
+
 if xlabel not in independentvariables:
     raise(Exception("~~~~~ ERROR: desired x variable is not independent ~~~~~"))
 
@@ -32,7 +41,10 @@ weatherlist         = []
 if simulationparams['drone'] == True:
     conversions = fun.getParams('Drone','paramlist.param','conversions.param'," ")
     dronename           = simulationparams['dronename']
-    droneparams         = fun.getParams('Drone','paramlist.param',dronename + '.param',' ')
+    if validation:
+        droneparams         = fun.getParams('Validation/' + validationcase,'paramlist.param',dronename + ".param"," ","params/Drone")
+    else:
+        droneparams         = fun.getParams('Drone','paramlist.param',dronename + '.param',' ')
     droneconversions    = fun.getParams('Drone','paramlist.param','conversions.param',' ')
     drone               = classes.Drone(dronename,droneparams,droneconversions)
 else:
@@ -103,7 +115,7 @@ x               = np.linspace(xbegin,xend,numsimulations)
 y               = []
 
 for xvalue in x:
-# update value
+    # update value
     ## determine x location
     if xlabel in drone.params:
         drone.params[xlabel] = xvalue
@@ -123,18 +135,31 @@ for xvalue in x:
         battery.update()
     else:
         raise(Exception("~~~~~ ERROR: desired x variable not set ~~~~~"))
-
     ynext = simulation.run(drone,battery,power,weather,mission)
     y.append(ynext)
 
 print("x data includes:    ",x)
 print("y data includes:    ",y)
 
-if simulationparams['plot'] == True:
-    xlabel = simulationparams['xlabel']
-    ylabel = desiredresult
-    axistitle = simulationparams['title']
-    plotter = classes.Plotter(x,xlabel,y,ylabel,axistitle)
-    plotter.plot_line()
-else: 
-    print('No plot functionality has been defined.')
+if not validation: #proceed with normal plot
+
+    if simulationparams['plot'] == True:
+        xlabel = simulationparams['xlabel']
+        ylabel = desiredresult
+        axistitle = simulationparams['title']
+        plotter = classes.Plotter(x,xlabel,y,ylabel,axistitle)
+        plotter.plot_line()
+    else: 
+        print('No plot functionality has been defined.')
+
+else: # Plot validation data on top of our model
+    xvalid,yvalid = fun.getXandY(validationcase,",")
+
+    if simulationparams['plot'] == True:
+        xlabel = simulationparams['xlabel']
+        ylabel = desiredresult
+        axistitle = simulationparams['title'] + "Validation"
+        plotter = classes.Plotter(x,xlabel,y,ylabel,axistitle)
+        plotter.plot_validation(xvalid,yvalid)
+    else: 
+        print('No plot functionality has been defined.')
