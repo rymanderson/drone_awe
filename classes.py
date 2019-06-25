@@ -70,11 +70,11 @@ class Battery:
 
     # time-variant methods go here:
     def updateLoad(self, power):
-        self.current = power.power / self.voltage
+        self.current = power.params['power'] / self.voltage
 
     def discharge(self, power, timestep):
-        self.soc = self.soc - power.power * timestep
-        self.current = power.power / self.voltage
+        self.soc = self.soc - power.params['power'] * timestep
+        self.current = power.params['power'] / self.voltage
 
 
 print("Successfully imported `Battery` class")
@@ -85,7 +85,8 @@ class Power:
 
     # class variables go here:
     params = {
-        'efficiencypropulsive': None
+        'efficiencypropulsive': None,
+        'power': None
     }
     power = None      # watts
 
@@ -108,7 +109,7 @@ class Power:
     def __getPowerDandrea(self, drone, weather):
         powerelectronics = 0.1          # kW, estimate from paper
         L_D = 3.0          # quick estimate for initial functionality TODO: Change this to something more scientific
-        self.power = (drone.params['takeoffweight'] + drone.params['payload']) * drone.params['endurancemaxspeed'] / (
+        self.params['power'] = (drone.params['takeoffweight'] + drone.params['payload']) * drone.params['endurancemaxspeed'] / (
             370.0 * self.params['efficiencypropulsive'] * L_D) - powerelectronics
 
     # slightly more complicated estimate for power
@@ -450,7 +451,7 @@ class Simulation:
 
     def __runSimpleModel(self, drone, battery, power, weather, mission):
         self.params['endurance']    = battery.capacity * battery.voltagemean / \
-                                      power.power  # simple endurance model
+                                      power.params['power']  # simple endurance model
         cruisespeed                 = mission.params["missionspeed"]
         self.params['range']        = self.params['endurance'] * cruisespeed
 
@@ -468,7 +469,7 @@ class Simulation:
     #                 sys.exit("ERR: attempted to run a time-invariant simulation with a time-variant `Power` object")
     #         else:
     #                 # calculate endurance
-    #                 return self.capacity * self.voltage_mean / power.power
+    #                 return self.capacity * self.voltage_mean / power.params['power']
 
 
 print("Successfully imported `Simulation` class")

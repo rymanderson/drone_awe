@@ -18,7 +18,7 @@ icing False
 timestep 1
 plot True
 xlabel missionspeed
-ylabel endurance
+ylabel power
 title First_test
 simulationtype simple
 model abdilla
