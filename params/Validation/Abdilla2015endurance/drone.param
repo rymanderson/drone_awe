@@ -7,5 +7,5 @@ batterycapacity 2200.0
 batteryvoltage 11.1
 batterytype LiPo
 batterymass 0.191
-payload = 0.0
+payload 0.0
 rotordiameter 0.2

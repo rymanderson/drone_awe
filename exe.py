@@ -175,11 +175,12 @@ if not validation: #proceed with normal plot
 
 else: # Plot validation data on top of our model
     xvalid,yvalid = fun.getXandY(validationcase,",")
+    # yvalid = [x * 60.0 for x in yvalid] #only for converting from minutes to seconds until we get the conversion working before plotting
 
     if simulationparams['plot'] == True:
         xlabel = simulationparams['xlabel']
         ylabel = desiredresult
-        axistitle = simulationparams['title'] + "Validation"
+        axistitle = simulationparams['title'] + " Validation"
         plotter = classes.Plotter(x,xlabel,y,ylabel,axistitle)
         plotter.plot_validation(xvalid,yvalid)
     else: 

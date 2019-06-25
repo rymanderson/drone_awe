@@ -1,6 +1,6 @@
 drone True
 dronename drone
-stateofhealth 90.0
+stateofhealth 100.0
 startstateofcharge 100.0
 altitude 100.0
 temperaturesealevel 15.0
@@ -17,13 +17,13 @@ relativehumidity 0.0
 icing False
 timestep 1
 plot True
-xlabel payload
-ylabel endurance
-title Abdilla 2015 Endurance vs Payload Validation Test
+xlabel missionspeed
+ylabel power
+title DiFranco
 simulationtype simple
 model abdilla
-xbegin 0.4
-xend 0.55
+xbegin 0.0
+xend 16.0
 xnumber 20
 validation False
-validationcase Abdilla2015endurance
+validationcase DiFranco2016
