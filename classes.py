@@ -39,21 +39,18 @@ print("Successfully imported `Drone` class")
 class Battery:
     'Class used to track battery characteristics and performance during simulation'
 
-    # class variables go here:
-    capacity = None          # Ampere-hours
-    soc = None          # state of charge (in percent nominal capacity)
-    startsoc = None          # state of charge at simulation start
-    # state of health (actual capacity divided by ideal capacity)
-    soh = None
-    # state of health at simulation start (for running many simulations with the same drone)
-    startsoh = None
-    batterytype = None          # possible values include LiPo, Li-ion, NiCd, NiMH, SLA
-    voltage = None          # Volts; this is the instantaneous voltage
-    # Volts; this is the average voltage used for time-invariant simulations
-    voltagemean = None
-    voltagecharged = None          # Volts
-    voltagedead = None          # Volts
-    current = None          # Amperes; this is the instantaneous current
+    params = {
+                'capacity':None,        # Ampere-hours
+                'soc':None,             # state of charge (in percent nominal capacity)
+                'startsoc':None,        # state of charge at simulation start
+                'soh':None,             # state of health (actual capacity divided by ideal capacity)
+                'batterytype':None,     # possible values include LiPo, Li-ion, NiCd, NiMH, SLA
+                'voltage':None,         # Volts; this is the instantaneous voltage
+                'voltagemean':None,     # Volts; average voltage used for time-invariant simulations
+                'voltagecharged':None,  # Volts
+                'voltagedead':None,     # Volts
+                'current':None          # Amperes; this is the instantaneous current
+            }
 
     # constructor
     # default value for soh is based on the assumption that batteries are retired at a soh of 80%
@@ -157,16 +154,15 @@ class Power:
 
     def __getEfficiencyPropulsive(self, drone, endurance):
         # Analyzing a single propeller
-        thrust = drone.params['takeoffweight']/drone.params['rotorquantity']
-        batteryenergy = drone.params['batteryenergy'] / \
+        thrust          = drone.params['takeoffweight']/drone.params['rotorquantity']
+        batteryenergy   = drone.params['batteryenergy'] / \
             drone.params['rotorquantity']
-        # endurancemaxhover       = self.params['endurancemaxhover']
-        rotorarea = drone.params['rotordiameter']**2/4*np.pi
-        airdensity = 1.225  # assuming air density was equal to 1.225 kg/m3 during drone testing
+        rotorarea       = drone.params['rotordiameter']**2/4*np.pi
+        airdensity      = 1.225  # assuming air density was equal to 1.225 kg/m3 during drone testing
 
-        poweractual = batteryenergy/endurance
-        powerideal = thrust * np.sqrt(thrust/(2*rotorarea*airdensity))
-        efficiency = powerideal/poweractual
+        poweractual     = batteryenergy/endurance
+        powerideal      = thrust * np.sqrt(thrust/(2*rotorarea*airdensity))
+        efficiency      = powerideal/poweractual
         # prediction based on momentum theory for hover case
         # slides from https://fenix.tecnico.ulisboa.pt/downloadFile/282093452028191/3-Momentum%20Theory%20in%20hover.pdf
 
@@ -177,7 +173,9 @@ print("Successfully imported `Power` class")
 
 
 class Weather:
-    'Class describing ambient weather conditions and is used to predict the drone\'s power requirement'
+    '''
+    Class describing ambient weather conditions and is used to predict the drone\'s power requirement
+    '''
 
     # miscellaneous weather
     # a list of weather objects (e.g., rain, icing, humidity, etc.)
@@ -208,6 +206,8 @@ class Weather:
     # or do above with average values of temperature/pressure/density for a given location
     # or none of the above - we vary temperature and assume either constant pressure or density (likely pressure)
 
+    # How about this: we assume that we know the pressure/density/temperature at ground level.
+
     # methods go here:
     def __init__(self, altitude, temperaturesealevel):  # keeping it simple to begin with
         pass
@@ -216,32 +216,41 @@ class Weather:
         # self.temperature = self.temperaturesealevel - 71.5 + 2*np.log(1 + np.exp(35.75 - 3.25*self.altitude) + np.exp(-3 + 0.0003 * self.altitude**3))
         # self.pressure = self.pressure_sl * np.exp(-0.118 * self.altitude - (0.0015*self.altitude**2) / (1 - 0.018*self.altitude + 0.0011 * self.altitude**2))
 
+    def update(self):
+        # update independent parameters
+        for weathertype in self.weatherlist:
+            for param in weathertype.params:
+                self.params[param] = weathertype.params[param]
+        # update dependent parameters
+        for weathertype in self.weatherlist: 
+            pass
+
     def getStandardAtmosphere(self, altitude):
         '''This function currently assumes STP conditions at sea level and should probably be adjusted to use ground level conditions as a baseline'''
 
         # set sea level parameters
-        temperaturesealevel = 288.15               # Kelvin
-        pressuresealevel = 1.01325e5            # Pascals
-        gravitationconstantsealevel = 9.80665              # m/s2
-        specificheatratio = 1.4
-        airgasconstant = 287.053              # J/(kg-K)
-        S = 110.4                # K
-        beta = 1.458e-6             # kg/(smK^1/2)
+        temperaturesealevel             = 288.15               # Kelvin
+        pressuresealevel                = 1.01325e5            # Pascals
+        gravitationconstantsealevel     = 9.80665              # m/s2
+        specificheatratio               = 1.4
+        airgasconstant                  = 287.053              # J/(kg-K)
+        S                               = 110.4                # K
+        beta                            = 1.458e-6             # kg/(smK^1/2)
 
         # compute parameters at altitude
-        altitude = altitude / 1000.0    # convert to kilometers
-        pressure = pressuresealevel *\
-            np.exp(-0.118 * altitude -
-                   (0.0015 * altitude**2) /
-                   (1 - 0.018 * altitude +
-                    0.0011 * altitude**2)
-                   )
-        temperature = temperaturesealevel - 71.5 + 2 * \
-            np.log(1 + exp(35.75 - 3.25 * h) +
+        altitude            = altitude / 1000.0    # convert to kilometers
+        pressure            = pressuresealevel *\
+                                np.exp(-0.118 * altitude - \
+                                    (0.0015 * altitude**2) / \
+                                    (1 - 0.018 * altitude + \
+                                        0.0011 * altitude**2) \
+                                    )
+        temperature         = temperaturesealevel - 71.5 + 2 * \
+            np.log(1 + np.exp(35.75 - 3.25 * altitude) +
                    np.exp(-3 + 0.0003 * altitude**3))
-        airdensity = pressure / (airgasconstant * temperature)
-        speedsound = np.sqrt(specificheatratio * airgasconstant * temperature)
-        dynamicviscocity = beta * temperature**1.5 / (temperature + S)
+        airdensity          = pressure / (airgasconstant * temperature)
+        speedsound          = np.sqrt(specificheatratio * airgasconstant * temperature)
+        dynamicviscocity    = beta * temperature**1.5 / (temperature + S)
 
         return (pressure, temperature, airdensity, speedsound, dynamicviscocity)
 
@@ -256,11 +265,14 @@ class WeatherType:
         'constructor'
         for name in paramnames:
             if not(name in params):
-                print("~~~~~ WARNING: parameter ",name," missing in WeatherType declaration ~~~~~")
-                print("~~~~~          creating as None type                                 ~~~~~")
+                print("~~~~~ WARNING: parameter ", name,
+                      " missing in WeatherType declaration ~~~~~")
+                print(
+                    "~~~~~        creating as None type ~~~~~")
                 params[name] = None
         if len(paramnames) < len(params):
-            print("~~~~~ WARNING: "+str(-len(paramnames)+len(params))+" extra parameters in WeatherType declaration ~~~~~")
+            print("~~~~~ WARNING: "+str(-len(paramnames)+len(params)) +
+                  " extra parameters in WeatherType declaration ~~~~~")
         self.params = params
 
 
@@ -274,8 +286,9 @@ class Rain(WeatherType):
     '''
 
     def __init__(self, params):
-        paramnames = ['LWC','dropsize','WVC']
-        WeatherType.__init__(self,params,paramnames)
+        paramnames = ['LWC', 'dropsize', 'WVC']
+        WeatherType.__init__(self, params, paramnames)
+
 
 print("Successfully imported `Rain` class")
 
@@ -289,8 +302,8 @@ class Temperature(WeatherType):
     '''
 
     def __init__(self, params):
-        paramnames = ['temperature','temperaturesealevel']
-        WeatherType.__init__(self,params,paramnames)
+        paramnames = ['temperature', 'temperaturesealevel']
+        WeatherType.__init__(self, params, paramnames)
 
 
 print("Successfully imported `Temperature` class")
@@ -305,8 +318,8 @@ class Humidity(WeatherType):
     '''
 
     def __init__(self, params):
-        paramnames = ['humidityrelative','humidityabsolute']
-        WeatherType.__init__(self,params,paramnames)
+        paramnames = ['humidityrelative', 'humidityabsolute']
+        WeatherType.__init__(self, params, paramnames)
 
 
 print("Successfully imported `Humidity` class")
@@ -323,30 +336,39 @@ class Wind(WeatherType):
     '''
 
     def __init__(self, params):
-        paramnames = ['velocityvector','heading','downdraftspeed','speednortheast']
-        WeatherType.__init__(self,params,paramnames)
+        paramnames = ['velocityvector', 'heading',
+                      'downdraftspeed', 'speednortheast']
+        WeatherType.__init__(self, params, paramnames)
         if self.params['velocityvector'] == None:
             if not(self.params['heading'] == None) and not(self.params['speednortheast'] == None):
                 if self.params['downdraftspeed'] == None:
-                    self.params['downdraftspeed'] = 0.0 # set downdraftspeed to 0 by default
-                velocityvector  = [ self.params['speednortheast'], 0.0, self.params['downdraftspeed'] ]
-                theta           = self.params['heading']*np.pi/180.0 # convert to radians
-                rotationmatrix  = np.array(
-                                        [[np.cos(theta), -np.sin(theta), 0.0],
-                                        [np.sin(theta), np.cos(theta), 0.0],
-                                        [0.0, 0.0, 0.0]]
-                                        )     
-                self.params['velocityvector'] = np.dot(rotationmatrix, velocityvector).tolist()
+                    # set downdraftspeed to 0 by default
+                    self.params['downdraftspeed'] = 0.0
+                velocityvector = [self.params['speednortheast'],
+                                  0.0, self.params['downdraftspeed']]
+                theta = self.params['heading'] * \
+                    np.pi/180.0  # convert to radians
+                rotationmatrix = np.array(
+                    [[np.cos(theta), -np.sin(theta), 0.0],
+                     [np.sin(theta), np.cos(theta), 0.0],
+                     [0.0, 0.0, 0.0]]
+                )
+                self.params['velocityvector'] = np.dot(
+                    rotationmatrix, velocityvector).tolist()
             else:
-                raise(Exception("~~~~~ ERROR: could not construct wind velocity vector ~~~~~"))
+                raise(
+                    Exception("~~~~~ ERROR: could not construct wind velocity vector ~~~~~"))
         if self.params['heading'] == None and not(self.params['velocityvector'] == None):
-            self.params['heading'] = np.arctan2(self.params['velocityvector'][1],self.params['velocityvector'][0])
+            self.params['heading'] = np.arctan2(
+                self.params['velocityvector'][1], self.params['velocityvector'][0])
             if self.params['heading'] < 0.0:
                 self.params['heading'] = self.params['heading'] + 2*np.pi
         if self.params['speednortheast'] == None and not(self.params['velocityvector'] == None):
-            self.params['speednortheast'] = np.hypot(self.params['velocityvector'][1],self.params['velocityvector'][0])
+            self.params['speednortheast'] = np.hypot(
+                self.params['velocityvector'][1], self.params['velocityvector'][0])
         if self.params['downdraftspeed'] == None and not(self.params['velocityvector'] == None):
             self.params['downdraftspeed'] = self.params['velocityvector'][2]
+
 
 print("Successfully imported `Wind` class")
 
@@ -360,8 +382,8 @@ class Gust(WeatherType):
     '''
 
     def __init__(self, params):
-        paramnames = ['amplitude','frequency']
-        WeatherType.__init__(self,params,paramnames)
+        paramnames = ['amplitude', 'frequency']
+        WeatherType.__init__(self, params, paramnames)
 
 
 print("Successfully imported `Gust` class")
@@ -375,8 +397,8 @@ class Ice(WeatherType):
 
     def __init__(self, params):
         paramnames = ['']
-        WeatherType.__init__(self,params,paramnames)
-        print("Too complicated. Stop now while you can!") # haha seriously!
+        WeatherType.__init__(self, params, paramnames)
+        print("Too complicated. Stop now while you can!")  # haha seriously!
 
 
 print("Successfully imported `Ice` class")
@@ -396,27 +418,28 @@ class Simulation:
 
     # class variables go here:
     params = {
+        # setup parameters
         'simulationtype': None,
-        'desiredresult': None,
+        #'desiredresult': None,
         'timestep': None,        # in seconds
         'clock': 0.0,            # tracks the current time
         'counter': 0,            # tracks the iteration number (0-indexed)
+        # results
+        'range':None,
+        'endurance':None
     }
 
     # methods go here:
-    def __init__(self, timestep, simulationtype, desiredresult):
+    def __init__(self, timestep, simulationtype): #, desiredresult):
         # get parameters from `settings.txt`
-        print("still working on simulation class constructor")
         self.params['simulationtype'] = simulationtype
-        self.params['desiredresult'] = desiredresult
-        print("Desired Result is        ", self.params['desiredresult'])
+        # self.params['desiredresult'] = desiredresult
+        # print("Desired Result is        ", self.params['desiredresult'])
 
     def run(self, drone, battery, power, weather, mission):
         if self.params['simulationtype'] == 'simple':
             # insert simple model here
-            desiredvalue = self.__runSimpleModel(
-                drone, battery, power, weather, mission)
-            return desiredvalue
+            self.__runSimpleModel(drone, battery, power, weather, mission)
         # we'll need to define a list of these terms in the README
         elif self.params['simulationtype'] == 'complicated':
             # insert another model here
@@ -426,23 +449,15 @@ class Simulation:
             raise(Exception("~~~~~ ERROR: simulation model not available ~~~~~"))
 
     def __runSimpleModel(self, drone, battery, power, weather, mission):
-        if self.params['desiredresult'] == 'Endurance' or self.params['desiredresult'] == 'endurance':
-            endurance = battery.capacity * battery.voltagemean / \
-                power.power  # simple endurance model
-            return endurance
-        elif self.params['desiredresult'] == 'Range' or self.params['desiredresult'] == 'range':
-            endurance = battery.capacity * battery.voltagemean / \
-                power.power  # simple endurance model
-            cruisespeed = mission.params["missionfspeed"]
-            rangevar = endurance * cruisespeed
-            return rangevar
-        elif self.params['desiredresult'] == 'Power' or self.params['desiredresult'] == 'power':
-            return power.power
+        self.params['endurance']    = battery.capacity * battery.voltagemean / \
+                                      power.power  # simple endurance model
+        cruisespeed                 = mission.params["missionspeed"]
+        self.params['range']        = self.params['endurance'] * cruisespeed
 
-    def model2(self, drone, battery, power, weather):
+    def __model2(self, drone, battery, power, weather):
         print('Model 2 is still in development')
 
-    def model3(self, drone, battery, power, weather):
+    def __model3(self, drone, battery, power, weather):
         print('Model 3 is still in development')
 
     # # time-invariant methods go here (indicated by suffix *_ti):
