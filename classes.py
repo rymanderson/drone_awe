@@ -27,7 +27,7 @@ class Drone:
                     self.params[spec] = self.params[spec] * \
                         self.conversions[spec]
                 else:
-                    print("Tried to convert:", spec, "- skipping for now.")
+                    print("~~~~~ WARNING: drone parameter ", spec, " not found- skipping ~~~~~")
             self.correctunits = True
         else:
             print("~~~~~ WARNING: problem converting units: skipping ~~~~~")
@@ -86,23 +86,26 @@ class Power:
     # class variables go here:
     params = {
         'efficiencypropulsive': None,
-        'power':None
+        'power':None,
+        'model':None
     }
 
     # methods go here:
-    def __init__(self, drone, weather):
-        pass
+    def __init__(self, drone, weather, model, mission):
+        self.params['model'] = model
+        self.update(drone, weather, mission)
 
-    def update(self, drone, weather, model, mission):
+    def update(self, drone, weather, mission):
         self.__updateEfficiencyPropulsive(drone, mission)
-        if model == 'dandrea':
+        if self.params['model'] == 'dandrea':
             self.__getPowerDandrea(drone, weather)
-        elif model == 'abdilla':
+        elif self.params['model'] == 'abdilla':
             self.__getPowerAbdilla(drone, weather)
         else:
             # raise Exception(f"~~~~~ ERROR: model { model } not available ~~~~~") #
             raise Exception("~~~~~ ERROR: model '" +
-                            model + "' not available ~~~~~")
+                            self.params['model'] + "' not available ~~~~~")
+        print("power.update(): power is ",self.params['power'])
 
     # super simple estimate for power from D'Andrea `Can Drones Deliver` *****Doesn't work well*******
     def __getPowerDandrea(self, drone, weather):
@@ -120,12 +123,12 @@ class Power:
         # print("drone:           rotorquantity is        ",drone.params['rotorquantity'])
         # print("weather:         airdensity is           ",weather.params['airdensity'])
         # print("")
-        self.power = (drone.params['takeoffweight']/weather.params['gravitationconstant'] + drone.params['payload'])**1.5 / \
-                     (self.params['efficiencypropulsive'] * drone.params['rotordiameter'] / 2.0) * \
-            weather.params['gravitationconstant']**1.5 / \
-            np.sqrt(2 * drone.params['rotorquantity'] *
-                    weather.params['airdensity'] * np.pi) + \
-            0.0  # Camera power consumption estimate
+        self.params['power'] = (drone.params['takeoffweight']/weather.params['gravitationconstant'] + drone.params['payload'])**1.5 / \
+                               (self.params['efficiencypropulsive'] * drone.params['rotordiameter'] / 2.0) * \
+                                weather.params['gravitationconstant']**1.5 / \
+                                np.sqrt(2 * drone.params['rotorquantity'] * \
+                                weather.params['airdensity'] * np.pi) + \
+                                0.0  # Camera power consumption estimate
 
     def __updateEfficiencyPropulsive(self, drone, mission):
         # default value:
@@ -476,6 +479,7 @@ class Simulation:
             raise(Exception("~~~~~ ERROR: simulation model not available ~~~~~"))
 
     def __runSimpleModel(self, drone, battery, power, weather, mission):
+
         self.params['endurance']    = battery.capacity * battery.voltagemean / \
                                       power.params['power']  # simple endurance model
         cruisespeed                 = mission.params["missionspeed"]
