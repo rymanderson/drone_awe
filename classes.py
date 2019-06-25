@@ -86,9 +86,8 @@ class Power:
     # class variables go here:
     params = {
         'efficiencypropulsive': None,
-        'power': None
+        'power':None
     }
-    power = None      # watts
 
     # methods go here:
     def __init__(self, drone, weather):
@@ -284,6 +283,12 @@ class Rain(WeatherType):
     * LWC (liquid water content) [kg/m3]
     * dropsize [m]
     * WVC (water vapor content) []
+
+    Rain is expected to affect:
+    * lift
+    * drag
+    * weight
+    * impart downward momentum
     '''
 
     def __init__(self, params):
@@ -300,6 +305,10 @@ class Temperature(WeatherType):
     * variable (parameter) [units] {example}
     * temperature [K]
     * temperaturesealevel [K]
+
+    Temperature is expected to affect:
+    * air density
+    * battery performance
     '''
 
     def __init__(self, params):
@@ -316,6 +325,10 @@ class Humidity(WeatherType):
     * variable (parameter) [units] {example}
     * humidityrelative (relative humidity) [%]
     * humidityabsolute (absolute humidity) []
+
+    Humidity is expected to affect:
+    * air density
+    * condensation
     '''
 
     def __init__(self, params):
@@ -334,6 +347,10 @@ class Wind(WeatherType):
     * heading [degrees East of North]
     * downdraftspeed (wind velocity component downwards) [m/s]
     * speednortheast (wind speed neglecting downdraft component) [m/s]
+
+    Wind is expected to affect:
+    * No downdraft: relative airspeed and therefore effective velocity
+    * With downdraft: ?? effective climb/descent ??
     '''
 
     def __init__(self, params):
@@ -380,6 +397,10 @@ class Gust(WeatherType):
     * variable (parameter) [units] {example}
     * amplitude (gust amplitude) [m/s]
     * frequency (gust frequency) [Hz]
+
+    Gusts are expected to affect:
+    * control effort
+    * ?? overall minimal effect on power consumption ??
     '''
 
     def __init__(self, params):
@@ -394,6 +415,11 @@ class Ice(WeatherType):
     '''
     Class used to define icing characteristics. Params variables include:
     * variable (parameter) [units] {example}
+
+    Ice is expected to affect:
+    * lift
+    * drag
+    NOTE: Ice is very dangerous and difficult to model
     '''
 
     def __init__(self, params):

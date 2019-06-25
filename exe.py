@@ -154,6 +154,8 @@ for xvalue in x:
         y.append(weather.params[ylabel])
     elif ylabel in mission.params:
         y.append(mission.params[ylabel])
+    elif ylabel in power.params:
+        y.append(power.params[ylabel])
     elif ylabel in simulationparams:
         y.append(simulationparams[ylabel])
     else:
