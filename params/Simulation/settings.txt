@@ -26,4 +26,4 @@ xbegin 0
 xend 0.5 
 xnumber 10
 validation True
-validationcase Stolaroff2018
+validationcase DiFranco2016

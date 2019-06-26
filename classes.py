@@ -14,11 +14,20 @@ class Drone:
     correctunits = False
 
     def __init__(self, name, params, conversions):
-        self.name = name
-        self.params = params
+        self.name                   = name
+        self.params                 = params
         # this input is obtained using functions.getParams() in exe.py
-        self.conversions = conversions
+        self.conversions            = conversions
         self.__convertUnits()
+        # extrapolate useful parameters
+        if 'width' in self.params and 'height' in self.params:
+            self.params['frontalarea']  = self.params['width'] * self.params['height']
+        else:
+            self.params['frontalarea']  = 1.0
+            print("Drone.__init__:  'width' and 'height' not found; 'frontalarea' set to 1.0")
+            # NOTE: if width and height are not available AND a test run is not available to calibrate C_D, method will not work
+        if 'rangemax' in self.params and 'rangemaxspeed' in self.params:
+            self.params['endurancemaxrange'] = self.params['rangemax'] / self.params['rangemaxspeed']
 
     def __convertUnits(self):
         if not self.correctunits:
@@ -87,25 +96,31 @@ class Power:
     params = {
         'efficiencypropulsive': None,
         'power':None,
-        'model':None
+        'model':None,
+        'dragcoefficient':None
     }
 
     # methods go here:
     def __init__(self, drone, weather, model, mission):
+        # initial propulsive efficiency values
+        
         self.params['model'] = model
         self.update(drone, weather, mission)
 
+
     def update(self, drone, weather, mission):
+        self.__getDragCoefficient(drone)
         self.__updateEfficiencyPropulsive(drone, mission)
         if self.params['model'] == 'dandrea':
             self.__getPowerDandrea(drone, weather)
         elif self.params['model'] == 'abdilla':
-            self.__getPowerAbdilla(drone, weather)
+            self.__getPowerAbdilla(drone, weather, mission)
         else:
             # raise Exception(f"~~~~~ ERROR: model { model } not available ~~~~~") #
             raise Exception("~~~~~ ERROR: model '" +
                             self.params['model'] + "' not available ~~~~~")
-        print("power.update(): power is ",self.params['power'])
+        # print("power.update(): power is            ",self.params['power'])
+        # print("power.update(): drag coefficient is ",self.params['dragcoefficient'])
 
     # super simple estimate for power from D'Andrea `Can Drones Deliver` *****Doesn't work well*******
     def __getPowerDandrea(self, drone, weather):
@@ -115,17 +130,18 @@ class Power:
             370.0 * self.params['efficiencypropulsive'] * L_D) - powerelectronics
 
     # slightly more complicated estimate for power
-    def __getPowerAbdilla(self, drone, weather):
-        # print("power:           takeoffweight is        ",drone.params['takeoffweight'])
-        # print("weather:         gravitationconstant is  ",weather.params['gravitationconstant'])
-        # print("power:           etapropulsive is        ",self.params['efficiencypropulsive'])
-        # print("drone:           payload is              ",drone.params['payload'])
-        # print("drone:           rotorquantity is        ",drone.params['rotorquantity'])
-        # print("weather:         airdensity is           ",weather.params['airdensity'])
-        # print("")
-        self.params['power'] = (drone.params['takeoffweight']/weather.params['gravitationconstant'] + drone.params['payload'])**1.5 / \
-                               (self.params['efficiencypropulsive'] * drone.params['rotordiameter'] / 2.0) * \
-                                weather.params['gravitationconstant']**1.5 / \
+    def __getPowerAbdilla(self, drone, weather, mission):
+        print("power:           takeoffweight is        ",drone.params['takeoffweight'])
+        print("weather:         gravitationconstant is  ",weather.params['gravitationconstant'])
+        print("power:           etapropulsive is        ",self.params['efficiencypropulsive'])
+        print("drone:           payload is              ",drone.params['payload'])
+        print("drone:           rotorquantity is        ",drone.params['rotorquantity'])
+        print("weather:         airdensity is           ",weather.params['airdensity'])
+        print("")
+        thrust               = self.__getThrust(drone,weather,mission)
+        print("power:           thrust is               ",thrust)
+        self.params['power'] = thrust**1.5 / \
+                               (self.params['efficiencypropulsive'] * drone.params['rotordiameter'] / 2.0) / \
                                 np.sqrt(2 * drone.params['rotorquantity'] * \
                                 weather.params['airdensity'] * np.pi) + \
                                 0.0  # Camera power consumption estimate
@@ -133,7 +149,7 @@ class Power:
     def __updateEfficiencyPropulsive(self, drone, mission):
         # default value:
         if 'endurancemax' not in drone.params or 'endurancemaxspeed' not in drone.params:
-            self.params['efficiencypropulsive'] = 0.4
+            self.params['efficiencypropulsive'] = 0.325
         else:
             # get efficiency at max endurance conditions
             etamaxendurance = self.__getEfficiencyPropulsive(
@@ -154,6 +170,8 @@ class Power:
             # print("Drone:           vmaxrange is       ",vmaxrange)
             # print("")
             # print("")
+        
+        # print("Drone:       efficiencypropulsive is ",self.params['efficiencypropulsive'])
 
     def __getEfficiencyPropulsive(self, drone, endurance):
         # Analyzing a single propeller
@@ -171,6 +189,21 @@ class Power:
 
         return efficiency
 
+    def __getThrust(self,drone,weather,mission):
+        totalweight = drone.params['takeoffweight'] + drone.params['payload'] * weather.params['gravitationconstant']
+        drag        = self.__getDrag(drone,weather,mission)
+        thrust      = np.sqrt(totalweight**2 + drag**2)
+
+        return thrust
+
+    def __getDrag(self,drone,weather,mission):
+        drag = 0.5 * drone.params['frontalarea'] * self.params['dragcoefficient'] * weather.params['airdensity'] * mission.params['missionspeed']**2
+
+        return drag
+
+    def __getDragCoefficient(self,drone):
+
+        self.params['dragcoefficient'] = 0.1
 
 print("Successfully imported `Power` class")
 
