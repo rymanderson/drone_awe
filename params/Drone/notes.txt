@@ -1,13 +1,47 @@
 Drone - website for specs
 3DR Solo - https://3dr.com/wp-content/uploads/2016/01/v8_01_05_16.pdf
+- 1 point (cruise speed & estimated endurance)
+- 880 Kv motors
+- 10x4.5 props
+- battery info
+
 aerovironment Puma 3AE - https://www.avinc.com/uas/view/puma
+- zero points (just general endurance and a range of speeds)
+- nothing on battery,motors or props
+
 aeryon SkyRanger R70/R60 - https://www.aeryon.com/skyranger/r70/
                            https://bssholland.com/products/skyranger-r70/
                            https://www.aeryon.com/skyranger/r60/#
+- zero points (endurance but not speed)
+- max speed and max endurance, but not a coupled data point
+
 asctec Falcoln 8 - http://www.asctec.de/en/uav-uas-drones-rpas-roav/asctec-falcon-8/#pane-0-1
+- zero points
+- max speed and max range
+
 DJI Mavic2 - https://www.dji.com/mavic-2/info#specs
+- 2 points (for max endurance and range)
+- battery energy info
+
 DJI Phantom 4 RTK - https://www.dji.com/phantom-4-rtk/info#specs
+- zero points
+- battery energy info
+
 FreeFly Alta 8 - https://freeflysystems.com/alta-8/specs
-Precision Hawk FireFly 6 Pro - https://www.birdseyeview.aero/collections/payloads-pro
+- props
+- motor type
+- battery info except capacity
+- plot of endurance vs payload (in the dependable section, https://freeflysystems.com/alta-8/dependable)
+
+Precision Hawk FireFly 6 Pro - https://www.birdseyeview.aero/pages/firefly6-pro
+- plot of endurance vs payload (https://www.birdseyeview.aero/collections/payloads-pro)
+- zero points (endurance, range, and cruise speed, but may be unrelated - possibly one point there)
+
 senseFly ebee X - https://www.sensefly.com/drone/ebee-x-fixed-wing-drone/
+- zero points (range of speeds, max endurance and max range, not related)
+- limited battery info (from video screenshots)
+
 yuneec Typhoon H Plus - https://us.yuneec.com/typhoon-h-plus-specs
+- motor Kv
+- battery info
+- zero points (max endurance and max speed, unrelated)
