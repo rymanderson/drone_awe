@@ -1,4 +1,5 @@
-Drone - website for specs
+Websites for drone specs
+
 3DR Solo - https://3dr.com/wp-content/uploads/2016/01/v8_01_05_16.pdf
 - 1 point (cruise speed & estimated endurance)
 - 880 Kv motors
