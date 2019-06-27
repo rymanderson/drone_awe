@@ -28,6 +28,10 @@ class Drone:
             # NOTE: if width and height are not available AND a test run is not available to calibrate C_D, method will not work
         if 'rangemax' in self.params and 'rangemaxspeed' in self.params:
             self.params['endurancemaxrange'] = self.params['rangemax'] / self.params['rangemaxspeed']
+        if self.params['wingtype'] == 'fixed':
+            self.params['spanefficiency'] = 0.8 #estimate from Dr. Ning's book (he lists 0.7-0.9). If we want to we could decrease this further based on fuselage diameter, but maybe that's requiring too much detail
+        if 'numbatteries' in self.params:
+            self.params['batterycapacity'] *= self.params['numbatteries'] #only works for parallel
 
     def __convertUnits(self):
         if not self.correctunits:
@@ -111,10 +115,10 @@ class Power:
     def update(self, drone, weather, mission):
         self.__getDragCoefficient(drone)
         self.__updateEfficiencyPropulsive(drone, mission)
-        if self.params['model'] == 'dandrea':
-            self.__getPowerDandrea(drone, weather)
-        elif self.params['model'] == 'abdilla':
+        if drone.params['wingtype'] == 'rotary':
             self.__getPowerAbdilla(drone, weather, mission)
+        elif drone.params['wingtype'] == 'fixed':
+            self.__getPowerTraub(drone, weather, mission)
         else:
             # raise Exception(f"~~~~~ ERROR: model { model } not available ~~~~~") #
             raise Exception("~~~~~ ERROR: model '" +
@@ -122,15 +126,27 @@ class Power:
         # print("power.update(): power is            ",self.params['power'])
         # print("power.update(): drag coefficient is ",self.params['dragcoefficient'])
 
-    # super simple estimate for power from D'Andrea `Can Drones Deliver` *****Doesn't work well*******
-    def __getPowerDandrea(self, drone, weather):
-        powerelectronics = 0.1          # kW, estimate from paper
-        L_D = 3.0          # quick estimate for initial functionality TODO: Change this to something more scientific
-        self.params['power'] = (drone.params['takeoffweight'] + drone.params['payload']) * drone.params['endurancemaxspeed'] / (
-            370.0 * self.params['efficiencypropulsive'] * L_D) - powerelectronics
+    # def update(self, drone, weather, mission):
+    #     self.__getDragCoefficient(drone)
+    #     self.__updateEfficiencyPropulsive(drone, mission)
+    #     if self.params['model'] == 'dandrea':
+    #         self.__getPowerDandrea(drone, weather)
+    #     elif self.params['model'] == 'abdilla':
+    #         self.__getPowerAbdilla(drone, weather, mission)
+    #     else:
+    #         # raise Exception(f"~~~~~ ERROR: model { model } not available ~~~~~") #
+    #         raise Exception("~~~~~ ERROR: model '" +
+    #                         self.params['model'] + "' not available ~~~~~")
+
+    # # super simple estimate for power from D'Andrea `Can Drones Deliver` *****Doesn't work well*******
+    # def __getPowerDandrea(self, drone, weather):
+    #     powerelectronics = 0.1          # kW, estimate from paper
+    #     L_D = 3.0          # quick estimate for initial functionality TODO: Change this to something more scientific
+    #     self.params['power'] = (drone.params['takeoffweight'] + drone.params['payload']) * drone.params['endurancemaxspeed'] / (
+    #         370.0 * self.params['efficiencypropulsive'] * L_D) - powerelectronics
 
     # slightly more complicated estimate for power
-    def __getPowerAbdilla(self, drone, weather, mission):
+    def __getPowerAbdilla(self, drone, weather, mission): #rotary-wing power model
         print("power:           takeoffweight is        ",drone.params['takeoffweight'])
         print("weather:         gravitationconstant is  ",weather.params['gravitationconstant'])
         print("power:           etapropulsive is        ",self.params['efficiencypropulsive'])
@@ -149,10 +165,30 @@ class Power:
         vi                   = np.sqrt(thrust/drone.params['rotorquantity']/2/area/weather.params['airdensity'])
         print("power:           vi is                   ",vi)
 
+    def __getPowerTraub(self, drone, weather, mission): #fixed-wing power model
+        density = weather.params['airdensity']
+        cruisespeed = mission.params['missionspeed']
+        if 'wingarea' in drone.params:
+            wingarea = drone.params['wingarea']
+        elif 'span' in drone.params and 'chord' in drone.params:
+            wingarea = drone.params['span'] * drone.params['chord']
+        else:
+            raise(Exception("~~~~~ ERROR: wing area needed to calculate power ~~~~~"))
+        span = drone.params['span']
+        self.__getDragCoefficient(drone)
+        dragcoefficient = self.params['dragcoefficient']
+        weight = drone.params['takeoffweight']
+        spanefficiency = drone.params['spanefficiency']
+        k = 1 / (np.pi*span**2 / wingarea * spanefficiency)
+
+        self.params['power'] = 0.5 * density * cruisespeed**3 * wingarea * dragcoefficient \
+                                + 2*weight**2*k \
+                                / (density*cruisespeed*wingarea)
+
     def __updateEfficiencyPropulsive(self, drone, mission):
         # default value:
         if 'endurancemax' not in drone.params or 'endurancemaxspeed' not in drone.params:
-            self.params['efficiencypropulsive'] = 0.5
+            self.params['efficiencypropulsive'] = 0.3
         else:
             # get efficiency at max endurance conditions
             etamaxendurance = self.__getEfficiencyPropulsive(
@@ -209,7 +245,7 @@ class Power:
 
     def __getDragCoefficient(self,drone):
 
-        self.params['dragcoefficient'] = 0.15
+        self.params['dragcoefficient'] = 0.35
 
 print("Successfully imported `Power` class")
 
@@ -514,7 +550,6 @@ class Simulation:
             # insert another model here
             pass
         else:
-            # insert another model here
             raise(Exception("~~~~~ ERROR: simulation model not available ~~~~~"))
 
     def __runSimpleModel(self, drone, battery, power, weather, mission):
