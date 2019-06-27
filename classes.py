@@ -79,11 +79,11 @@ class Battery:
 
     # time-variant methods go here:
     def updateLoad(self, power):
-        self.current = power.params['power'] / self.voltage
+        self.current = power.params['power'] / self.params['voltage']
 
     def discharge(self, power, timestep):
         self.soc = self.soc - power.params['power'] * timestep
-        self.current = power.params['power'] / self.voltage
+        self.current = power.params['power'] / self.params['voltage']
 
 
 print("Successfully imported `Battery` class")
@@ -145,11 +145,14 @@ class Power:
                                 np.sqrt(2 * drone.params['rotorquantity'] * \
                                 weather.params['airdensity'] * np.pi) + \
                                 0.0  # Camera power consumption estimate
+        area                 = np.pi * drone.params['rotordiameter']**2/4
+        vi                   = np.sqrt(thrust/drone.params['rotorquantity']/2/area/weather.params['airdensity'])
+        print("power:           vi is                   ",vi)
 
     def __updateEfficiencyPropulsive(self, drone, mission):
         # default value:
         if 'endurancemax' not in drone.params or 'endurancemaxspeed' not in drone.params:
-            self.params['efficiencypropulsive'] = 0.325
+            self.params['efficiencypropulsive'] = 0.5
         else:
             # get efficiency at max endurance conditions
             etamaxendurance = self.__getEfficiencyPropulsive(
@@ -186,6 +189,9 @@ class Power:
         efficiency      = powerideal/poweractual
         # prediction based on momentum theory for hover case
         # slides from https://fenix.tecnico.ulisboa.pt/downloadFile/282093452028191/3-Momentum%20Theory%20in%20hover.pdf
+        # prediction based on momentum theory for forward flight
+        # slides from https://fenix.tecnico.ulisboa.pt/downloadFile/845043405440064/6-Momentum%20Theory%20in%20forward%20flight.pdf
+        # see also: http://www.aerospaceweb.org/design/helicopter/momentum.shtml
 
         return efficiency
 
@@ -203,7 +209,7 @@ class Power:
 
     def __getDragCoefficient(self,drone):
 
-        self.params['dragcoefficient'] = 0.1
+        self.params['dragcoefficient'] = 0.15
 
 print("Successfully imported `Power` class")
 
