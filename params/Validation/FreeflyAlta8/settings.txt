@@ -21,7 +21,6 @@ xlabel payload
 ylabel endurance
 title FreeFLY_Alta8
 simulationtype simple
-model abdilla
 xbegin 0.0
 xend 10.0
 xnumber 20

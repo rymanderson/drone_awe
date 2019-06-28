@@ -1,3 +1,5 @@
+validation True
+validationcase FreeflyAlta8
 drone True
 dronename dji-Mavic2
 stateofhealth 90.0
@@ -25,5 +27,3 @@ model abdilla
 xbegin 0
 xend 0.5 
 xnumber 10
-validation True
-validationcase FreeflyAlta8
