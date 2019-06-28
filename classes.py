@@ -31,7 +31,12 @@ class Drone:
         if self.params['wingtype'] == 'fixed':
             self.params['spanefficiency'] = 0.8 #estimate from Dr. Ning's book (he lists 0.7-0.9). If we want to we could decrease this further based on fuselage diameter, but maybe that's requiring too much detail
         if 'numbatteries' in self.params:
-            self.params['batterycapacity'] *= self.params['numbatteries'] #only works for parallel
+            if self.params['numbatteriesconnection'] == 'parallel':
+                self.params['batterycapacity'] *= self.params['numbatteries'] #increase capacity in parallel
+            elif self.params['numbatteriesconnection'] == 'series':
+                self.params['batteryvoltage'] *= self.params['nummbatteries'] #increase voltage in series
+            else:
+                 raise(Exception("~~~~~ ERROR: incorrect battery connection parameter applied ~~~~~"))
 
     def __convertUnits(self):
         if not self.correctunits:

@@ -6,6 +6,7 @@ batteryvoltage 22.2
 batterycapacity 10000
 batterytype LiPo
 numbatteries 2
+numbatteriesconnection parallel
 max_takeoffweight 18.1
 takeoffweight 6.2
 max_payload 9.1
