@@ -18,6 +18,8 @@ batterycells
 batteryenergy
 batterymass
 batteryrechargetime
+numbatteries
+numbatteriesconnection
 windspeedmax
 waterproof
 rotorquantity

@@ -5,10 +5,10 @@ batterycells 6
 batteryvoltage 22.2
 batterycapacity 10000
 batterytype LiPo
-num_batteries 2
+numbatteries 2
 numbatteriesconnection parallel
 max_takeoffweight 18.1
-empty_weight 6.2
+takeoffweight 6.2
 max_payload 9.1
 specific_power 145
 props 18x6_Folding
@@ -17,3 +17,5 @@ motor_max_power_peak 950
 temperaturemin -20
 temperaturemax 45
 thrust_ratio_at_max_takeoffweight 1.85:1
+rotordiameter 0.4572
+payload 0.0

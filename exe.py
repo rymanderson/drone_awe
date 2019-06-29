@@ -104,7 +104,7 @@ for weathertype in weatherlist:
     weatherparams = weatherparams + weathertype.params
 
 weather         = classes.Weather(simulationparams['altitude'],simulationparams['temperaturesealevel'])
-power           = classes.Power(drone,weather,simulationparams['model'],mission)
+power           = classes.Power(drone,weather,mission)
 
 #simulation variables
 timestep        = simulationparams['timestep'] # more relevant later
@@ -126,12 +126,12 @@ for xvalue in x:
     ## determine x location
     if xlabel in drone.params:
         drone.params[xlabel] = xvalue
-        power.update(drone,weather,simulationparams['model'],mission)
+        power.update(drone,weather,mission)
         battery.update()
     elif xlabel in weather.params:
         weather.params[xlabel] = xvalue
         weather.update()
-        power.update(drone,weather,simulationparams['model'],mission)
+        power.update(drone,weather,mission)
         battery.update()
     elif xlabel in mission.params:
         mission.params[xlabel] = xvalue
@@ -139,7 +139,7 @@ for xvalue in x:
         battery.update()
     elif xlabel in simulationparams:
         simulationparams[xlabel] = xvalue
-        power.update(drone,weather,simulationparams['model'],mission)
+        power.update(drone,weather,mission)
         battery.update()
     else:
         raise(Exception("~~~~~ ERROR: desired x variable not set ~~~~~"))

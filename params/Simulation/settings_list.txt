@@ -1,3 +1,5 @@
+validation
+validationcase
 drone
 dronename
 stateofhealth
@@ -21,11 +23,8 @@ xlabel
 ylabel
 title
 simulationtype
-model
 xbegin
 xend
 xnumber
 mission
 speed
-validation
-validationcase
