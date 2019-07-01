@@ -1,0 +1,8 @@
+wingtype fixed
+span 1.524
+takeoffweight 4.5
+endurancemax 59
+max_payload 0.7
+cruise_speed 18
+VTOL yes
+batterytype LiHV

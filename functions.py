@@ -78,3 +78,7 @@ def getXandY(validationcase, delimiter):
             y[counter] = float(val)
             counter += 1
         return x, y
+
+def interpolate(x1,x2,y1,y2,x):
+    y = (x-x1)*(y2-y1) / (x2-x1) + y1   
+    return y

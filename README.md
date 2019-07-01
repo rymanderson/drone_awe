@@ -234,6 +234,7 @@ Similar to the Drone `.param` files, battery `.param` files exist for each type 
 ## functions.py - Commonly used functions
 * `getparams` reads in a .txt or .csv file and outputs a dictionary with keys from a specified list and values from the specified parameter file.
 * `getXandY()` reads in data from a validation case and saves the contents to lists for x and y. This function assumes the first row contains labels and ignores them.
+* `interpolate()` does a simple linear interpolation with inputs of 2 x-values, 2 y-values, and the x-value of the parameter you are seeking.
 
 ## Testing
 * test_power.py
