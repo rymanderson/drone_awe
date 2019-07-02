@@ -307,69 +307,6 @@ class Power:
 
         self.params['dragcoefficient'] = 0.35
 
-    def __humidity_power(self,drone,power,weather): # 2D linear interpolation based on Yue (2017)
-        relativehumiditylist = [0,25,50,70,90]
-        temperaturelist = [15,20,25,30,35]
-
-        #humidity effects only
-        humidityarray = np.array([[1.0, 1.0, 1.0, 1.0, 1.0],\
-                                    [0.99837, 0.99751, 0.99662, 0.99656, 0.99389],\
-                                    [0.99673, 0.99585, 0.99409, 0.99055, 0.98866],\
-                                    [0.99592, 0.99419, 0.99155, 0.98883, 0.98517],\
-                                    [0.99429, 0.99252, 0.98902, 0.98625, 0.98080]]) # increasing humditiy in rows, temp in columns
-
-
-        # temperature and humidity effects included
-        # humidityarray = np.array([[1.0, 0.98286, 0.96653, 0.95020, 0.93551],\
-        #                             [0.99837, 0.98041, 0.96327, 0.94694, 0.92980],\
-        #                             [0.99673, 0.97878, 0.96082, 0.94122, 0.92490],\
-        #                             [0.99592, 0.97714, 0.95837, 0.93959, 0.92163],\
-        #                             [0.99429, 0.97551, 0.95592, 0.93714, 0.91755]]) # increasing humditiy in rows, temp in columns
-
-        relativehumidity = weather.params['relativehumidity']
-        temperature = weather.params['temperaturesealevel']
-
-        # determine 4 closest points before doing a 2D interpolation
-        counter = 0
-        if temperature < temperaturelist[0] or temperature > temperaturelist[-1]:
-            raise(Exception("~~~~~ ERROR: cannot estimate humidity's eefect on density at extreme temperatures ~~~~~"))
-        elif relativehumidity < 0.0 or relativehumidity > relativehumiditylist[-1]:
-            raise(Exception("~~~~~ ERROR: relative humidity is outside of available bounds ~~~~~"))
-        else:
-            for temp in temperaturelist:
-                if temperature <= temp:
-                    idT1 = counter - 1
-                    idT2 = counter
-                counter += 1
-            for hum in relativehumiditylist:
-                if relativehumidity <= hum:
-                    idH1 = counter - 1
-                    idH2 = counter
-                counter += 1
-
-        #interpolate temperature at each humidity index
-        x1 = temperaturelist[idT1]
-        x2 = temperaturelist[idT2]
-        y1 = humidityarray[idH1,idT1]
-        y2 = humidityarray[idH1,idT2]
-        x = temperature
-        tempid1 = fun.interpolate(x1,x2,y1,y2,x)
-        
-        x1 = temperaturelist[idT1]
-        x2 = temperaturelist[idT2]
-        y1 = humidityarray[idH2,idT1]
-        y2 = humidityarray[idH2,idT2]
-        x = temperature
-        tempid2 = fun.interpolate(x1,x2,y1,y2,x)
-
-        #now interpolate based on humidity
-        x1 = relativehumiditylist[idH1]
-        x2 = relativehumiditylist[idH2]
-        y1 = tempid1
-        y2 = tempid2
-        x = relativehumidity
-        humidityeffect = fun.interpolate(x1,x2,y1,y2,x)
-        self.power *= humidityeffect
 
 print("Successfully imported `Power` class")
 
@@ -516,6 +453,13 @@ class Temperature(WeatherType):
     def __init__(self, params):
         paramnames = ['temperature', 'temperaturesealevel']
         WeatherType.__init__(self, params, paramnames)
+    
+    def __tempPower(self,drone,power,weather):
+        newtemperature = weather.params['temperature']
+        oldtemperature = weather.params['temperaturesealevel']
+        olddensity = weather.params['airdensity']
+        newdensity = olddensity / ((newtemperature-oldtemperature)/oldtemperature)
+        weather.params['airdensity'] = newdensity
 
 
 print("Successfully imported `Temperature` class")
@@ -536,6 +480,73 @@ class Humidity(WeatherType):
     def __init__(self, params):
         paramnames = ['humidityrelative', 'humidityabsolute']
         WeatherType.__init__(self, params, paramnames)
+
+    def __humidityPower(self,drone,power,weather): # 2D linear interpolation based on Yue (2017)
+        relativehumiditylist = [0,25,50,70,90] #percentage
+        temperaturelist = [15,20,25,30,35] #may need to convert this to kelvin
+
+        #humidity effects only
+        humidityarray = np.array([[1.0, 1.0, 1.0, 1.0, 1.0],\
+                                    [0.99837, 0.99751, 0.99662, 0.99656, 0.99389],\
+                                    [0.99673, 0.99585, 0.99409, 0.99055, 0.98866],\
+                                    [0.99592, 0.99419, 0.99155, 0.98883, 0.98517],\
+                                    [0.99429, 0.99252, 0.98902, 0.98625, 0.98080]]) # increasing humditiy in rows, temp in columns
+
+
+        # temperature and humidity effects included
+        # humidityarray = np.array([[1.0, 0.98286, 0.96653, 0.95020, 0.93551],\
+        #                             [0.99837, 0.98041, 0.96327, 0.94694, 0.92980],\
+        #                             [0.99673, 0.97878, 0.96082, 0.94122, 0.92490],\
+        #                             [0.99592, 0.97714, 0.95837, 0.93959, 0.92163],\
+        #                             [0.99429, 0.97551, 0.95592, 0.93714, 0.91755]]) # increasing humditiy in rows, temp in columns
+
+        relativehumidity = weather.params['relativehumidity']
+        temperature = weather.params['temperaturesealevel']
+
+        # determine 4 closest points before doing a 2D interpolation
+        counter = 0
+        if temperature < temperaturelist[0] or temperature > temperaturelist[-1]:
+            raise(Exception("~~~~~ ERROR: cannot estimate humidity's eefect on density at extreme temperatures ~~~~~"))
+        elif relativehumidity < 0.0 or relativehumidity > relativehumiditylist[-1]:
+            raise(Exception("~~~~~ ERROR: relative humidity is outside of available bounds ~~~~~"))
+        else:
+            for temp in temperaturelist:
+                if temperature <= temp:
+                    idT1 = counter - 1
+                    idT2 = counter
+                counter += 1
+            for hum in relativehumiditylist:
+                if relativehumidity <= hum:
+                    idH1 = counter - 1
+                    idH2 = counter
+                counter += 1
+
+        #interpolate temperature at each humidity index
+        x1 = temperaturelist[idT1]
+        x2 = temperaturelist[idT2]
+        y1 = humidityarray[idH1,idT1]
+        y2 = humidityarray[idH1,idT2]
+        x = temperature
+        tempid1 = fun.interpolate(x1,x2,y1,y2,x)
+        
+        x1 = temperaturelist[idT1]
+        x2 = temperaturelist[idT2]
+        y1 = humidityarray[idH2,idT1]
+        y2 = humidityarray[idH2,idT2]
+        x = temperature
+        tempid2 = fun.interpolate(x1,x2,y1,y2,x)
+
+        #now interpolate based on humidity
+        x1 = relativehumiditylist[idH1]
+        x2 = relativehumiditylist[idH2]
+        y1 = tempid1
+        y2 = tempid2
+        x = relativehumidity
+        humidityeffect = fun.interpolate(x1,x2,y1,y2,x)
+        self.params['airdensity'] *= humidityeffect
+        # OR
+        # This method could be placed in the power sub-class and change power by this much instead:
+        # self.params['power'] *= humidityeffect
 
 print("Successfully imported `Humidity` class")
 

@@ -1,5 +1,5 @@
 validation True
-validationcase Stolaroff2018
+validationcase FreeflyAlta8
 drone True
 dronename dji-Mavic2
 stateofhealth 90.0

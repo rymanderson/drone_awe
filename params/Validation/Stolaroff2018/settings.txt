@@ -12,8 +12,8 @@ newtemperature 0.0
 wind False
 windspeed 0.0
 winddirection 0.0
-humidity False
-relativehumidity 0.0
+humidity True
+relativehumidity 85.0
 icing False
 timestep 1
 plot True
