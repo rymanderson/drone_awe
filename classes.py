@@ -285,7 +285,7 @@ class Power:
 
             return (return1,return2)
         
-        (alpha, velocityinduced)        = fsolve(momentumTheoryEquations,(5,10))
+        (alpha, velocityinduced)        = fsolve(momentumTheoryEquations,(0,0))
 
         self.params['alpha']            = alpha
         self.params['velocityinduced']  = velocityinduced
