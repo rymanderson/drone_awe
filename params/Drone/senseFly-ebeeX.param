@@ -5,7 +5,9 @@ speedmax 30
 endurancemax 90
 batterytype LiPo
 batterycapacity 4900
-batteryvoltage 11.1
-batterycells 3
+batteryvoltage 14.8
+batterycells 4
+batterymass 0.4
+batteryrechargetime 40
 windspeedmax 12.8
 VTOL no

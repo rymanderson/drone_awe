@@ -202,11 +202,14 @@ class Power:
         cruisespeed = mission.params['missionspeed']
         if 'wingarea' in drone.params:
             wingarea = drone.params['wingarea']
-        elif 'span' in drone.params and 'chord' in drone.params:
-            wingarea = drone.params['span'] * drone.params['chord']
+        elif 'wingspan' in drone.params and 'chord' in drone.params:
+            wingarea = drone.params['wingspan'] * drone.params['chord']
         else:
             raise(Exception("~~~~~ ERROR: wing area needed to calculate power ~~~~~"))
-        span = drone.params['span']
+        if 'wingspan' not in drone.params:
+            raise(Exception("~~~~~ ERROR: wing span needed to calculate power ~~~~~"))
+        else:
+            span = drone.params['wingspan']
         self.__getDragCoefficient(drone)
         dragcoefficient = self.params['dragcoefficient']
         weight = drone.params['takeoffweight']
