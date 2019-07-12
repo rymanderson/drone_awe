@@ -12,7 +12,7 @@ newtemperature 0.0
 wind False
 windspeed 0.0
 winddirection 0.0
-humidity True
+humidity False
 relativehumidity 85.0
 icing False
 timestep 1
@@ -24,6 +24,6 @@ simulationtype simple
 model abdilla
 xbegin 0.0
 xend 15.0
-xnumber 20
+xnumber 10
 validation False
 validationcase Stolaroff2018

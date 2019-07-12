@@ -72,11 +72,16 @@ mission             = classes.Mission(missionparams)
 #     # …
 #     rain                = classes.Rain(dropsize,liquidwatercontent)
 
-# temperaturetest = simulationparams['temperature']
-# if temperaturetest == True:
-#     weatherlist.append('temperature')
-#     newtemperature  = simulationparams['newtemperature']
-#     temperature     = classes.Temperature(newtemperature)
+temperaturetest = simulationparams['temperature']
+if temperaturetest == True:
+    weatherlist.append('temperature')
+    newtemperature  = simulationparams['newtemperature']
+    temperaturesealevel = simulationparams['temperaturesealevel']
+    temperatureparams = {
+                        'temperature':newtemperature,        # Ampere-hours
+                        'temperaturesealevel':temperaturesealevel 
+                        }
+    temperature     = classes.Temperature(temperatureparams)
 
 # windtest = simulationparams['wind']
 # if windtest == True:
@@ -85,11 +90,12 @@ mission             = classes.Mission(missionparams)
 #     direction   = simulationparams['winddirection']
 #     wind        = classes.Wind(speed,direction)
 
-# humiditytest = simulationparams['humidity']
-# if humiditytest == True:
-#     weatherlist.append('humidity')
-#     relativehumidity    = simulationparams['relativehumidity']
-#     direction           = classes.Humidity(relativehumidity)
+humiditytest = simulationparams['humidity']
+if humiditytest == True:
+    weatherlist.append('humidity')
+    relativehumidity    = simulationparams['relativehumidity']
+    humidityparams      = {'relativehumidity':relativehumidity}
+    humidity            = classes.Humidity(humidityparams)
 
 # icingtest = simulationparams['icing']
 # if icingtest == True:
@@ -99,11 +105,14 @@ mission             = classes.Mission(missionparams)
 # print("Weather parameters are: ")
 # print(str(weatherlist)[1:-1]) 
 
-weatherparams   = []
-for weathertype in weatherlist:
-    weatherparams = weatherparams + weathertype.params
+# weatherparams   = []
+# for weathertype in weatherlist:
+#     weatherparams = weatherparams + weathertype.params
 
-weather         = classes.Weather(simulationparams['altitude'],simulationparams['temperaturesealevel'])
+
+
+weather         = classes.Weather(simulationparams['altitude'],simulationparams['temperaturesealevel'],weatherlist)
+weather.update()
 power           = classes.Power(drone,weather,mission)
 
 #simulation variables
@@ -161,8 +170,8 @@ for xvalue in x:
     else:
         raise(Exception("~~~~~ ERROR: desired y variable not found ~~~~~"))
 
-print("x data includes:    ",x)
-print("y data includes:    ",y)
+# print("x data includes:    ",x)
+# print("y data includes:    ",y)
 
 if not validation: #proceed with normal plot
 

@@ -146,9 +146,6 @@ class Power:
         # print("power.update(): power is            ",self.params['power'])
         # print("power.update(): drag coefficient is ",self.params['dragcoefficient'])
 
-        if 'humidity' in weather.weatherlist:
-            self.__humidityPower(drone,weather)
-
     # def update(self, drone, weather, mission):
     #     self.__getDragCoefficient(drone)
     #     self.__updateEfficiencyPropulsive(drone, mission)
@@ -223,7 +220,7 @@ class Power:
     def __updateEfficiencyPropulsive(self, drone, mission):
         # default value:
         if 'endurancemax' not in drone.params or 'endurancemaxspeed' not in drone.params:
-            self.params['efficiencypropulsive'] = 0.3
+            self.params['efficiencypropulsive'] = 0.5
         else:
             # get efficiency at max endurance conditions
             etamaxendurance = self.__getEfficiencyPropulsive(
@@ -308,7 +305,7 @@ class Power:
 
     def __getDragCoefficient(self,drone):
 
-        self.params['dragcoefficient'] = 0.35
+        self.params['dragcoefficient'] = 0.15
 
 
 print("Successfully imported `Power` class")
@@ -321,7 +318,7 @@ class Weather:
 
     # miscellaneous weather
     # a list of weather objects (e.g., rain, icing, humidity, etc.)
-    weatherlist = []
+    weatherlist = None
 
     # ambient air quality
     params = {
@@ -351,8 +348,8 @@ class Weather:
     # How about this: we assume that we know the pressure/density/temperature at ground level.
 
     # methods go here:
-    def __init__(self, altitude, temperaturesealevel):  # keeping it simple to begin with
-        pass
+    def __init__(self, altitude, temperaturesealevel,weatherlist):  # keeping it simple to begin with
+        self.weatherlist = weatherlist
         # self.altitude = altitude
         # self.temperaturesealevel = temperaturesealevel
         # self.temperature = self.temperaturesealevel - 71.5 + 2*np.log(1 + np.exp(35.75 - 3.25*self.altitude) + np.exp(-3 + 0.0003 * self.altitude**3))
@@ -365,7 +362,10 @@ class Weather:
                 self.params[param] = weathertype.params[param]
         # update dependent parameters
         for weathertype in self.weatherlist: 
-            pass
+            densityfactor = weathertype.updateDensity(self)
+            self.params['airdensity'] *= densityfactor
+            # print(weathertype,self.params['airdensity'])
+            print("TESTING TESTING TESTING")
 
     def getStandardAtmosphere(self, altitude):
         '''This function currently assumes STP conditions at sea level and should probably be adjusted to use ground level conditions as a baseline'''
@@ -457,12 +457,13 @@ class Temperature(WeatherType):
         paramnames = ['temperature', 'temperaturesealevel']
         WeatherType.__init__(self, params, paramnames)
     
-    def __tempPower(self,drone,power,weather):
+    def updateDensity(self,weather):
         newtemperature = weather.params['temperature']
         oldtemperature = weather.params['temperaturesealevel']
         olddensity = weather.params['airdensity']
         newdensity = olddensity / ((newtemperature-oldtemperature)/oldtemperature)
-        weather.params['airdensity'] = newdensity
+        temperatureeffect = newdensity / olddensity
+        return temperatureeffect
 
 
 print("Successfully imported `Temperature` class")
@@ -481,10 +482,10 @@ class Humidity(WeatherType):
     '''
 
     def __init__(self, params):
-        paramnames = ['humidityrelative', 'humidityabsolute']
+        paramnames = ['humidityrelative']    #, 'humidityabsolute'] - most of the time it is only given in relative terms
         WeatherType.__init__(self, params, paramnames)
 
-    def __humidityPower(self,drone,power,weather): # 2D linear interpolation based on Yue (2017)
+    def updateDensity(self,weather): # 2D linear interpolation based on Yue (2017)
         relativehumiditylist = [0,25,50,70,90] #percentage
         temperaturelist = [15,20,25,30,35] #may need to convert this to kelvin
 
@@ -546,10 +547,8 @@ class Humidity(WeatherType):
         y2 = tempid2
         x = relativehumidity
         humidityeffect = fun.interpolate(x1,x2,y1,y2,x)
-        self.params['airdensity'] *= humidityeffect
-        # OR
-        # This method could be placed in the power sub-class and change power by this much instead:
-        # self.params['power'] *= humidityeffect
+        return humidityeffect
+
 
 print("Successfully imported `Humidity` class")
 

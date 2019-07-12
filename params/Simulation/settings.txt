@@ -1,5 +1,5 @@
 validation True
-validationcase Ostler2009
+validationcase Stolaroff2018
 drone True
 dronename dji-Mavic2
 stateofhealth 90.0

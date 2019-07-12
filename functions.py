@@ -64,7 +64,7 @@ def getXandY(validationcase, delimiter):
         y = []
         for line in paramfile:  # separates columns from .param file
             parts = line.strip().split(delimiter)
-            print(parts)
+            # print(parts)
             x.append(parts[0])
             y.append(parts[1])
         x = x[1:]
