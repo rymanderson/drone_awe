@@ -74,7 +74,6 @@ mission             = classes.Mission(missionparams)
 
 temperaturetest = simulationparams['temperature']
 if temperaturetest == True:
-    weatherlist.append('temperature')
     newtemperature  = simulationparams['newtemperature']
     temperaturesealevel = simulationparams['temperaturesealevel']
     temperatureparams = {
@@ -82,6 +81,7 @@ if temperaturetest == True:
                         'temperaturesealevel':temperaturesealevel 
                         }
     temperature     = classes.Temperature(temperatureparams)
+    weatherlist.append(temperature)
 
 # windtest = simulationparams['wind']
 # if windtest == True:
@@ -92,10 +92,10 @@ if temperaturetest == True:
 
 humiditytest = simulationparams['humidity']
 if humiditytest == True:
-    weatherlist.append('humidity')
     relativehumidity    = simulationparams['relativehumidity']
     humidityparams      = {'relativehumidity':relativehumidity}
     humidity            = classes.Humidity(humidityparams)
+    weatherlist.append(humidity)
 
 # icingtest = simulationparams['icing']
 # if icingtest == True:
@@ -112,7 +112,9 @@ if humiditytest == True:
 
 
 weather         = classes.Weather(simulationparams['altitude'],simulationparams['temperaturesealevel'],weatherlist)
+print("About to update weather:")
 weather.update()
+print("Weather updated.")
 power           = classes.Power(drone,weather,mission)
 
 #simulation variables
