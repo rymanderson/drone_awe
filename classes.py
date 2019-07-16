@@ -351,7 +351,8 @@ class Weather:
     # ambient air quality
     params = {
         'airdensity': 1.225,
-        'gravitationconstant': 9.807
+        'gravitationconstant': 9.807,
+        'temperature': 288.15
     }
 
     # airdensity      = 1.225 #kg/m^3
@@ -379,21 +380,24 @@ class Weather:
     def __init__(self, altitude, temperaturesealevel,weatherlist):  # keeping it simple to begin with
         self.weatherlist = weatherlist
         # self.altitude = altitude
-        # self.temperaturesealevel = temperaturesealevel
+        self.temperature = temperaturesealevel
         # self.temperature = self.temperaturesealevel - 71.5 + 2*np.log(1 + np.exp(35.75 - 3.25*self.altitude) + np.exp(-3 + 0.0003 * self.altitude**3))
         # self.pressure = self.pressure_sl * np.exp(-0.118 * self.altitude - (0.0015*self.altitude**2) / (1 - 0.018*self.altitude + 0.0011 * self.altitude**2))
 
     def update(self):
         # update independent parameters
+        print(self.weatherlist)
         for weathertype in self.weatherlist:
+            print(weathertype)
+            print(weathertype.params)
             for param in weathertype.params:
                 self.params[param] = weathertype.params[param]
         # update dependent parameters
         for weathertype in self.weatherlist: 
+            print(self.params)
             densityfactor = weathertype.updateDensity(self)
             self.params['airdensity'] *= densityfactor
             # print(weathertype,self.params['airdensity'])
-            print("TESTING TESTING TESTING")
 
     def getStandardAtmosphere(self, altitude):
         '''This function currently assumes STP conditions at sea level and should probably be adjusted to use ground level conditions as a baseline'''
@@ -486,10 +490,13 @@ class Temperature(WeatherType):
         WeatherType.__init__(self, params, paramnames)
     
     def updateDensity(self,weather):
-        newtemperature = weather.params['temperature']
-        oldtemperature = weather.params['temperaturesealevel']
+        newtemperature = weather.params['temperature'] + 273.15 #convert to kelvin
+        oldtemperature = weather.params['temperaturesealevel'] + 273.15 #convert to kelvin
+        print("old temperature is",oldtemperature)
+        print("new temperature is",newtemperature)
         olddensity = weather.params['airdensity']
-        newdensity = olddensity / ((newtemperature-oldtemperature)/oldtemperature)
+        print("old density is",olddensity)
+        newdensity = olddensity * ((oldtemperature-newtemperature)/oldtemperature + 1) #inverse relationship
         temperatureeffect = newdensity / olddensity
         return temperatureeffect
 
@@ -501,8 +508,8 @@ class Humidity(WeatherType):
     '''
     Class used to define humidity characteristics. Params variables include:
     * variable (parameter) [units] {example}
-    * humidityrelative (relative humidity) [%]
-    * humidityabsolute (absolute humidity) []
+    * relativehumidity (relative humidity) [%]
+    * absolutehumidity (absolute humidity) []
 
     Humidity is expected to affect:
     * air density
@@ -510,7 +517,7 @@ class Humidity(WeatherType):
     '''
 
     def __init__(self, params):
-        paramnames = ['humidityrelative']    #, 'humidityabsolute'] - most of the time it is only given in relative terms
+        paramnames = ['relativehumidity']    #, 'absolutehumidity'] - most of the time it is only given in relative terms
         WeatherType.__init__(self, params, paramnames)
 
     def updateDensity(self,weather): # 2D linear interpolation based on Yue (2017)
@@ -533,48 +540,52 @@ class Humidity(WeatherType):
         #                             [0.99429, 0.97551, 0.95592, 0.93714, 0.91755]]) # increasing humditiy in rows, temp in columns
 
         relativehumidity = weather.params['relativehumidity']
-        temperature = weather.params['temperaturesealevel']
-
+        # temperature = weather.params['temperaturesealevel']
+        # temperature = 288.15 - 273.15 #convert to celcius - need to update this if temperature is altered
+        temperature = weather.params['temperature'] #already to celcius
+        # print("Temperature is",temperature)
         # determine 4 closest points before doing a 2D interpolation
-        counter = 0
         if temperature < temperaturelist[0] or temperature > temperaturelist[-1]:
-            raise(Exception("~~~~~ ERROR: cannot estimate humidity's eefect on density at extreme temperatures ~~~~~"))
+            print("~~~~~ WARNING: cannot estimate humidity's effect on density at temperatures below 15 and above 35 degrees Celcius. Assuming no humidity effect on density. ~~~~~")
+            humidityeffect = 1.0
         elif relativehumidity < 0.0 or relativehumidity > relativehumiditylist[-1]:
             raise(Exception("~~~~~ ERROR: relative humidity is outside of available bounds ~~~~~"))
         else:
+            counter = 0
             for temp in temperaturelist:
                 if temperature <= temp:
                     idT1 = counter - 1
                     idT2 = counter
                 counter += 1
+            counter = 0
             for hum in relativehumiditylist:
                 if relativehumidity <= hum:
                     idH1 = counter - 1
                     idH2 = counter
                 counter += 1
 
-        #interpolate temperature at each humidity index
-        x1 = temperaturelist[idT1]
-        x2 = temperaturelist[idT2]
-        y1 = humidityarray[idH1,idT1]
-        y2 = humidityarray[idH1,idT2]
-        x = temperature
-        tempid1 = fun.interpolate(x1,x2,y1,y2,x)
-        
-        x1 = temperaturelist[idT1]
-        x2 = temperaturelist[idT2]
-        y1 = humidityarray[idH2,idT1]
-        y2 = humidityarray[idH2,idT2]
-        x = temperature
-        tempid2 = fun.interpolate(x1,x2,y1,y2,x)
+            #interpolate temperature at each humidity index
+            x1 = temperaturelist[idT1]
+            x2 = temperaturelist[idT2]
+            y1 = humidityarray[idH1,idT1]
+            y2 = humidityarray[idH1,idT2]
+            x = temperature
+            tempid1 = fun.interpolate(x1,x2,y1,y2,x)
+            
+            x1 = temperaturelist[idT1]
+            x2 = temperaturelist[idT2]
+            y1 = humidityarray[idH2,idT1]
+            y2 = humidityarray[idH2,idT2]
+            x = temperature
+            tempid2 = fun.interpolate(x1,x2,y1,y2,x)
 
-        #now interpolate based on humidity
-        x1 = relativehumiditylist[idH1]
-        x2 = relativehumiditylist[idH2]
-        y1 = tempid1
-        y2 = tempid2
-        x = relativehumidity
-        humidityeffect = fun.interpolate(x1,x2,y1,y2,x)
+            #now interpolate based on humidity
+            x1 = relativehumiditylist[idH1]
+            x2 = relativehumiditylist[idH2]
+            y1 = tempid1
+            y2 = tempid2
+            x = relativehumidity
+            humidityeffect = fun.interpolate(x1,x2,y1,y2,x)
         return humidityeffect
 
 

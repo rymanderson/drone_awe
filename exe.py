@@ -21,7 +21,7 @@ xlabel               = simulationparams['xlabel']
 independentvariables = [
                         "startstateofcharge",
                         "altitude",
-                        "temperaturesealevel",
+                        "temperature",
                         "dropsize",
                         "liquidwatercontent",
                         "newtemperature",
@@ -72,30 +72,31 @@ mission             = classes.Mission(missionparams)
 #     # …
 #     rain                = classes.Rain(dropsize,liquidwatercontent)
 
-temperaturetest = simulationparams['temperature']
-if temperaturetest == True:
-    weatherlist.append('temperature')
-    newtemperature  = simulationparams['newtemperature']
-    temperaturesealevel = simulationparams['temperaturesealevel']
-    temperatureparams = {
-                        'temperature':newtemperature,        # Ampere-hours
-                        'temperaturesealevel':temperaturesealevel 
-                        }
-    temperature     = classes.Temperature(temperatureparams)
+# Temperature
+if xlabel == 'temperature':
+    newtemperature = simulationparams['xbegin']
+else:
+    newtemperature  = simulationparams['temperature']
+temperaturesealevel = 15 #do we still need this?
+temperatureparams   = {
+                    'temperature':newtemperature,        # Ampere-hours
+                    'temperaturesealevel':temperaturesealevel 
+                    }
+temperature     = classes.Temperature(temperatureparams)
+weatherlist.append(temperature)
+
+#Humidity
+relativehumidity    = simulationparams['relativehumidity']
+humidityparams      = {'relativehumidity':relativehumidity}
+humidity            = classes.Humidity(humidityparams)
+weatherlist.append(humidity)
 
 # windtest = simulationparams['wind']
 # if windtest == True:
-#     weatherlist.append('wind')
 #     speed       = simulationparams['windspeed']
 #     direction   = simulationparams['winddirection']
 #     wind        = classes.Wind(speed,direction)
-
-humiditytest = simulationparams['humidity']
-if humiditytest == True:
-    weatherlist.append('humidity')
-    relativehumidity    = simulationparams['relativehumidity']
-    humidityparams      = {'relativehumidity':relativehumidity}
-    humidity            = classes.Humidity(humidityparams)
+#     weatherlist.append(wind)
 
 # icingtest = simulationparams['icing']
 # if icingtest == True:
@@ -111,8 +112,10 @@ if humiditytest == True:
 
 
 
-weather         = classes.Weather(simulationparams['altitude'],simulationparams['temperaturesealevel'],weatherlist)
+weather         = classes.Weather(simulationparams['altitude'],simulationparams['temperature'],weatherlist)
+print("About to update weather:")
 weather.update()
+print("Weather updated.")
 power           = classes.Power(drone,weather,mission)
 
 #simulation variables
@@ -138,6 +141,7 @@ for xvalue in x:
         power.update(drone,weather,mission)
         battery.update()
     elif xlabel in weather.params:
+        print("temperature is indeed in weather.params :)")
         weather.params[xlabel] = xvalue
         weather.update()
         power.update(drone,weather,mission)
