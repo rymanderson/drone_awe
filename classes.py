@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy.optimize import fsolve
 import functions as fun
+import gekko
 
 # insert classes here
 
@@ -167,23 +168,19 @@ class Power:
 
     # slightly more complicated estimate for power
     def __getPowerAbdilla(self, drone, weather, mission):
-        thrust               = self.params['thrust']
-        self.params['power'] = thrust**1.5 / \
+        self.params['power'] = self.params['thrust']**1.5 / \
                                self.params['efficiencypropulsive'] / \
                                 np.sqrt(2 * drone.params['rotorquantity'] * \
                                 weather.params['airdensity'] * drone.params['rotorarea']) + \
                                 0.0  # Camera power consumption estimate
 
-        area                 = np.pi * drone.params['rotordiameter']**2/4
-        vi                   = np.sqrt(thrust/drone.params['rotorquantity']/2/area/weather.params['airdensity'])
-        
         print("----- MISSION SPEED = ",mission.params['missionspeed']," -----")
         print("power:           takeoffweight is        ",drone.params['takeoffweight'])
         print("power:           alpha is                ",self.params['alpha'])
         print("power:           thrust is               ",self.params['thrust'])
         print("power:           drag is                 ",self.params['drag'])
         print("power:           velocityinduced is      ",self.params['velocityinduced'])
-        print("power:           velcoityinducedhover is ",vi)
+        print("power:           velcoityinducedhover is ",self.params['velocityinducedhover'])
         print("power:           etapropulsive is        ",self.params['efficiencypropulsive'])
         print("")
         print("drone:           payload is              ",drone.params['payload'])
@@ -274,21 +271,52 @@ class Power:
         frontalarea         = drone.params['frontalarea']
         toparea             = drone.params['toparea']
 
-        def momentumTheoryEquations(variables):
-            alpha, velocityinduced  = variables
+        self.params['area'] = np.pi * drone.params['rotordiameter']**2/4
+        self.params['velocityinducedhover']  = np.sqrt(totalweight/drone.params['rotorquantity']/2/self.params['area']/weather.params['airdensity'])
+
+        # def momentumTheoryEquations(variables):
+        #     alpha, velocityinduced  = variables
             
-            return1     = velocityinduced**4 + velocityinduced**3 * (2*velocityinfinity*np.sin(alpha*np.pi/180.0)) + \
-                        velocityinduced**2 * velocityinfinity**2 - (totalweight/(2*airdensity*rotorarea*rotorquantity))**2
-            return2     = totalweight/(rotorquantity*np.cos(alpha*np.pi/180.0)) - \
-                        airdensity*velocityinfinity**2*dragcoefficient / (2*rotorquantity*np.sin(alpha*np.pi/180.0)) * \
-                        toparea*np.sin(alpha*np.pi/180.0) + frontalarea*np.cos(alpha*np.pi/180.0)
+        #     return1     = velocityinduced**4 + velocityinduced**3 * (2*velocityinfinity*np.sin(alpha*np.pi/180.0)) + \
+        #                 velocityinduced**2 * velocityinfinity**2 - (totalweight/(2*airdensity*rotorarea*rotorquantity))**2
+        #     return2     = totalweight/(rotorquantity*np.cos(alpha*np.pi/180.0)) - \
+        #                 airdensity*velocityinfinity**2*dragcoefficient / (2*rotorquantity*np.sin(alpha*np.pi/180.0)) * \
+        #                 toparea*np.sin(alpha*np.pi/180.0) + frontalarea*np.cos(alpha*np.pi/180.0)
 
-            return (return1,return2)
+        #     return (return1,return2)
         
-        (alpha, velocityinduced)        = fsolve(momentumTheoryEquations,(0,0))
+        # (alpha, velocityinduced)        = fsolve(momentumTheoryEquations,(0.0,0.0))
 
-        self.params['alpha']            = alpha
-        self.params['velocityinduced']  = velocityinduced
+        m               = gekko.GEKKO()             # create GEKKO model
+        alpha           = m.Var(value=0.0)      # define new variable, initial value=0
+        velocityinduced = m.Var(value=self.params['velocityinducedhover'])      # define new variable, initial value=0
+        m.Equations([ \
+
+            2*airdensity*rotorarea*velocityinduced*m.sqrt(velocityinfinity**2 + 2*velocityinfinity*velocityinduced*m.sin(alpha) + velocityinduced**2) == \
+            m.sqrt(totalweight**2 + (1/2*airdensity*velocityinfinity**2*dragcoefficient * (toparea*m.sin(alpha) + frontalarea*m.cos(alpha)))**2), \
+            velocityinduced == totalweight/2.0/airdensity/rotorarea/m.sqrt((velocityinfinity*m.cos(alpha))**2 + (velocityinfinity*m.sin(alpha) + velocityinduced)**2)
+
+            # velocityinduced**4 + velocityinduced**3 * (2*velocityinfinity*m.sin(alpha*np.pi/180.0)) + \
+            # velocityinduced**2 * velocityinfinity**2 - (totalweight/(2*airdensity*rotorarea*rotorquantity))**2==0.0, \
+            # totalweight/(rotorquantity*m.cos(alpha*np.pi/180.0)) - \
+            # airdensity*velocityinfinity**2*dragcoefficient / (2*rotorquantity*m.sin(alpha*np.pi/180.0)) * \
+            # toparea*m.sin(alpha*np.pi/180.0) + frontalarea*m.cos(alpha*np.pi/180.0) == 0.0 \
+
+            ]) # equations
+        m.solve(disp=False)     # solve
+
+        alpha                           = alpha.value[0]
+        # ensure alpha is between -pi and pi
+        if alpha > np.pi or alpha < -np.pi:
+            print("NOTE: alpha was evaluated as ",alpha,"; adjusting")
+            while alpha > np.pi or alpha < -np.pi:
+                if alpha > np.pi:
+                    alpha = alpha - 2*np.pi
+                elif alpha < -np.pi:
+                    alpha = alpha + 2*np.pi
+        self.params['alpha']            = alpha            
+        self.params['velocityinduced']  = velocityinduced.value[0]
+        print("TESTING: VELOCITYINDUCED is ",velocityinduced.value[0])
 
     def __getDrag(self,drone,weather,mission):
         drag = 0.5 * self.params['dragcoefficient'] * weather.params['airdensity'] * mission.params['missionspeed']**2 * \
