@@ -480,8 +480,8 @@ class Humidity(WeatherType):
     '''
     Class used to define humidity characteristics. Params variables include:
     * variable (parameter) [units] {example}
-    * humidityrelative (relative humidity) [%]
-    * humidityabsolute (absolute humidity) []
+    * relativehumidity (relative humidity) [%]
+    * absolutehumidity (absolute humidity) []
 
     Humidity is expected to affect:
     * air density
@@ -489,7 +489,7 @@ class Humidity(WeatherType):
     '''
 
     def __init__(self, params):
-        paramnames = ['humidityrelative']    #, 'humidityabsolute'] - most of the time it is only given in relative terms
+        paramnames = ['relativehumidity']    #, 'absolutehumidity'] - most of the time it is only given in relative terms
         WeatherType.__init__(self, params, paramnames)
 
     def updateDensity(self,weather): # 2D linear interpolation based on Yue (2017)
@@ -518,7 +518,8 @@ class Humidity(WeatherType):
         # print("Temperature is",temperature)
         # determine 4 closest points before doing a 2D interpolation
         if temperature < temperaturelist[0] or temperature > temperaturelist[-1]:
-            raise(Exception("~~~~~ ERROR: cannot estimate humidity's eefect on density at extreme temperatures ~~~~~"))
+            print("~~~~~ WARNING: cannot estimate humidity's effect on density at temperatures below 15 and above 35 degrees Celcius. Assuming no humidity effect on density. ~~~~~")
+            humidityeffect = 1.0
         elif relativehumidity < 0.0 or relativehumidity > relativehumiditylist[-1]:
             raise(Exception("~~~~~ ERROR: relative humidity is outside of available bounds ~~~~~"))
         else:
@@ -535,28 +536,28 @@ class Humidity(WeatherType):
                     idH2 = counter
                 counter += 1
 
-        #interpolate temperature at each humidity index
-        x1 = temperaturelist[idT1]
-        x2 = temperaturelist[idT2]
-        y1 = humidityarray[idH1,idT1]
-        y2 = humidityarray[idH1,idT2]
-        x = temperature
-        tempid1 = fun.interpolate(x1,x2,y1,y2,x)
-        
-        x1 = temperaturelist[idT1]
-        x2 = temperaturelist[idT2]
-        y1 = humidityarray[idH2,idT1]
-        y2 = humidityarray[idH2,idT2]
-        x = temperature
-        tempid2 = fun.interpolate(x1,x2,y1,y2,x)
+            #interpolate temperature at each humidity index
+            x1 = temperaturelist[idT1]
+            x2 = temperaturelist[idT2]
+            y1 = humidityarray[idH1,idT1]
+            y2 = humidityarray[idH1,idT2]
+            x = temperature
+            tempid1 = fun.interpolate(x1,x2,y1,y2,x)
+            
+            x1 = temperaturelist[idT1]
+            x2 = temperaturelist[idT2]
+            y1 = humidityarray[idH2,idT1]
+            y2 = humidityarray[idH2,idT2]
+            x = temperature
+            tempid2 = fun.interpolate(x1,x2,y1,y2,x)
 
-        #now interpolate based on humidity
-        x1 = relativehumiditylist[idH1]
-        x2 = relativehumiditylist[idH2]
-        y1 = tempid1
-        y2 = tempid2
-        x = relativehumidity
-        humidityeffect = fun.interpolate(x1,x2,y1,y2,x)
+            #now interpolate based on humidity
+            x1 = relativehumiditylist[idH1]
+            x2 = relativehumiditylist[idH2]
+            y1 = tempid1
+            y2 = tempid2
+            x = relativehumidity
+            humidityeffect = fun.interpolate(x1,x2,y1,y2,x)
         return humidityeffect
 
 
