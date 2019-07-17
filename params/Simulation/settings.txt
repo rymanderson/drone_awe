@@ -17,10 +17,10 @@ icing False
 timestep 1
 plot True
 xlabel temperature
-ylabel power
+ylabel range
 title First_test
 simulationtype simple
 model abdilla
 xbegin 10
-xend 40 
-xnumber 10
+xend 40
+xnumber 20

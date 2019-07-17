@@ -80,5 +80,8 @@ def getXandY(validationcase, delimiter):
         return x, y
 
 def interpolate(x1,x2,y1,y2,x):
-    y = (x-x1)*(y2-y1) / (x2-x1) + y1   
+    if x1 == x2:
+        y = y1
+    else:
+        y = (x-x1)*(y2-y1) / (x2-x1) + y1   
     return y
