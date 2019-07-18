@@ -204,7 +204,7 @@ class Power:
             span = drone.params['wingspan']
         self.__getDragCoefficient(drone)
         dragcoefficient = self.params['dragcoefficient']
-        weight = drone.params['takeoffweight']
+        weight = drone.params['takeoffweight'] * weather.params['gravitationconstant']
         spanefficiency = drone.params['spanefficiency']
         k = 1 / (np.pi*span**2 / wingarea * spanefficiency)
 
@@ -241,7 +241,7 @@ class Power:
 
     def __getEfficiencyPropulsive(self, drone, weather, endurance):
         # Analyzing a single propeller
-        thrust          = drone.params['takeoffweight'] / drone.params['rotorquantity']
+        thrust          = drone.params['takeoffweight'] * weather.params['gravitationconstant'] / drone.params['rotorquantity']
         batteryenergy   = drone.params['batteryenergy'] / \
                           drone.params['rotorquantity']
         rotorarea       = drone.params['rotorarea']
@@ -332,7 +332,7 @@ class Power:
         self.params['bladeprofilepower'] = 145.0
 
     def __setParameters(self,drone,weather):
-        drone.params['totalweight']             = drone.params['takeoffweight'] + drone.params['payload'] * \
+        drone.params['totalweight']             = (drone.params['takeoffweight'] + drone.params['payload']) * \
                                                   weather.params['gravitationconstant']
         self.params['area']                     = np.pi * drone.params['rotordiameter']**2/4
         self.params['velocityinducedhover']     = np.sqrt(drone.params['totalweight'] / \
