@@ -16,11 +16,11 @@ relativehumidity 0.0
 icing False
 timestep 1
 plot True
-xlabel missionspeed
-ylabel power
+xlabel temperature
+ylabel range
 title First_test
 simulationtype simple
 model abdilla
-xbegin 0
-xend 40 
-xnumber 10
+xbegin 10
+xend 40
+xnumber 20
