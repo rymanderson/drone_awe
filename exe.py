@@ -56,7 +56,8 @@ else:
 # instantiate battery
 stateofhealth       = simulationparams['stateofhealth']
 startstateofcharge  = simulationparams['startstateofcharge']
-battery             = classes.Battery(drone,stateofhealth,startstateofcharge)
+batterytechnology   = simulationparams['batterytechnology']
+battery             = classes.Battery(drone,stateofhealth,startstateofcharge, batterytechnology)
 
 # instantiate mission
 missionparams       = fun.getParams('Mission','list.mission','simple.mission'," ")
@@ -138,13 +139,13 @@ else:
     weathernumber = int(1)
     wvector = range(weathernumber) # only iterate once
 
-for wvalue in wvector:
+for zvalue in wvector:
     if "weathereffect" in simulationparams:
         if weathereffect == 'temperature':
             print("weathereffect = temperature confirmed")
-            weather.weatherlist[0].params["temperature"] = wvalue
+            weather.weatherlist[0].params["temperature"] = zvalue
         elif weathereffect == 'relativehumidity':
-            weather.weatherlist[1].params["relativehummidity"] = wvalue
+            weather.weatherlist[1].params["relativehummidity"] = zvalue
         else:
             raise(Exception("ERROR: weathereffect not a valid input"))
         weather.update()

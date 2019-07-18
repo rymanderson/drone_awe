@@ -83,21 +83,36 @@ class Battery:
                 'voltagemean':None,     # Volts; average voltage used for time-invariant simulations
                 'voltagecharged':None,  # Volts
                 'voltagedead':None,     # Volts
-                'current':None          # Amperes; this is the instantaneous current
+                'current':None,         # Amperes; this is the instantaneous current
+                'batterytechnology':None # current, near-future, or far-future
             }
 
     # constructor
     # default value for soh is based on the assumption that batteries are retired at a soh of 80%
-    def __init__(self, drone, soh=90.0, startsoc=100.0):
+    def __init__(self, drone, soh=90.0, startsoc=100.0, batterytechnology):
         # import parameters from drone object
         self.batterytype = drone.params['batterytype']
         self.voltagemean = drone.params['batteryvoltage']
-        self.capacity = drone.params['batterycapacity']
+
+        #update capacity based on future technology if needed
+        self.defineCapacity()
 
         # update parameters
         self.update()
 
         # estimate list lengths for prior memory allocation
+
+    def defineCapacity(self,drone)
+        if self.params['batterytechnology'] == 'current':
+            self.capacity = drone.params['batterycapacity']
+        elif self.params['batterytechnology'] == 'near-future':
+            print("Assuming a LiPo battery capacity increase of 3.5% per year for 5 years.")
+            self.capacity = drone.params['batterycapacity'] * (1.035**5) # capacity increases by 3-4% each year, this assumes 3.5% for 5 years. It may be an option to let the user specify a timeline, but past 5 years I don't know if that growth in capacity is sustainable.
+        elif self.params['batterytechnology'] == 'far-future': #Li-air batteries
+            print("Assuming Lithium-air batteries with a capacity of ____ mAh.")
+            self.capacity = drone.params['batterycapacity'] * 10 # estimate for now - ten times the capacity
+        else:
+            raise(Exception("ERROR: Incompatible battery technology input."))
 
     def update(self):
         print("still working on Battery.update method")

@@ -2,6 +2,7 @@ validation False
 validationcase DiFranco2016
 drone True
 dronename dji-Mavic2
+batterytechnology nearfuture
 stateofhealth 90.0
 startstateofcharge 100.0
 altitude 100.0
