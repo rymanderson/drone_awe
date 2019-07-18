@@ -1,5 +1,5 @@
-validation False
-validationcase Stolaroff2018
+validation True
+validationcase DiFranco2016
 drone True
 dronename dji-Mavic2
 stateofhealth 90.0
@@ -16,11 +16,11 @@ relativehumidity 0.0
 icing False
 timestep 1
 plot True
-xlabel temperature
+xlabel missionspeed
 ylabel power
 title First_test
 simulationtype simple
 model abdilla
-xbegin 10
+xbegin 0
 xend 40 
 xnumber 10

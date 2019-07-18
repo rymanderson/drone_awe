@@ -113,7 +113,7 @@ weatherlist.append(humidity)
 
 
 weather         = classes.Weather(simulationparams['altitude'],simulationparams['temperature'],weatherlist)
-print("About to update weather:")
+print("Preparing to update weather:")
 weather.update()
 print("Weather updated.")
 power           = classes.Power(drone,weather,mission)
