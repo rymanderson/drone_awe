@@ -28,3 +28,7 @@ xend
 xnumber
 mission
 speed
+weathereffect
+weatherbegin
+weatherend
+weathernumber

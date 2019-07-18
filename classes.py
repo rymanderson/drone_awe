@@ -358,27 +358,29 @@ class Power:
         velocityinduced2 = totalweight/rotorquantity/2.0/airdensity/rotorarea/np.sqrt((velocityinfinity*np.cos(alpha))**2 + \
                            (velocityinfinity*np.sin(alpha) + velocityinduced)**2)
 
-        print("----- MISSION SPEED = ",mission.params['missionspeed']," -----")
-        print("")
-        print("power:           alpha is                ",self.params['alpha']*180/np.pi)
-        print("power:           thrust is               ",self.params['thrust'])
-        print("power:           thrust2 is              ",thrust2)
-        print("power:           thrust3 is              ",thrust3)
-        print("power:           drag is                 ",self.params['drag'])
-        print("power:           velocityinduced is      ",self.params['velocityinduced'])
-        print("power:           velocityinduced2 is     ",velocityinduced2)
-        print("power:           velocityinducedhover is ",self.params['velocityinducedhover'])
-        print("power:           etapropulsive is        ",self.params['efficiencypropulsive'])
-        print("")
-        print("drone:           totalweight is          ",drone.params['totalweight'])
-        print("drone:           takeoffweight is        ",drone.params['takeoffweight'])
-        print("drone:           payload is              ",drone.params['payload'])
-        print("drone:           rotorquantity is        ",drone.params['rotorquantity'])
+        # print("----- MISSION SPEED = ",mission.params['missionspeed']," -----")
+        # print("")
+        # print("power:           alpha is                ",self.params['alpha']*180/np.pi)
+        # print("power:           thrust is               ",self.params['thrust'])
+        # print("power:           thrust2 is              ",thrust2)
+        # print("power:           thrust3 is              ",thrust3)
+        # print("power:           drag is                 ",self.params['drag'])
+        # print("power:           velocityinduced is      ",self.params['velocityinduced'])
+        # print("power:           velocityinduced2 is     ",velocityinduced2)
+        # print("power:           velocityinducedhover is ",self.params['velocityinducedhover'])
+        # print("power:           etapropulsive is        ",self.params['efficiencypropulsive'])
+        # print("")
+        # print("drone:           totalweight is          ",drone.params['totalweight'])
+        # print("drone:           takeoffweight is        ",drone.params['takeoffweight'])
+        # print("drone:           payload is              ",drone.params['payload'])
+        # print("drone:           rotorquantity is        ",drone.params['rotorquantity'])
         print("")
         print("weather:         airdensity is           ",weather.params['airdensity'])
         print("weather:         gravitationconstant is  ",weather.params['gravitationconstant'])
+        print("weather:         temperature is          ",weather.weatherlist[0].params['temperature'])
+        print("weather:         relativehumidity is     ",weather.weatherlist[1].params['relativehumidity'])
         print("")  
-        print("")
+        # print("")
 
 print("Successfully imported `Power` class")
 
@@ -611,7 +613,7 @@ class Humidity(WeatherType):
             raise(Exception("~~~~~ ERROR: relative humidity is outside of available bounds ~~~~~"))
         elif relativehumidity > relativehumiditylist[-1]:
             relativehumidity = relativehumiditylist[-1]
-            print("WARNING: Humidity is above interpolation bounds. Humidy effects are assumed to be as if the temperature is",humiditylist[-1],"%")
+            print("WARNING: Humidity is above interpolation bounds. Humidy effects are assumed to be as if the temperature is",relativehumiditylist[-1],"%")
 
         counter = 0
         for temp in temperaturelist:
@@ -836,13 +838,14 @@ class Plotter:
 
     # methods go here:
     # def __init__(self,x,xlabel: string,y,ylabel,axistitle) -> None:
-    def __init__(self, x, xlabel, y, ylabel, axistitle):
+    def __init__(self, x, xlabel, y, ylabel, axistitle, numplots):
         d = datetime.datetime.today()
         self.title = axistitle + " (" + d.strftime("%b-%d-%Y") + ")"
         self.xlabel = xlabel
         self.ylabel = ylabel
         self.x = x
         self.y = y
+        self.numplots = numplots
         # plt.plot(self.x,self.y)
         # plt.xlabel(self.xlabel)
         # plt.ylabel(self.ylabel)
@@ -852,10 +855,11 @@ class Plotter:
     def plot_line(self):
         fig = plt.figure(Plotter.fig_num)
         fig.patch.set_facecolor('w')
-        plt.plot(self.x, self.y)
         plt.xlabel(self.xlabel)
         plt.ylabel(self.ylabel)
         plt.title(self.title)
+        for i in range(self.numplots):
+            plt.plot(self.x, self.y[i])
         Plotter.fig_num += 1
         fig.show()
         input()
@@ -863,10 +867,11 @@ class Plotter:
     def plot_scatter(self):
         fig = plt.figure(Plotter.fig_num)
         fig.patch.set_facecolor('w')
-        plt.plot(self.x, self.y, 'ro')
         plt.xlabel(self.xlabel)
         plt.ylabel(self.ylabel)
         plt.title(self.title)
+        for i in range(self.numplots):
+            plt.plot(self.x, self.y[i], 'ro')
         Plotter.fig_num += 1
         fig.show()
         input()
@@ -874,11 +879,12 @@ class Plotter:
     def plot_validation(self, xvalid, yvalid):
         fig = plt.figure(Plotter.fig_num)
         fig.patch.set_facecolor('w')
-        plt.plot(self.x, self.y)
-        plt.plot(xvalid, yvalid, 'ko')
         plt.xlabel(self.xlabel)
         plt.ylabel(self.ylabel)
         plt.title(self.title)
+        plt.plot(xvalid, yvalid, 'ko')
+        for i in range(self.numplots):
+            plt.plot(self.x, self.y[i])
         Plotter.fig_num += 1
         fig.show()
         input()
