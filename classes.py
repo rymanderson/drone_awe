@@ -32,7 +32,7 @@ class Drone:
         if 'width' in self.params and 'length' in self.params:
             self.params['toparea'] = self.params['width'] * self.params['length']
         else:
-            self.params['toparea'] = 6.0
+            self.params['toparea'] = 8.0
             print("Drone.__init__:  'width' and 'length' not found; 'frontalarea' set to 1.0")
         if 'rangemax' in self.params and 'rangemaxspeed' in self.params:
             self.params['endurancemaxrange'] = self.params['rangemax'] / self.params['rangemaxspeed']
@@ -268,6 +268,7 @@ class Power:
         dragcoefficient     = self.params['dragcoefficient']
         frontalarea         = drone.params['frontalarea']
         toparea             = drone.params['toparea']
+        pi                  = np.pi
 
         # def momentumTheoryEquations(variables):
         #     alpha, velocityinduced  = variables
@@ -282,13 +283,26 @@ class Power:
         
         # (alpha, velocityinduced)        = fsolve(momentumTheoryEquations,(0.0,0.0))
 
-        m               = gekko.GEKKO()             # create GEKKO model
+        m               = gekko.GEKKO(remote=False)             # create GEKKO model
         alpha           = m.Var(value=0.0)      # define new variable, initial value=0
         velocityinduced = m.Var(value=self.params['velocityinducedhover'])      # define new variable, initial value
+
+        # print values for debugging
+        print("GEKKO:       airdensity*velocityinfinity**2*pi*toparea = ",airdensity*velocityinfinity**2*pi*0.006)
+
+        qty             = (totalweight/rotorquantity + 0.00000000/rotorquantity)**2
+
         m.Equations([ \
 
+
+# airdensity*velocityinfinity**2*pi*alpha*0.006
+
+
             2*airdensity*rotorarea*velocityinduced*m.sqrt(velocityinfinity**2 + 2*velocityinfinity*velocityinduced*m.sin(alpha) + velocityinduced**2) == \
-            m.sqrt((totalweight/rotorquantity)**2 + (1/2*airdensity*velocityinfinity**2*dragcoefficient * (toparea*m.sin(alpha) + frontalarea*m.cos(alpha)))**2), \
+            m.sqrt( \
+            (totalweight/rotorquantity + 0/rotorquantity)**2 + \
+            # qty + \
+            (1/2*airdensity*velocityinfinity**2*dragcoefficient * (toparea*m.sin(-alpha) + frontalarea*m.cos(alpha)))**2 ), \
             velocityinduced == totalweight/rotorquantity/2.0/airdensity/rotorarea/m.sqrt((velocityinfinity*m.cos(alpha))**2 + (velocityinfinity*m.sin(alpha) + velocityinduced)**2)
 
             # velocityinduced**4 + velocityinduced**3 * (2*velocityinfinity*m.sin(alpha*np.pi/180.0)) + \
@@ -326,7 +340,7 @@ class Power:
         self.params['thrust'] = thrust
 
     def __getDragCoefficient(self,drone):
-        self.params['dragcoefficient'] = 0.08
+        self.params['dragcoefficient'] = 0.07
     
     def __getBladeProfilePower(self):
         self.params['bladeprofilepower'] = 145.0
