@@ -2,6 +2,7 @@ validation
 validationcase
 drone
 dronename
+batterytechnology
 stateofhealth
 startstateofcharge
 altitude
@@ -28,3 +29,7 @@ xend
 xnumber
 mission
 speed
+weathereffect
+weatherbegin
+weatherend
+weathernumber

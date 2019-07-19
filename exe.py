@@ -56,18 +56,12 @@ else:
 # instantiate battery
 stateofhealth       = simulationparams['stateofhealth']
 startstateofcharge  = simulationparams['startstateofcharge']
-battery             = classes.Battery(drone,stateofhealth,startstateofcharge)
+batterytechnology   = simulationparams['batterytechnology']
+battery             = classes.Battery(drone,stateofhealth,startstateofcharge, batterytechnology)
 
 # instantiate mission
 missionparams       = fun.getParams('Mission','list.mission','simple.mission'," ")
 mission             = classes.Mission(missionparams)
-
-# Rain
-#     dropsize            = simulationparams['dropsize']
-#     liquidwatercontent  = simulationparams['liquidwatercontent']
-#     # …
-#     rain                = classes.Rain(dropsize,liquidwatercontent)
-#     weatherlist.append('rain')
 
 # Temperature
 if xlabel == 'temperature':
@@ -86,6 +80,13 @@ else:
 humidityparams      = {'relativehumidity':relativehumidity}
 humidity            = classes.Humidity(humidityparams)
 weatherlist.append(humidity)
+
+# Rain
+#     dropsize            = simulationparams['dropsize']
+#     liquidwatercontent  = simulationparams['liquidwatercontent']
+#     # …
+#     rain                = classes.Rain(dropsize,liquidwatercontent)
+#     weatherlist.append('rain')
 
 # Wind
 #     speed       = simulationparams['windspeed']
@@ -125,53 +126,80 @@ simulation      = classes.Simulation(timestep,simulationtype)#,desiredresult)
 x               = np.linspace(xbegin,xend,numsimulations)
 y               = []
 
-for xvalue in x:
-    # update value
-    ## determine x location
-    if xlabel in drone.params:
-        drone.params[xlabel] = xvalue
-        power.update(drone,weather,mission)
-        battery.update()
-    elif xlabel in weather.params:
-        # print("temperature is indeed in weather.params :)")
-        # print("weather.weatherlist =",weather.weatherlist)
-        if xlabel == 'temperature':
-            weather.weatherlist[0].params[xlabel] = xvalue
-        elif xlabel == 'relativehumidity':
-            weather.weatherlist[1].params[xlabel] = xvalue
+xplot = x
+yplot = []
+
+if "weathereffect" in simulationparams:
+    weathereffect = simulationparams["weathereffect"]
+    weatherbegin = simulationparams["weatherbegin"]
+    weatherend = simulationparams["weatherend"]
+    weathernumber = int(simulationparams["weathernumber"])
+    wvector = np.linspace(weatherbegin,weatherend,weathernumber)
+else:
+    weathernumber = int(1)
+    wvector = range(weathernumber) # only iterate once
+
+for zvalue in wvector:
+    if "weathereffect" in simulationparams:
+        if weathereffect == 'temperature':
+            print("weathereffect = temperature confirmed")
+            weather.weatherlist[0].params["temperature"] = zvalue
+        elif weathereffect == 'relativehumidity':
+            weather.weatherlist[1].params["relativehummidity"] = zvalue
+        else:
+            raise(Exception("ERROR: weathereffect not a valid input"))
         weather.update()
         power.update(drone,weather,mission)
         battery.update()
-    elif xlabel in mission.params:
-        mission.params[xlabel] = xvalue
-        power.update(drone,weather,mission)
-        battery.update()
-    elif xlabel in simulationparams:
-        simulationparams[xlabel] = xvalue
-        power.update(drone,weather,mission)
-        battery.update()
-    else:
-        raise(Exception("~~~~~ ERROR: desired x variable not set ~~~~~"))
-    
-    simulation.run(drone,battery,power,weather,mission)
 
-    if ylabel in drone.params:
-        y.append(drone.params[ylabel])
-    elif ylabel in simulation.params:
-        y.append(simulation.params[ylabel])
-    elif ylabel in weather.params:
-        y.append(weather.params[ylabel])
-    elif ylabel in mission.params:
-        y.append(mission.params[ylabel])
-    elif ylabel in power.params:
-        y.append(power.params[ylabel])
-    elif ylabel in simulationparams:
-        y.append(simulationparams[ylabel])
-    else:
-        raise(Exception("~~~~~ ERROR: desired y variable not found ~~~~~"))
+    for xvalue in x:
+        # update value
+        ## determine x location
+        if xlabel in drone.params:
+            drone.params[xlabel] = xvalue
+            power.update(drone,weather,mission)
+            battery.update()
+        elif xlabel in weather.params:
+            if xlabel == 'temperature':
+                weather.weatherlist[0].params[xlabel] = xvalue
+            elif xlabel == 'relativehumidity':
+                weather.weatherlist[1].params[xlabel] = xvalue
+            weather.update()
+            power.update(drone,weather,mission)
+            battery.update()
+        elif xlabel in mission.params:
+            mission.params[xlabel] = xvalue
+            power.update(drone,weather,mission)
+            battery.update()
+        elif xlabel in simulationparams:
+            simulationparams[xlabel] = xvalue
+            power.update(drone,weather,mission)
+            battery.update()
+        else:
+            raise(Exception("~~~~~ ERROR: desired x variable not set ~~~~~"))
+        
+        simulation.run(drone,battery,power,weather,mission)
 
-# print("x data includes:    ",x)
-# print("y data includes:    ",y)
+        if ylabel in drone.params:
+            y.append(drone.params[ylabel])
+        elif ylabel in simulation.params:
+            y.append(simulation.params[ylabel])
+        elif ylabel in weather.params:
+            y.append(weather.params[ylabel])
+        elif ylabel in mission.params:
+            y.append(mission.params[ylabel])
+        elif ylabel in power.params:
+            y.append(power.params[ylabel])
+        elif ylabel in simulationparams:
+            y.append(simulationparams[ylabel])
+        else:
+            raise(Exception("~~~~~ ERROR: desired y variable not found ~~~~~"))
+
+    yplot.append(y)
+    y = []
+
+print("x data includes:    ",xplot)
+print("y data includes:    ",yplot)
 
 if not validation: #proceed with normal plot
 
@@ -179,7 +207,7 @@ if not validation: #proceed with normal plot
         xlabel = simulationparams['xlabel']
         ylabel = desiredresult
         axistitle = simulationparams['title']
-        plotter = classes.Plotter(x,xlabel,y,ylabel,axistitle)
+        plotter = classes.Plotter(xplot,xlabel,yplot,ylabel,axistitle,weathernumber)
         plotter.plot_line()
     else: 
         print('No plot functionality has been defined.')
@@ -192,7 +220,7 @@ else: # Plot validation data on top of our model
         xlabel = simulationparams['xlabel']
         ylabel = desiredresult
         axistitle = simulationparams['title'] + " Validation"
-        plotter = classes.Plotter(x,xlabel,y,ylabel,axistitle)
+        plotter = classes.Plotter(xplot,xlabel,yplot,ylabel,axistitle,weathernumber)
         plotter.plot_validation(xvalid,yvalid)
     else: 
         print('No plot functionality has been defined.')
