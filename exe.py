@@ -151,6 +151,23 @@ for zvalue in wvector:
         weather.update()
         power.update(drone,weather,mission)
         battery.update()
+    
+    simulation.run(drone,battery,power,weather,mission)
+
+    if ylabel in drone.params:
+        y.append(drone.params[ylabel])
+    elif ylabel in simulation.params:
+        y.append(simulation.params[ylabel])
+    elif ylabel in weather.params:
+        y.append(weather.params[ylabel])
+    elif ylabel in mission.params:
+        y.append(mission.params[ylabel])
+    elif ylabel in power.params:
+        y.append(power.params[ylabel]*180.0/np.pi)
+    elif ylabel in simulationparams:
+        y.append(simulationparams[ylabel])
+    else:
+        raise(Exception("~~~~~ ERROR: desired y variable not found ~~~~~"))
 
     for xvalue in x:
         # update value

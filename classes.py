@@ -33,9 +33,13 @@ class Drone:
             self.params['toparea'] = self.params['width'] * self.params['length']
         else:
             self.params['toparea'] = 8.0
-            print("Drone.__init__:  'width' and 'length' not found; 'frontalarea' set to 1.0")
+            print("Drone.__init__:  'width' and 'length' not found; 'toparea' set to 8.0")
         if 'rangemax' in self.params and 'rangemaxspeed' in self.params:
             self.params['endurancemaxrange'] = self.params['rangemax'] / self.params['rangemaxspeed']
+        if 'endurancemaxhover' not in self.params and 'endurancemax' in self.params:
+            self.params['endurancemaxhover'] = self.params['endurancemax'] * 0.9
+            print("Drone.__init__:  'endurancemaxhover' not found; assuming 90%% of 'endurancemax'")
+            
         if 'rotordiameter' in self.params:
             self.params['rotorarea'] = self.params['rotordiameter']**2/4*np.pi # area per rotor
         else:
@@ -49,6 +53,8 @@ class Drone:
                 self.params['batteryvoltage'] *= self.params['nummbatteries'] #increase voltage in series
             else:
                  raise(Exception("~~~~~ ERROR: incorrect battery connection parameter applied ~~~~~"))
+        if 'batteryenergy' not in self.params:
+            self.params['batteryenergy'] = self.params['batterycapacity'] * self.params['batteryvoltage']
         # print parameters for debugging
         self.__printParameters()
 
@@ -137,25 +143,19 @@ class Power:
         'efficiencypropulsive': None,
         'power':None,
         'model':None,
-        'dragcoefficient':None,
-        'alpha':None
+        'dragcoefficient':1.0,
+        'alpha':0.0
     }
 
     # methods go here:
     def __init__(self, drone, weather, mission):
-        # initial propulsive efficiency values
-
-        self.update(drone, weather, mission)
-
-
-    def update(self, drone, weather, mission):
-        self.__setParameters(drone,weather)
-        self.__getDragCoefficient(drone)
-        self.__updateEfficiencyPropulsive(drone, weather, mission)
-        self.__getAlphaVelocity(drone,weather,mission)
-        self.__getDrag(drone,weather,mission)
-        self.__getThrust(drone,weather,mission)
+        self.__initializeParameters(drone,weather)                
+        self.__getDragCoefficient(drone)                # hopefully constant across different rotary drones
+        self.__setupModel(drone,weather,mission)
         
+        # print("power.update(): power is            ",self.params['power'])
+        # print("power.update(): drag coefficient is ",self.params['dragcoefficient'])
+    def update(self, drone, weather, mission):
         if drone.params['wingtype'] == 'rotary':
             # self.__getPowerAbdilla(drone, weather, mission)
             self.__getPowerMomentum(drone, weather, mission)
@@ -165,8 +165,6 @@ class Power:
             # raise Exception(f"~~~~~ ERROR: model { model } not available ~~~~~") #
             raise Exception("~~~~~ ERROR: model '" +
                             self.params['model'] + "' not available ~~~~~")
-        # print("power.update(): power is            ",self.params['power'])
-        # print("power.update(): drag coefficient is ",self.params['dragcoefficient'])
 
     # def update(self, drone, weather, mission):
     #     self.__getDragCoefficient(drone)
@@ -189,6 +187,7 @@ class Power:
 
     # slightly more complicated estimate for power
     def __getPowerAbdilla(self, drone, weather, mission):
+        self.__updateEfficiencyPropulsive(drone, weather, mission)
         self.params['power'] = self.params['thrust']**1.5 / \
                                self.params['efficiencypropulsive'] / \
                                 np.sqrt(2 * drone.params['rotorquantity'] * \
@@ -198,11 +197,18 @@ class Power:
         self.__printParameters(drone,weather,mission)
 
     def __getPowerMomentum(self, drone, weather, mission):
+        self.__setupModel(drone,weather,mission)
+        self.__solveModel()
+        # self.__getDrag(drone,weather,mission)
+        # self.__getThrust(drone,weather,mission)
         self.__getBladeProfilePower()
-        self.params['power'] = self.params['thrust']*self.params['velocityinduced'] + \
-                                                self.params['drag']*mission.params['missionspeed'] + \
-                                                self.params['bladeprofilepower']
+        self.__getEfficiencyPropulsive(drone, weather, drone.params['endurancemaxhover'])
+        self.params['power'] = (self.params['thrust']*self.params['velocityinduced'] + \
+                                self.params['drag']*mission.params['missionspeed'] + \
+                                self.params['bladeprofilepower'])/self.params['efficiencypropulsive']
         self.__printParameters(drone,weather,mission)
+
+        # TODO: determine why alpha is crazy... fix.
 
     def __getPowerTraub(self, drone, weather, mission): #fixed-wing power model
         density = weather.params['airdensity']
@@ -243,16 +249,6 @@ class Power:
             # interpolate for the current velocity
             self.params['efficiencypropulsive'] = etamaxendurance - (vmaxendurance - mission.params['missionspeed']) / \
                 (vmaxendurance - vmaxrange) * (etamaxendurance - etamaxrange)
-            # print("Drone:           etamaxendurance is ",etamaxendurance)
-            # print("Drone:           etamaxrange is     ",etamaxrange)
-            # print("Mission:         mission speed is   ",mission.params['speed'])
-            # print("Drone:           etamission is      ",self.params['efficiencypropulsive'])
-            # print("Drone:           vmaxendurance is   ",vmaxendurance)
-            # print("Drone:           vmaxrange is       ",vmaxrange)
-            # print("")
-            # print("")
-        
-        # print("Drone:       efficiencypropulsive is ",self.params['efficiencypropulsive'])
 
     def __getEfficiencyPropulsive(self, drone, weather, endurance):
         # Analyzing a single propeller
@@ -262,18 +258,23 @@ class Power:
         rotorarea       = drone.params['rotorarea']
         airdensity      = 1.225  # assuming air density was equal to 1.225 kg/m3 during drone testing
 
+        # TODO: is batteryenergy wrong here???
+
         poweractual     = batteryenergy/endurance
-        powerideal      = thrust * np.sqrt(thrust/(2*rotorarea*airdensity))
-        efficiency      = powerideal/poweractual
+        powerideal      = thrust**1.5 / np.sqrt(2*rotorarea*airdensity)
+
+        print('gEP: poweractual is      ',poweractual)
+        print('gEP: powerideal is      ',powerideal)
+
+        self.params['efficiencypropulsive']      = powerideal/poweractual
+
         # prediction based on momentum theory for hover case
         # slides from https://fenix.tecnico.ulisboa.pt/downloadFile/282093452028191/3-Momentum%20Theory%20in%20hover.pdf
         # prediction based on momentum theory for forward flight
         # slides from https://fenix.tecnico.ulisboa.pt/downloadFile/845043405440064/6-Momentum%20Theory%20in%20forward%20flight.pdf
         # see also: http://www.aerospaceweb.org/design/helicopter/momentum.shtml
 
-        return efficiency
-
-    def __getAlphaVelocity(self,drone,weather,mission):
+    def __setupModel(self,drone,weather,mission):
 
         velocityinfinity    = mission.params['missionspeed']
         totalweight         = drone.params['totalweight']
@@ -285,51 +286,81 @@ class Power:
         toparea             = drone.params['toparea']
         pi                  = np.pi
 
-        # def momentumTheoryEquations(variables):
-        #     alpha, velocityinduced  = variables
-            
-        #     return1     = velocityinduced**4 + velocityinduced**3 * (2*velocityinfinity*np.sin(alpha*np.pi/180.0)) + \
-        #                 velocityinduced**2 * velocityinfinity**2 - (totalweight/(2*airdensity*rotorarea*rotorquantity))**2
-        #     return2     = totalweight/(rotorquantity*np.cos(alpha*np.pi/180.0)) - \
-        #                 airdensity*velocityinfinity**2*dragcoefficient / (2*rotorquantity*np.sin(alpha*np.pi/180.0)) * \
-        #                 toparea*np.sin(alpha*np.pi/180.0) + frontalarea*np.cos(alpha*np.pi/180.0)
-
-        #     return (return1,return2)
-        
-        # (alpha, velocityinduced)        = fsolve(momentumTheoryEquations,(0.0,0.0))
-
-        m               = gekko.GEKKO(remote=False)             # create GEKKO model
-        alpha           = m.Var(value=0.0)      # define new variable, initial value=0
-        velocityinduced = m.Var(value=self.params['velocityinducedhover'])      # define new variable, initial value
-
+        m                 = gekko.GEKKO(remote=False)             # create GEKKO modelz
+        m.alpha           = m.Var(value=self.params['alpha_gekko'])      # define new variable, initial value=0
+        m.velocityinduced = m.Var(value=self.params['velocityinduced'])      # define new variable, initial value
+        m.thrust          = m.Var(value=self.params['thrust'])
+        # dragcoefficient = m.Var(value=1.0)
+        m.drag            = m.Var(value=self.params['drag'])
+        m.area            = m.Var(value=self.params['area'])
         # print values for debugging
-        print("GEKKO:       airdensity*velocityinfinity**2*pi*toparea = ",airdensity*velocityinfinity**2*pi*0.006)
+        # print("GEKKO:       airdensity*velocityinfinity**2*pi*toparea = ",airdensity*velocityinfinity**2*pi*0.006)
 
         qty             = (totalweight/rotorquantity + 0.00000000/rotorquantity)**2
 
         m.Equations([ \
+            m.thrust          == m.sqrt(totalweight**2 + m.drag**2), \
+            m.tan(m.alpha)    == m.drag / totalweight, \
+            m.drag            == 0.5*airdensity*velocityinfinity**2 * dragcoefficient * m.area, \
+            m.velocityinduced == m.thrust / (2*rotorarea*rotorquantity*airdensity*m.sqrt((velocityinfinity*m.cos(m.alpha))**2 + (velocityinfinity*m.sin(m.alpha) + m.velocityinduced)**2)), \
+            m.area            == (frontalarea * m.cos(m.alpha) + toparea * m.sin(m.alpha))
+            ])
+        
+        self.params['model'] = m
+        self.__print5('__setupModel')
+    
+    # def __warmModel(self,drone,weather,mission):
+    #     velocityinfinity    = mission.params['missionspeed']
+    #     totalweight         = drone.params['totalweight']
+    #     airdensity          = weather.params['airdensity']
+    #     rotorarea           = drone.params['rotorarea']
+    #     rotorquantity       = drone.params['rotorquantity']
+    #     dragcoefficient     = self.params['dragcoefficient']
+    #     frontalarea         = drone.params['frontalarea']
+    #     toparea             = drone.params['toparea']
+    #     dynamicpressure     = 0.5*airdensity*velocityinfinity**2
 
+    #     self.params['model'].alpha.value           = self.params['alpha']
+    #     self.params['model'].velocityinduced.value = self.params['velocityinduced']
+    #     self.params['model'].thrust.value          = self.params['thrust']
+    #     # dragcoefficient = m.Var(value=1.0)
+    #     self.params['model'].drag.value            = self.params['drag']
+    #     self.params['model'].area.value            = self.params['area']
 
-# airdensity*velocityinfinity**2*pi*alpha*0.006
+    #     self.__print5('__warmModel')
 
+    #     print(" *** +/= : EQUATIONs = ",self.params['model'].Equations, "before")
 
-            2*airdensity*rotorarea*velocityinduced*m.sqrt(velocityinfinity**2 + 2*velocityinfinity*velocityinduced*m.sin(alpha) + velocityinduced**2) == \
-            m.sqrt( \
-            (totalweight/rotorquantity + 0/rotorquantity)**2 + \
-            # qty + \
-            (1/2*airdensity*velocityinfinity**2*dragcoefficient * (toparea*m.sin(-alpha) + frontalarea*m.cos(alpha)))**2 ), \
-            velocityinduced == totalweight/rotorquantity/2.0/airdensity/rotorarea/m.sqrt((velocityinfinity*m.cos(alpha))**2 + (velocityinfinity*m.sin(alpha) + velocityinduced)**2)
+    #     self.params['model'].Equations = [ \
+    #         self.params['model'].thrust          == self.params['model'].sqrt(totalweight**2 + self.params['model'].drag**2), \
+    #         self.params['model'].tan(self.params['model'].alpha)    == self.params['model'].drag / totalweight, \
+    #         self.params['model'].drag            == dynamicpressure * dragcoefficient * self.params['model'].area, \
+    #         self.params['model'].velocityinduced == self.params['model'].thrust / (2*rotorarea*rotorquantity*airdensity*self.params['model'].sqrt(( \
+    #                                                 velocityinfinity*self.params['model'].cos(self.params['model'].alpha))**2 + (velocityinfinity* \
+    #                                                 self.params['model'].sin(self.params['model'].alpha) + self.params['model'].velocityinduced)**2)), \
+    #         self.params['model'].area            == (frontalarea * self.params['model'].cos(self.params['model'].alpha) + toparea * self.params['model'].sin(self.params['model'].alpha)) \
+    #         ]
 
-            # velocityinduced**4 + velocityinduced**3 * (2*velocityinfinity*m.sin(alpha*np.pi/180.0)) + \
-            # velocityinduced**2 * velocityinfinity**2 - (totalweight/(2*airdensity*rotorarea*rotorquantity))**2==0.0, \
-            # totalweight/(rotorquantity*m.cos(alpha*np.pi/180.0)) - \
-            # airdensity*velocityinfinity**2*dragcoefficient / (2*rotorquantity*m.sin(alpha*np.pi/180.0)) * \
-            # toparea*m.sin(alpha*np.pi/180.0) + frontalarea*m.cos(alpha*np.pi/180.0) == 0.0 \
+    #     print(" *** >/> : EQUATIONs = ",self.params['model'].Equations, "after")
 
-            ]) # equations
-        m.solve(disp=False)     # solve
+    def __print5(self,functionname):
+        # print('===== ',functionname,' =====')
+        # print('')
+        # print('     > thrust    = ',self.params['thrust'])
+        # print('     > alpha     = ',self.params['alpha'])
+        # print('     > velocityi = ',self.params['velocityinduced'])
+        # print('     > drag      = ',self.params['drag'])
+        # print('     > area      = ',self.params['area'])
+        # print('')
+        pass
 
-        alpha                           = alpha.value[0]
+    def __solveModel(self):
+        self.__print5('__solveModel BEFORE ')
+        self.params['model'].options.SOLVER=3
+        self.params['model'].solve(disp=False)     # solve
+
+        self.params['alpha_gekko']      = self.params['model'].alpha.value[0]
+        alpha                           = self.params['model'].alpha.value[0]
         # ensure alpha is between -pi and pi
         if alpha > np.pi or alpha < -np.pi:
             print("NOTE: alpha was evaluated as ",alpha,"; adjusting")
@@ -338,35 +369,46 @@ class Power:
                     alpha = alpha - 2*np.pi
                 elif alpha < -np.pi:
                     alpha = alpha + 2*np.pi
-        self.params['alpha']            = alpha            
-        self.params['velocityinduced']  = velocityinduced.value[0]
+        self.params['alpha']            = alpha        
+        self.params['velocityinduced']  = self.params['model'].velocityinduced.value[0]
+        self.params['thrust']           = self.params['model'].thrust.value[0]
+        self.params['drag']             = self.params['model'].drag.value[0]
+        self.params['area']             = self.params['model'].area.value[0]
 
-    def __getDrag(self,drone,weather,mission):
-        drag = 0.5 * self.params['dragcoefficient'] * weather.params['airdensity'] * mission.params['missionspeed']**2 * \
-               (drone.params['frontalarea'] * np.cos(self.params['alpha']*np.pi/180.0) + \
-                drone.params['toparea'] * np.sin(self.params['alpha']*np.pi/180.0))
-        self.params['drag'] = drag
+        self.__print5('__solveModel AFTER')
 
-    def __getThrust(self,drone,weather,mission):
-        totalweight = drone.params['totalweight']
-        drag        = self.params['drag']
-        thrust      = np.sqrt(totalweight**2 + drag**2)
+    # def __getDrag(self,drone,weather,mission):
+    #     drag = 0.5 * self.params['dragcoefficient'] * weather.params['airdensity'] * mission.params['missionspeed']**2 * \
+    #            (drone.params['frontalarea'] * np.cos(self.params['alpha']*np.pi/180.0) + \
+    #             drone.params['toparea'] * np.sin(self.params['alpha']*np.pi/180.0))
+    #     self.params['drag'] = drag
 
-        self.params['thrust'] = thrust
+    # def __getThrust(self,drone,weather,mission):
+    #     totalweight = drone.params['totalweight']
+    #     drag        = self.params['drag']
+    #     thrust      = np.sqrt(totalweight**2 + drag**2)
+
+    #     self.params['thrust'] = thrust
 
     def __getDragCoefficient(self,drone):
-        self.params['dragcoefficient'] = 0.07
+        self.params['dragcoefficient'] = 5.0
     
     def __getBladeProfilePower(self):
-        self.params['bladeprofilepower'] = 145.0
+        self.params['bladeprofilepower'] = 0.0
 
-    def __setParameters(self,drone,weather):
+    def __initializeParameters(self,drone,weather):
         drone.params['totalweight']             = (drone.params['takeoffweight'] + drone.params['payload']) * \
                                                   weather.params['gravitationconstant']
         self.params['area']                     = np.pi * drone.params['rotordiameter']**2/4
         self.params['velocityinducedhover']     = np.sqrt(drone.params['totalweight'] / \
                                                   drone.params['rotorquantity'] / 2 / \
                                                   self.params['area']/weather.params['airdensity'])
+        self.params['velocityinduced']          = self.params['velocityinducedhover']
+        self.params['thrust']                   = drone.params['totalweight']
+        self.params['alpha']                    = 0.0
+        self.params['alpha_gekko']                    = 0.0
+        self.params['drag']                     = 0.0
+        self.params['area']                     = drone.params['frontalarea']
 
     def __printParameters(self,drone,weather,mission):
         velocityinfinity    = mission.params['missionspeed']
@@ -403,12 +445,12 @@ class Power:
         # print("drone:           takeoffweight is        ",drone.params['takeoffweight'])
         # print("drone:           payload is              ",drone.params['payload'])
         # print("drone:           rotorquantity is        ",drone.params['rotorquantity'])
-        print("")
-        print("weather:         airdensity is           ",weather.params['airdensity'])
-        print("weather:         gravitationconstant is  ",weather.params['gravitationconstant'])
-        print("weather:         temperature is          ",weather.weatherlist[0].params['temperature'])
-        print("weather:         relativehumidity is     ",weather.weatherlist[1].params['relativehumidity'])
-        print("")  
+        # print("")
+        # print("weather:         airdensity is           ",weather.params['airdensity'])
+        # print("weather:         gravitationconstant is  ",weather.params['gravitationconstant'])
+        # print("weather:         temperature is          ",weather.weatherlist[0].params['temperature'])
+        # print("weather:         relativehumidity is     ",weather.weatherlist[1].params['relativehumidity'])
+        # print("")  
         # print("")
 
 print("Successfully imported `Power` class")
