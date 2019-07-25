@@ -95,20 +95,22 @@ class Battery:
 
     # constructor
     # default value for soh is based on the assumption that batteries are retired at a soh of 80%
-    def __init__(self, drone, soh=90.0, startsoc=100.0, batterytechnology):
+    def __init__(self, drone, soh=90.0, startsoc=100.0, batterytechnology='current'):
         # import parameters from drone object
         self.batterytype = drone.params['batterytype']
         self.voltagemean = drone.params['batteryvoltage']
 
         #update capacity based on future technology if needed
-        self.defineCapacity()
+        self.params['batterytechnology'] = batterytechnology
+        self.defineCapacity(drone)
 
         # update parameters
         self.update()
 
         # estimate list lengths for prior memory allocation
 
-    def defineCapacity(self,drone)
+    def defineCapacity(self,drone):
+        print("defineCapacity:  batterytechnology is: ",self.params['batterytechnology'])
         if self.params['batterytechnology'] == 'current':
             self.capacity = drone.params['batterycapacity']
         elif self.params['batterytechnology'] == 'near-future':
