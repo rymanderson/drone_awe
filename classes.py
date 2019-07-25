@@ -393,7 +393,7 @@ class Power:
     #     self.params['thrust'] = thrust
 
     def __getDragCoefficient(self,drone):
-        self.params['dragcoefficient'] = 5.0
+        self.params['dragcoefficient'] = 2.0
     
     def __getBladeProfilePower(self):
         self.params['bladeprofilepower'] = 0.0

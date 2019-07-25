@@ -25,3 +25,4 @@ xend 15.0
 xnumber 10
 validation False
 validationcase Stolaroff2018
+batterytechnology current

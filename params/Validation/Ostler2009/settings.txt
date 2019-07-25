@@ -24,3 +24,4 @@ simulationtype simple
 xbegin 0.0
 xend 30.0
 xnumber 20
+batterytechnology current

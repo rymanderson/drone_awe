@@ -25,3 +25,4 @@ xend 0.55
 xnumber 20
 validation False
 validationcase Abdilla2015endurance
+batterytechnology current

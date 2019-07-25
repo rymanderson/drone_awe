@@ -119,9 +119,6 @@ xbegin          = simulationparams['xbegin']
 xend            = simulationparams['xend']
 numsimulations  = simulationparams['xnumber']
 
-print("EXE.py:      Independent variable is ",xlabel)
-print("EXE.py:      Desired Result is       ",desiredresult)
-
 simulation      = classes.Simulation(timestep,simulationtype)#,desiredresult)
 x               = np.linspace(xbegin,xend,numsimulations)
 y               = []
@@ -152,22 +149,22 @@ for zvalue in wvector:
         power.update(drone,weather,mission)
         battery.update()
     
-    simulation.run(drone,battery,power,weather,mission)
+    # simulation.run(drone,battery,power,weather,mission)
 
-    if ylabel in drone.params:
-        y.append(drone.params[ylabel])
-    elif ylabel in simulation.params:
-        y.append(simulation.params[ylabel])
-    elif ylabel in weather.params:
-        y.append(weather.params[ylabel])
-    elif ylabel in mission.params:
-        y.append(mission.params[ylabel])
-    elif ylabel in power.params:
-        y.append(power.params[ylabel]*180.0/np.pi)
-    elif ylabel in simulationparams:
-        y.append(simulationparams[ylabel])
-    else:
-        raise(Exception("~~~~~ ERROR: desired y variable not found ~~~~~"))
+    # if ylabel in drone.params:
+    #     y.append(drone.params[ylabel])
+    # elif ylabel in simulation.params:
+    #     y.append(simulation.params[ylabel])
+    # elif ylabel in weather.params:
+    #     y.append(weather.params[ylabel])
+    # elif ylabel in mission.params:
+    #     y.append(mission.params[ylabel])
+    # elif ylabel in power.params:
+    #     y.append(power.params[ylabel]*180.0/np.pi)
+    # elif ylabel in simulationparams:
+    #     y.append(simulationparams[ylabel])
+    # else:
+    #     raise(Exception("~~~~~ ERROR: desired y variable not found ~~~~~"))
 
     for xvalue in x:
         # update value
@@ -217,6 +214,14 @@ for zvalue in wvector:
 
 print("x data includes:    ",xplot)
 print("y data includes:    ",yplot)
+
+print("")
+
+print("EXE.py:      Independent variable is ",xlabel)
+print("EXE.py:      Desired Result is       ",desiredresult)
+if "weathereffect" in simulationparams:
+    print("EXE.py:      Z iterator is           ",simulationparams['weathereffect'])
+
 
 if not validation: #proceed with normal plot
 

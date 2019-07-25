@@ -24,3 +24,4 @@ xend 10.0
 xnumber 100
 validation False
 validationcase Stolaroff2018
+batterytechnology current

@@ -1,4 +1,4 @@
-validation False
+validation true
 validationcase DiFranco2016
 drone True
 dronename dji-Mavic2
@@ -17,8 +17,8 @@ relativehumidity 0.0
 icing False
 timestep 1
 plot True
-xlabel payload
-ylabel range
+xlabel missionspeed
+ylabel power
 title First_test
 simulationtype simple
 model abdilla

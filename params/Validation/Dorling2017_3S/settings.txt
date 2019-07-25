@@ -25,3 +25,4 @@ xend 1.5
 xnumber 10
 validation False
 validationcase Dorling2017_3S
+batterytechnology current

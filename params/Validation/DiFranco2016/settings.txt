@@ -25,3 +25,4 @@ xend 16.0
 xnumber 20
 validation False
 validationcase DiFranco2016
+batterytechnology current
