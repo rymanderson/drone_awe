@@ -164,7 +164,7 @@ for xvalue in x:
     elif ylabel in mission.params:
         y.append(mission.params[ylabel])
     elif ylabel in power.params:
-        y.append(power.params[ylabel])
+        y.append(power.params[ylabel]*180.0/np.pi)
     elif ylabel in simulationparams:
         y.append(simulationparams[ylabel])
     else:

@@ -16,12 +16,12 @@ icing False
 timestep 1
 plot True
 xlabel missionspeed
-ylabel power
+ylabel alpha
 title Stolaroff
 simulationtype simple
 model abdilla
 xbegin 0.0
 xend 15.0
-xnumber 20
+xnumber 10
 validation False
 validationcase Stolaroff2018
