@@ -965,8 +965,9 @@ class Plotter:
 print("Successfully imported `Plotter` class")
 
 
-class DronesAndWeather:
+class awe:
     '''
+    Drone Applications in Weather Environments \\
     Top-level class used by pip3 package to run simulations using python dictionary inputs.
     '''
 
