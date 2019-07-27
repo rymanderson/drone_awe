@@ -973,6 +973,7 @@ class drone_awe:
     Top-level class used by pip3 package to run simulations using python dictionary inputs.
     '''
 
+    output = {}
     params = {
         "validation":True,
         "validationcase":"DiFranco2016",
@@ -1196,8 +1197,10 @@ class drone_awe:
                     battery.update()
                 else:
                     raise(Exception("~~~~~ ERROR: desired x variable not set ~~~~~"))
-                
+            
                 simulation.run(drone,battery,power,weather,mission)
+
+                self.__updateOutput([drone,battery,power,weather,mission,simulation])
 
                 if ylabel in drone.params:
                     y.append(drone.params[ylabel])
@@ -1224,6 +1227,7 @@ class drone_awe:
 
         print("EXE.py:      Independent variable is ",xlabel)
         print("EXE.py:      Desired Result is       ",desiredresult)
+
         if "weathereffect" in self.params:
             print("EXE.py:      Z iterator is           ",self.params['weathereffect'])
 
@@ -1251,10 +1255,19 @@ class drone_awe:
                 plotter.plot_validation(xvalid,yvalid)
             else: 
                 print('No plot functionality has been defined.')
+        
+        return self.output
 
     
     def setDefaultParams(self):
         pass
 
+    def __updateOutput(self,classes):
+        for myclass in classes:
+            for param in myclass.params:
+                if param not in self.output:
+                    self.output[param] = []
+                self.output[param].append(myclass.params[param])
 
-print("Successfully imported `DronesAndWeather` class")
+
+print("Successfully imported `drone_awe` class")
