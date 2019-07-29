@@ -3,3 +3,5 @@ Simulation/ARPACK/
 *.pyc
 __pycache__/
 .vscode/
+*.save
+*.ipynb_checkpoints

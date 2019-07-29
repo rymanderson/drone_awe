@@ -2,8 +2,12 @@ import datetime
 import matplotlib.pyplot as plt
 import numpy as np
 from .functions import getParams, getXandY, interpolate
+from .validationdata import validationdatabase
+from .drones import drones
+from .drones import conversions
 from scipy.optimize import fsolve
 import gekko
+
 
 # insert classes here
 
@@ -936,8 +940,8 @@ class Plotter:
         for i in range(self.numplots):
             plt.plot(self.x, self.y[i])
         Plotter.fig_num += 1
-        plt.show(block = False)
-        input()
+        plt.show()
+        # input()
 
     def plot_scatter(self):
         fig = plt.figure(Plotter.fig_num)
@@ -948,8 +952,8 @@ class Plotter:
         for i in range(self.numplots):
             plt.plot(self.x, self.y[i], 'ro')
         Plotter.fig_num += 1
-        plt.show(block = False)
-        input()
+        plt.show()
+        # input()
 
     def plot_validation(self, xvalid, yvalid):
         fig = plt.figure(Plotter.fig_num)
@@ -961,8 +965,8 @@ class Plotter:
         for i in range(self.numplots):
             plt.plot(self.x, self.y[i])
         Plotter.fig_num += 1
-        plt.show(block = False)
-        input()
+        plt.show()
+        # input()
 
 print("Successfully imported `Plotter` class")
 
@@ -992,6 +996,9 @@ class drone_awe:
         "winddirection":0.0,
         "relativehumidity":0.0,
         "icing":False,
+        "mission": {
+                "missionspeed": 10.0
+            },
         "timestep":1,
         "plot":True,
         "xlabel":"missionspeed",
@@ -999,13 +1006,15 @@ class drone_awe:
         "title":"First_test",
         "simulationtype":"simple",
         "model":"abdilla",
-        "xbegin":0,
-        "xend":1,
-        "xnumber":5,
+        # "xbegin":0,
+        # "xend":1,
+        # "xnumber":5,
+        "xvals":[0,1,2,3,4,5],
         "weathereffect":"temperature",
-        "weatherbegin":10,
-        "weatherend":40,
-        "weathernumber":3
+        # "weatherbegin":10,
+        # "weatherend":40,
+        # "weathernumber":3
+        "weathervals":[10,20,30,40]
     }
 
     def __init__(self,input):
@@ -1019,7 +1028,8 @@ class drone_awe:
         if self.params['validation'] == True: #validation == True
             validation = True
             validationcase = self.params['validationcase']
-            self.params = getParams('Validation/' + validationcase,'settings_list.txt','settings.txt'," ","params/Simulation") #specifies settings_list is in separate path
+            validationdata = getParams(validationdatabase,validationcase) #specifies settings_list is in separate path
+            self.params = validationdata['settings']
         else:
             validation = False
 
@@ -1048,16 +1058,13 @@ class drone_awe:
         weatherlist         = []
             
         #instantiate drone
-        if self.params['drone'] == True:
-            dronename           = self.params['dronename']
-            if validation:
-                droneparams         = getParams('Validation/' + validationcase,'paramlist.param',dronename + ".param"," ","params/Drone")
-            else:
-                droneparams         = getParams('Drone','paramlist.param',dronename + '.param',' ')
-            droneconversions    = getParams('Drone','paramlist.param','conversions.param',' ')
-            drone               = Drone(dronename,droneparams,droneconversions)
+        dronename           = self.params['dronename']
+        if validation:
+            droneparams         = validationdata['drone']
         else:
-            raise Exception('Must specify drone name')
+            droneparams         = getParams(drones,params['dronename'])
+        droneconversions    = conversions
+        drone               = Drone(dronename,droneparams,droneconversions)
 
         # instantiate battery
         stateofhealth       = self.params['stateofhealth']
@@ -1066,12 +1073,13 @@ class drone_awe:
         battery             = Battery(drone,stateofhealth,startstateofcharge, batterytechnology)
 
         # instantiate mission
-        missionparams       = getParams('Mission','list.mission','simple.mission'," ")
+        print(self.params)
+        missionparams       = self.params['mission']
         mission             = Mission(missionparams)
 
         # Temperature
         if xlabel == 'temperature':
-            newtemperature = self.params['xbegin']
+            newtemperature  = self.params['xvals'][0]
         else:
             newtemperature  = self.params['temperature']
         temperatureparams   = {'temperature':newtemperature}        # Ampere-hours
@@ -1080,7 +1088,7 @@ class drone_awe:
 
         # Humidity
         if xlabel == 'humidity':
-            relativehumidity = self.params['xbegin']
+            relativehumidity = self.params['xvals'][0]
         else:
             relativehumidity = self.params['relativehumidity']
         humidityparams      = {'relativehumidity':relativehumidity}
@@ -1121,12 +1129,13 @@ class drone_awe:
         timestep        = self.params['timestep'] # more relevant later
         simulationtype  = self.params['simulationtype']
         desiredresult   = self.params['ylabel']
-        xbegin          = self.params['xbegin']
-        xend            = self.params['xend']
-        numsimulations  = self.params['xnumber']
+        # xbegin          = self.params['xbegin']
+        # xend            = self.params['xend']
+        # numsimulations  = self.params['xnumber']
 
         simulation      = Simulation(timestep,simulationtype)#,desiredresult)
-        x               = np.linspace(xbegin,xend,numsimulations)
+        # x               = np.linspace(xbegin,xend,numsimulations)
+        x               = self.params['xvals']
         y               = []
 
         xplot = x
@@ -1134,13 +1143,15 @@ class drone_awe:
 
         if "weathereffect" in self.params:
             weathereffect = self.params["weathereffect"]
-            weatherbegin = self.params["weatherbegin"]
-            weatherend = self.params["weatherend"]
-            weathernumber = int(self.params["weathernumber"])
-            wvector = np.linspace(weatherbegin,weatherend,weathernumber)
+            # weatherbegin = self.params["weatherbegin"]
+            # weatherend = self.params["weatherend"]
+            # weathernumber = int(self.params["weathernumber"])
+            # wvector = np.linspace(weatherbegin,weatherend,weathernumber)
+            wvector = params['weathervals']
         else:
             weathernumber = int(1)
             wvector = range(weathernumber) # only iterate once
+            # wvector = [0]
 
         for zvalue in wvector:
             if "weathereffect" in self.params:
@@ -1150,7 +1161,7 @@ class drone_awe:
                 elif weathereffect == 'relativehumidity':
                     weather.weatherlist[1].params["relativehummidity"] = zvalue
                 else:
-                    raise(Exception("ERROR: weathereffect not a valid input"))
+                    raise(Exception("~~~~~ ERROR: weathereffect not a valid input ~~~~~"))
                 weather.update()
                 power.update(drone,weather,mission)
                 battery.update()
@@ -1231,7 +1242,6 @@ class drone_awe:
         if "weathereffect" in self.params:
             print("EXE.py:      Z iterator is           ",self.params['weathereffect'])
 
-
         if not validation: #proceed with normal plot
 
             if self.params['plot'] == True:
@@ -1244,7 +1254,9 @@ class drone_awe:
                 print('No plot functionality has been defined.')
 
         else: # Plot validation data on top of our model
-            xvalid,yvalid = getXandY(validationcase,",")
+            xvalid = validationdata['xvalid']
+            yvalid = validationdata['yvalid']
+            # xvalid,yvalid = getXandY(validationcase,",")
             # yvalid = [x * 60.0 for x in yvalid] #only for converting from minutes to seconds until we get the conversion working before plotting
 
             if self.params['plot'] == True:
@@ -1256,6 +1268,8 @@ class drone_awe:
             else: 
                 print('No plot functionality has been defined.')
         
+        # Remove GEKKO objects from output
+
         return self.output
 
     
@@ -1265,9 +1279,10 @@ class drone_awe:
     def __updateOutput(self,classes):
         for myclass in classes:
             for param in myclass.params:
-                if param not in self.output:
+                if param not in self.output and param != "model":
                     self.output[param] = []
-                self.output[param].append(myclass.params[param])
+                if param != "model":
+                    self.output[param].append(myclass.params[param])
 
 
 print("Successfully imported `drone_awe` class")
