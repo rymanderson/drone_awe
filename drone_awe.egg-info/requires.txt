@@ -1,5 +1,5 @@
-scipy
-numpy
+datetime
 gekko
 matplotlib
-datetime
+numpy
+scipy

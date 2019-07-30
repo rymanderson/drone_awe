@@ -11,7 +11,7 @@ setuptools.setup(
     description="A versatile modeling package for drone performance in various weather environments.",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/pypa/sampleproject",
+    download_url="https://github.com/rymanderson/Drone-Models.git",
     packages=setuptools.find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3",
