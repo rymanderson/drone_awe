@@ -1,12 +1,24 @@
-# Drone-Models
+# Drone-AWE: Drone Applications in Weather Environments
 
-Development of drone models accounting for weather and battery characteristics.
+This repository is being developed to advance the state of the art of drone performance predictions under a wide range of weather and battery conditions with mission planning in mind. An interactive GUI is available at http://droneecon.com. This README will explain general usage as well as the underlying theory for the models used, as currently implemented. Note that *Drone-AWE* is a work in progress (see **Future Work**). This document will explain general usage for the latter, as well as the engineering theory at work behind the scenes.
 
-## Instructions
+## Installation
 
-To run this model, it is necessary to first edit the file `settings.txt` found in `params/Simulation/`. Specifics on these parameters can be found in the simulation subsection of the Parameter Files section in this document. Eventually `settings.txt` will become a GUI interface. 
+Drone-AWE may be used in two ways: using the GUI available at http://droneecon.com, or by using the source code directly. To use the source code directly, install using
 
-Once that has been edited, simply run exe.py from the main `Drone-Models` directory and it should run everything automatically and result in a nice plot of the model (and of validation comparison data if validation is set to true).  
+```python3
+pip install drone_awe
+```
+
+## Usage
+
+Base functionality is achieved by following this example:
+
+```python3
+import drone_awe
+m = drone_awe.drone_awe({})
+m.simulate()
+```
 
 ## Classes
 
@@ -14,9 +26,9 @@ This section contains a detailed description of each class, all contained in Cla
 
 * the `Drone` class
 
-	* class variables contain:
+    * class variables contain:
 
-		* data sheet specifications of specific drone models (e.g., the Mavic 2 Pro), including
+        * data sheet specifications of specific drone models (e.g., the Mavic 2 Pro), including
 
 			* battery size
 			* battery type

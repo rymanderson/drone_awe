@@ -971,7 +971,7 @@ class Plotter:
 print("Successfully imported `Plotter` class")
 
 
-class drone_awe:
+class model:
     '''
     Drone Applications in Weather Environments \\
     Top-level class used by pip3 package to run simulations using python dictionary inputs.
@@ -979,7 +979,7 @@ class drone_awe:
 
     output = {}
     params = {
-        "validation":True,
+        "validation":False,
         "validationcase":"DiFranco2016",
         "drone":True,
         "dronename":"dji-Mavic2",
@@ -1062,7 +1062,7 @@ class drone_awe:
         if validation:
             droneparams         = validationdata['drone']
         else:
-            droneparams         = getParams(drones,params['dronename'])
+            droneparams         = getParams(drones,dronename)
         droneconversions    = conversions
         drone               = Drone(dronename,droneparams,droneconversions)
 
@@ -1147,7 +1147,7 @@ class drone_awe:
             # weatherend = self.params["weatherend"]
             # weathernumber = int(self.params["weathernumber"])
             # wvector = np.linspace(weatherbegin,weatherend,weathernumber)
-            wvector = params['weathervals']
+            wvector = self.params['weathervals']
         else:
             weathernumber = int(1)
             wvector = range(weathernumber) # only iterate once
@@ -1248,7 +1248,7 @@ class drone_awe:
                 xlabel = self.params['xlabel']
                 ylabel = desiredresult
                 axistitle = self.params['title']
-                plotter = Plotter(xplot,xlabel,yplot,ylabel,axistitle,weathernumber)
+                plotter = Plotter(xplot,xlabel,yplot,ylabel,axistitle,len(self.params['weathervals']))
                 plotter.plot_line()
             else: 
                 print('No plot functionality has been defined.')
@@ -1263,7 +1263,7 @@ class drone_awe:
                 xlabel = self.params['xlabel']
                 ylabel = desiredresult
                 axistitle = self.params['title'] + " Validation"
-                plotter = Plotter(xplot,xlabel,yplot,ylabel,axistitle,weathernumber)
+                plotter = Plotter(xplot,xlabel,yplot,ylabel,axistitle,len(self.params['weathervals']))
                 plotter.plot_validation(xvalid,yvalid)
             else: 
                 print('No plot functionality has been defined.')
@@ -1294,4 +1294,4 @@ class drone_awe:
         return validationdatabase
 
 
-print("Successfully imported `drone_awe` class")
+print("Successfully imported `model` class")
