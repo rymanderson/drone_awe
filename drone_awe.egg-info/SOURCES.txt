@@ -7,9 +7,14 @@ drone_awe/app.py
 drone_awe/app_old.py
 drone_awe/classes.py
 drone_awe/classes_test_weather.py
+drone_awe/conversions.py
+drone_awe/drones.py
 drone_awe/functions.py
 drone_awe/functions_test.py
 drone_awe/test_plotter.py
+drone_awe/validationdata.py
+drone_awe/validationdrones.py
+drone_awe/validationsettings.py
 drone_awe.egg-info/PKG-INFO
 drone_awe.egg-info/SOURCES.txt
 drone_awe.egg-info/dependency_links.txt
