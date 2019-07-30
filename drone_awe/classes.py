@@ -1284,5 +1284,14 @@ class drone_awe:
                 if param != "model":
                     self.output[param].append(myclass.params[param])
 
+    # These methods are written for Danielito
+    def getDrones(self):
+        # returns a list of dictionaries describing drones with their parameters
+        return drones
+
+    def getValidationCases(self):
+        # returns a list of validation cases with their associated data
+        return validationdatabase
+
 
 print("Successfully imported `drone_awe` class")
