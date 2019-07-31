@@ -17,7 +17,7 @@
 'plot': True,
 'xlabel': 'missionspeed',
 'ylabel': 'power',
-'title': 'Stolaroff',
+'title': 'Chang2016',
 'simulationtype': 'simple',
 'model': 'abdilla',
 'xbegin': 0.0,

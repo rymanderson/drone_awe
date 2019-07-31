@@ -77,8 +77,6 @@ class Drone:
     def __printParameters(self):
         print("DRONEIMPORT:     takeoffweight is: ",self.params['takeoffweight'])
 
-print("Successfully imported `Drone` class")
-
 
 class Battery:
     'Class used to track battery characteristics and performance during simulation'
@@ -136,9 +134,6 @@ class Battery:
     def discharge(self, power, timestep):
         self.soc = self.soc - power.params['power'] * timestep
         self.current = power.params['power'] / self.params['voltage']
-
-
-print("Successfully imported `Battery` class")
 
 
 class Power:
@@ -213,8 +208,6 @@ class Power:
                                                 self.params['drag']*mission.params['missionspeed'] + \
                                                 self.params['bladeprofilepower'])/self.params['efficiencypropulsive']
         self.__printParameters(drone,weather,mission)
-
-        # TODO: determine why alpha is crazy... fix.
 
     def __getPowerTraub(self, drone, weather, mission): #fixed-wing power model
         density = weather.params['airdensity']
@@ -461,8 +454,6 @@ class Power:
         # print("")  
         # print("")
 
-print("Successfully imported `Power` class")
-
 
 class Weather:
     '''
@@ -564,9 +555,6 @@ class Weather:
         return (pressure, temperature, airdensity, speedsound, dynamicviscocity)
 
 
-print("Successfully imported `Weather` class")
-
-
 class WeatherType:
     params = {}
 
@@ -605,9 +593,6 @@ class Rain(WeatherType):
         WeatherType.__init__(self, params, paramnames)
 
 
-print("Successfully imported `Rain` class")
-
-
 class Temperature(WeatherType):
     '''
     Class used to define temperature characteristics. Params variables include:
@@ -634,9 +619,6 @@ class Temperature(WeatherType):
         newdensity = olddensity * ((oldtemperature-newtemperature)/oldtemperature + 1) #inverse relationship
         temperatureeffect = newdensity / olddensity
         return temperatureeffect
-
-
-print("Successfully imported `Temperature` class")
 
 
 class Humidity(WeatherType):
@@ -744,9 +726,6 @@ class Humidity(WeatherType):
         return humidityeffect
 
 
-print("Successfully imported `Humidity` class")
-
-
 class Wind(WeatherType):
     '''
     Class used to define wind characteristics. Params variables include:
@@ -796,9 +775,6 @@ class Wind(WeatherType):
             self.params['downdraftspeed'] = self.params['velocityvector'][2]
 
 
-print("Successfully imported `Wind` class")
-
-
 class Gust(WeatherType):
     '''
     Class used to define gust characteristics. Params variables include:
@@ -816,9 +792,6 @@ class Gust(WeatherType):
         WeatherType.__init__(self, params, paramnames)
 
 
-print("Successfully imported `Gust` class")
-
-
 class Ice(WeatherType):
     '''
     Class used to define icing characteristics. Params variables include:
@@ -834,9 +807,6 @@ class Ice(WeatherType):
         paramnames = ['']
         WeatherType.__init__(self, params, paramnames)
         print("Too complicated. Stop now while you can!")  # haha seriously!
-
-
-print("Successfully imported `Ice` class")
 
 
 class Mission:
@@ -906,9 +876,6 @@ class Simulation:
     #                 return self.capacity * self.voltage_mean / power.params['power']
 
 
-print("Successfully imported `Simulation` class")
-
-
 class Plotter:
     'Class used to make plots of simulation results'
 
@@ -968,8 +935,6 @@ class Plotter:
         plt.show()
         # input()
 
-print("Successfully imported `Plotter` class")
-
 
 class model:
     '''
@@ -977,61 +942,83 @@ class model:
     Top-level class used by pip3 package to run simulations using python dictionary inputs.
     '''
 
+    input  = {}
     output = {}
-    params = {
-        "validation":False,
-        "validationcase":"DiFranco2016",
-        "drone":True,
-        "dronename":"dji-Mavic2",
-        "batterytechnology":"near-future",
-        "stateofhealth":90.0,
-        "startstateofcharge":100.0,
-        "altitude":100.0,
-        "rain":False,
-        "dropsize":1.0,
-        "liquidwatercontent":1.0,
-        "temperature":15.0,
-        "wind":False,
-        "windspeed":10.0,
-        "winddirection":0.0,
-        "relativehumidity":0.0,
-        "icing":False,
-        "mission": {
-                "missionspeed": 10.0
-            },
-        "timestep":1,
-        "plot":True,
-        "xlabel":"missionspeed",
-        "ylabel":"power",
-        "title":"First_test",
-        "simulationtype":"simple",
-        "model":"abdilla",
-        # "xbegin":0,
-        # "xend":1,
-        # "xnumber":5,
-        "xvals":[0,1,2,3,4,5],
-        "weathereffect":"temperature",
-        # "weatherbegin":10,
-        # "weatherend":40,
-        # "weathernumber":3
-        "weathervals":[10,20,30,40]
-    }
+    params = {}
+    drone  = {}
 
     def __init__(self,input):
-        for key in input:
-            self.params[key] = input[key]
+        self.input = input
+        self.__resetParams()
+
+    def __resetParams(self):
+        self.params = {
+            "validation":True,
+            "validationcase":"DiFranco2016",
+            "drone":None,
+            "dronename":"dji-Mavic2",
+            "batterytechnology":"near-future",
+            "stateofhealth":90.0,
+            "startstateofcharge":100.0,
+            "altitude":100.0,
+            "rain":False,
+            "dropsize":1.0,
+            "liquidwatercontent":1.0,
+            "temperature":15.0,
+            "wind":False,
+            "windspeed":10.0,
+            "winddirection":0.0,
+            "relativehumidity":0.0,
+            "icing":False,
+            "mission": {
+                    "missionspeed": 10.0,
+                    "heading": 0.0
+                },
+            "timestep":1,
+            "plot":True,
+            "xlabel":"missionspeed",
+            "ylabel":"power",
+            "title":"First_test",
+            "simulationtype":"simple",
+            "model":"abdilla",
+            # "xbegin":0,
+            # "xend":1,
+            # "xnumber":5,
+            "xvals":[0,1,2,3,4,5],
+            "weathereffect":"temperature",
+            # "weatherbegin":10,
+            # "weatherend":40,
+            # "weathernumber":3
+            "weathervals":[10,20,30,40]
+        }
+
+        for key in self.input:
+            self.params[key] = self.input[key]
+
+    def __setupValidation(self):
+        validationdata = getParams(validationdatabase,self.params['validationcase'])
+        self.params             = validationdata['settings']
+        self.params['xvalid']   = validationdata['xvalid']
+        self.params['yvalid']   = validationdata['yvalid']
+        self.drone              = Drone(validationdata['settings']['dronename'],validationdata['drone'],conversions)
+
+    def __setup(self):
+        droneparams         = getParams(drones,self.params['dronename'])
+        self.drone          = Drone(self.params['dronename'],droneparams,conversions)
 
     def simulate(self):
 
-
-        validation = None
-        if self.params['validation'] == True: #validation == True
-            validation = True
-            validationcase = self.params['validationcase']
-            validationdata = getParams(validationdatabase,validationcase) #specifies settings_list is in separate path
-            self.params = validationdata['settings']
+        self.__resetParams()
+        if self.params['validation'] == True:
+            # validation = True
+            # validationcase = self.params['validationcase']
+            # validationdata = getParams(validationdatabase,validationcase) #specifies settings_list is in separate path
+            # self.params = validationdata['settings']
+            self.__setupValidation()
+            print(" = = = = Ran setupValidation() = = = = =")
         else:
-            validation = False
+            self.__setup()
+            print(" = = = = Ran setup() = = = = =")
 
         xlabel               = self.params['xlabel']
         # ensure xlabel is an independent variable
@@ -1053,29 +1040,24 @@ class model:
         if xlabel not in independentvariables:
             raise(Exception("~~~~~ ERROR: desired x variable is not independent ~~~~~"))
 
-        ylabel               = self.params['ylabel']
+        ylabel              = self.params['ylabel']
 
         weatherlist         = []
             
         #instantiate drone
-        dronename           = self.params['dronename']
-        if validation:
-            droneparams         = validationdata['drone']
-        else:
-            droneparams         = getParams(drones,dronename)
-        droneconversions    = conversions
-        drone               = Drone(dronename,droneparams,droneconversions)
+        drone               = self.drone
 
         # instantiate battery
         stateofhealth       = self.params['stateofhealth']
         startstateofcharge  = self.params['startstateofcharge']
         batterytechnology   = self.params['batterytechnology']
         battery             = Battery(drone,stateofhealth,startstateofcharge, batterytechnology)
+        self.battery        = battery
 
         # instantiate mission
-        print(self.params)
         missionparams       = self.params['mission']
         mission             = Mission(missionparams)
+        self.mission        = mission
 
         # Temperature
         if xlabel == 'temperature':
@@ -1123,18 +1105,19 @@ class model:
         print("Preparing to update weather:")
         weather.update()
         print("Weather updated.")
+        self.weather    = weather
+
+        # instantiate power
         power           = Power(drone,weather,mission)
 
-        #simulation variables
+        # simulation variables
         timestep        = self.params['timestep'] # more relevant later
         simulationtype  = self.params['simulationtype']
         desiredresult   = self.params['ylabel']
-        # xbegin          = self.params['xbegin']
-        # xend            = self.params['xend']
-        # numsimulations  = self.params['xnumber']
+        simulation      = Simulation(timestep,simulationtype)
+        self.simulation = simulation
 
-        simulation      = Simulation(timestep,simulationtype)#,desiredresult)
-        # x               = np.linspace(xbegin,xend,numsimulations)
+
         x               = self.params['xvals']
         y               = []
 
@@ -1143,10 +1126,6 @@ class model:
 
         if "weathereffect" in self.params:
             weathereffect = self.params["weathereffect"]
-            # weatherbegin = self.params["weatherbegin"]
-            # weatherend = self.params["weatherend"]
-            # weathernumber = int(self.params["weathernumber"])
-            # wvector = np.linspace(weatherbegin,weatherend,weathernumber)
             wvector = self.params['weathervals']
         else:
             weathernumber = int(1)
@@ -1242,36 +1221,42 @@ class model:
         if "weathereffect" in self.params:
             print("EXE.py:      Z iterator is           ",self.params['weathereffect'])
 
-        if not validation: #proceed with normal plot
-
-            if self.params['plot'] == True:
-                xlabel = self.params['xlabel']
-                ylabel = desiredresult
-                axistitle = self.params['title']
-                plotter = Plotter(xplot,xlabel,yplot,ylabel,axistitle,len(self.params['weathervals']))
-                plotter.plot_line()
-            else: 
-                print('No plot functionality has been defined.')
-
-        else: # Plot validation data on top of our model
-            xvalid = validationdata['xvalid']
-            yvalid = validationdata['yvalid']
-            # xvalid,yvalid = getXandY(validationcase,",")
-            # yvalid = [x * 60.0 for x in yvalid] #only for converting from minutes to seconds until we get the conversion working before plotting
-
-            if self.params['plot'] == True:
-                xlabel = self.params['xlabel']
-                ylabel = desiredresult
-                axistitle = self.params['title'] + " Validation"
-                plotter = Plotter(xplot,xlabel,yplot,ylabel,axistitle,len(self.params['weathervals']))
-                plotter.plot_validation(xvalid,yvalid)
-            else: 
-                print('No plot functionality has been defined.')
-        
-        # Remove GEKKO objects from output
+        self.params['yplot'] = yplot
+        if self.params['plot'] == True:
+            if self.params['validation'] == True:
+                self.validationPlot()
+            else:
+                self.simulationPlot()
 
         return self.output
 
+    def simulationPlot(self):
+        if self.params['plot'] == True:
+            xlabel      = self.params['xlabel']
+            ylabel      = self.params['ylabel']
+            yplot       = self.params['yplot']
+            axistitle   = self.params['title']
+            plotter     = Plotter(self.params['xvals'],xlabel,yplot,ylabel,axistitle,len(self.params['weathervals']))
+            plotter.plot_line()
+        else: 
+            print('No plot functionality has been defined.')
+
+    def validationPlot(self):
+        xvalid = self.params['xvalid']
+        yvalid = self.params['yvalid']
+
+        if self.params['plot'] == True:
+            xplot  = self.params['xvals']
+            xlabel = self.params['xlabel']
+            yplot  = self.params['yplot']
+            ylabel = self.params['ylabel']
+            axistitle = self.params['title'] + " Validation"
+            if 'weathervals' not in self.params:
+                self.params['weathervals'] = [0]
+            plotter = Plotter(xplot,xlabel,yplot,ylabel,axistitle,len(self.params['weathervals']))
+            plotter.plot_validation(xvalid,yvalid)
+        else: 
+            print('No plot functionality has been defined.')
     
     def setDefaultParams(self):
         pass
@@ -1293,5 +1278,3 @@ class model:
         # returns a list of validation cases with their associated data
         return validationdatabase
 
-
-print("Successfully imported `model` class")

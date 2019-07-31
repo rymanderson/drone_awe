@@ -12,12 +12,168 @@ pip install drone_awe
 
 ## Usage
 
-Base functionality is achieved by following this example:
+Base functionality is achieved by following the following format:
 
 ```python3
 import drone_awe
-m = drone_awe.drone_awe({})
+m = drone_awe.model(args)
 m.simulate()
+```
+
+where `args` is a dictionary containing simulation parameters. Note that for every parameter not specified in `args`, a default value is used. It is possible to run the default simulation by passing an empty dictionary into the `drone_awe.model()` method:
+
+```python3
+import drone_awe
+m = drone_awe.model({})
+m.simulate()
+```
+
+The default dictionary looks like:
+
+```python3
+{
+    "validation":False,
+    "validationcase":"DiFranco2016",
+    "dronename":"dji-Mavic2",
+    "batterytechnology":"near-future",
+    "stateofhealth":90.0,
+    "startstateofcharge":100.0,
+    "altitude":100.0,
+    "rain":False,
+    "dropsize":1.0,
+    "liquidwatercontent":1.0,
+    "temperature":15.0,
+    "wind":False,
+    "windspeed":10.0,
+    "winddirection":0.0,
+    "relativehumidity":0.0,
+    "mission": {
+            "missionspeed": 10.0
+        },
+    "timestep":1,
+    "plot":True,
+    "xlabel":"missionspeed",
+    "ylabel":"power",
+    "title":"First_test",
+    "simulationtype":"simple",
+    "model":"abdilla",
+    "xvals":[0,1,2,3,4,5],
+    "weathereffect":"temperature",
+    "weathervals":[10,20,30,40]
+}
+
+```
+
+To access a dictionary containing all supported drones and experimental data for model validation, use the following methods:
+
+```python3
+droneDictionary = m.getDrones()
+validationDictionary = m.getValidationCases()
+```
+
+If a drone or validation case does not exist in the default dictionary, it may be appended to the model using the following methods:
+
+```python3
+m.addDrone(droneDictionary)
+m.addValidationCase(validationCaseDictionary)
+```
+
+where `droneDictionary` is a dictionary with the same keys as the following:
+
+```python3
+{
+    'id': 'dji-Mavic2',
+    'wingtype': 'rotary',
+    'diagonal': 0.354,
+    'takeoffweight': 0.907,
+    'speedmax': 20,
+    'altitudemax': 6000,
+    'endurancemax': 31,
+    'endurancemaxspeed': 6.944,
+    'endurancemaxhover': 29,
+    'rangemax': 18000,
+    'rangemaxspeed': 13.889,
+    'temperaturemin': -10,
+    'chargerpowerrating': 60,
+    'batterytype': 'LiPo',
+    'batterycapacity': 3850,
+    'batteryvoltage': 15.4,
+    'batterycells': 4,
+    'batteryenergy': 59.29,
+    'batterymass': 0.297,
+    'waterproof': 'no',
+    'windspeedmax': 10.8,
+    'batteryrechargetime': 90,
+    'rotorquantity': 4,
+    'rotordiameter': 0.2,
+    'cruisespeed': 6.94,
+    'payload': 0.0,
+    'length': 0.322,
+    'width': 0.242,
+    'height': 0.084
+}
+```
+
+Note that not all parameters need be specified, but if a simulation is run that requires unspecified parameters, the model will not run.\\
+
+Additionally, `validationCaseDictionary` is a dictionary with the same keys as:
+
+```python3
+{
+    'id': 'Stolaroff2018',
+    'xvalid': [1.358974359,1.7179487179,1.6923076923,1.7692307692,1.7692307692,1.8205128205,1.8717948718,1.8974358974,1.9230769231,1.9743589744,2.0512820513,2.1025641026,2.1025641026,2.1794871795,2.2820512821,2.3076923077,2.3333333333,2.4358974359,2.5384615385,2.5384615385,2.6666666667,2.7948717949,2.9487179487,3.1025641026,3.2564102564,3.358974359,3.4615384615,3.641025641,3.7435897436,3.8717948718,4.0512820513,4.2564102564,4.358974359,4.641025641,4.8974358974,5.8461538462,6,6.2820512821,6.5384615385,7.1538461538,7.4871794872,7.8205128205,8.4871794872,9.1794871795,9.7692307692,10.2564102564,10.6923076923,11.1282051282,11.5897435897],
+    'yvalid': [133.7510729614,149.2375075128,142.6477385276,144.5897859156,140.9450186657,141.7583868756,142.3874173587,140.4340604922,139.3656195241,139.5335348046,140.2321151941,139.9589946754,136.1689649626,138.3618186589,141.3711557508,139.4001574523,136.7492021569,136.5131929807,137.712167001,133.136399421,135.7755034665,136.58240428,141.8694500174,143.7278953027,145.8751386173,144.4503136349,143.5492800366,144.4966689523,140.8944307591,139.7885398414,140.0842115956,140.6905892611,140.7593265104,140.4412051028,148.3297356325,161.0751453894,160.7738527567,158.8079335653,157.0439596719,161.2248774665,165.1381601781,164.7032531681,177.1408013138,175.6982333173,190.095233258,197.4485952036,209.0736216573,203.7684942987,215.7551870381],
+    'drone': {
+        'validationcase':'Stolaroff2018',
+        'wingtype': 'rotary',
+        'rotorquantity': 4,
+        'takeoffweight': 1.3,
+        'batterytype': 'LiPo',
+        'batteryvoltage': 11.1,
+        'batterymass': 0.262,
+        'props': '10x4.7',
+        'endurancemaxhover': 16,
+        'payloadmax': 0.4,
+        'batterycapacity': 5500,
+        'payload': 0.0,
+        'rotordiameter': 0.254,
+        'batterycells': 3,
+        'length': 0.280,
+        'width': 0.140,
+        'height': 0.100,
+        'waterproof': 'no'
+        },
+    'settings': {
+        'dronename': 'drone',
+        'stateofhealth': 100.0,
+        'startstateofcharge': 100.0,
+        'altitude': 100.0,
+        'temperaturesealevel': 15.0,
+        'rain': False,
+        'dropsize': 0.0,
+        'liquidwatercontent': 1.0,
+        'temperature': 15.0,
+        'wind': False,
+        'windspeed': 0.0,
+        'winddirection': 0.0,
+        'relativehumidity': 85.0,
+        'icing': False,
+        "mission": {
+            "missionspeed": 10.0
+        },
+        'timestep': 1,
+        'plot': True,
+        'xlabel': 'missionspeed',
+        'ylabel': 'alpha',
+        'title': 'Stolaroff',
+        'simulationtype': 'simple',
+        'model': 'abdilla',
+        'xvals': [0.0,1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0,9.0,10.0,11.0,12.0,13.0,14.0,15.0],
+        'validation': False,
+        'validationcase': 'Stolaroff2018',
+        'batterytechnology': 'current'
+        }
+}
 ```
 
 ## Classes
