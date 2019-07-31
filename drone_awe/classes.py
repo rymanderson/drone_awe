@@ -125,7 +125,8 @@ class Battery:
             raise(Exception("ERROR: Incompatible battery technology input."))
 
     def update(self):
-        print("still working on Battery.update method")
+        # print("still working on Battery.update method")
+        pass
 
     # time-variant methods go here:
     def updateLoad(self, power):
@@ -146,6 +147,11 @@ class Power:
         'model':None,
         'dragcoefficient':1.0,
         'alpha':0.0
+    }
+
+    # variables that won't change for a simulation set go here
+    consts = {
+        'model':None
     }
 
     # methods go here:
@@ -262,8 +268,8 @@ class Power:
         poweractual     = batteryenergy/endurance
         powerideal      = thrust**1.5 / np.sqrt(2*rotorarea*airdensity)
 
-        print('gEP: poweractual is      ',poweractual)
-        print('gEP: powerideal is      ',powerideal)
+        # print('gEP: poweractual is      ',poweractual)
+        # print('gEP: powerideal is      ',powerideal)
 
         efficiencypropulsive = powerideal/poweractual
 
@@ -942,14 +948,35 @@ class model:
     Top-level class used by pip3 package to run simulations using python dictionary inputs.
     '''
 
-    input  = {}
-    output = {}
-    params = {}
-    drone  = {}
+    input       = {}
+    output      = {}
+    params      = {}
+    drone       = None
+    weather     = None
+    power       = None
+    simulation  = None
+    mission     = None
+    plotter     = None
+    battery     = None
 
-    def __init__(self,input):
-        self.input = input
+    verbose     = False # returns self.output after simulation
+    plot        = False # toggles plotting feature
+
+    def __init__(self,input,verbose=False,plot=False):
+        self.input      = input
         self.__resetParams()
+        self.verbose    = verbose
+        self.plot       = plot
+        self.__resetParams()
+
+        if self.params['validation'] == True:
+            # validation = True
+            # validationcase = self.params['validationcase']
+            # validationdata = getParams(validationdatabase,validationcase) #specifies settings_list is in separate path
+            # self.params = validationdata['settings']
+            self.__setupValidation()
+        else:
+            self.__setupSimulation()
 
     def __resetParams(self):
         self.params = {
@@ -975,7 +1002,7 @@ class model:
                     "heading": 0.0
                 },
             "timestep":1,
-            "plot":True,
+            # "plot":True,
             "xlabel":"missionspeed",
             "ylabel":"power",
             "title":"First_test",
@@ -1000,27 +1027,18 @@ class model:
         self.params             = validationdata['settings']
         self.params['xvalid']   = validationdata['xvalid']
         self.params['yvalid']   = validationdata['yvalid']
+        if self.drone != None:
+            print("~~~~~ ",self.drone.params)
         self.drone              = Drone(validationdata['settings']['dronename'],validationdata['drone'],conversions)
+        print("===== ",self.drone.params)
 
-    def __setup(self):
+    def __setupSimulation(self):
         droneparams         = getParams(drones,self.params['dronename'])
         self.drone          = Drone(self.params['dronename'],droneparams,conversions)
 
-    def simulate(self):
-
-        self.__resetParams()
-        if self.params['validation'] == True:
-            # validation = True
-            # validationcase = self.params['validationcase']
-            # validationdata = getParams(validationdatabase,validationcase) #specifies settings_list is in separate path
-            # self.params = validationdata['settings']
-            self.__setupValidation()
-            print(" = = = = Ran setupValidation() = = = = =")
-        else:
-            self.__setup()
-            print(" = = = = Ran setup() = = = = =")
-
+    def __setup(self):
         xlabel               = self.params['xlabel']
+
         # ensure xlabel is an independent variable
         independentvariables = [
                                 "startstateofcharge",
@@ -1036,28 +1054,20 @@ class model:
                                 "missionspeed",
                                 "model"
                                 ]
-
         if xlabel not in independentvariables:
             raise(Exception("~~~~~ ERROR: desired x variable is not independent ~~~~~"))
 
-        ylabel              = self.params['ylabel']
-
         weatherlist         = []
-            
-        #instantiate drone
-        drone               = self.drone
 
         # instantiate battery
         stateofhealth       = self.params['stateofhealth']
         startstateofcharge  = self.params['startstateofcharge']
         batterytechnology   = self.params['batterytechnology']
-        battery             = Battery(drone,stateofhealth,startstateofcharge, batterytechnology)
-        self.battery        = battery
+        self.battery        = Battery(self.drone,stateofhealth,startstateofcharge, batterytechnology)
 
         # instantiate mission
         missionparams       = self.params['mission']
-        mission             = Mission(missionparams)
-        self.mission        = mission
+        self.mission        = Mission(missionparams)
 
         # Temperature
         if xlabel == 'temperature':
@@ -1101,27 +1111,18 @@ class model:
         # for weathertype in weatherlist:
         #     weatherparams = weatherparams + weathertype.params
 
-        weather         = Weather(self.params['altitude'],weatherlist)
+        self.weather        = Weather(self.params['altitude'],weatherlist)
         print("Preparing to update weather:")
-        weather.update()
+        self.weather.update()
         print("Weather updated.")
-        self.weather    = weather
-
-        # instantiate power
-        power           = Power(drone,weather,mission)
-
-        # simulation variables
-        timestep        = self.params['timestep'] # more relevant later
-        simulationtype  = self.params['simulationtype']
-        desiredresult   = self.params['ylabel']
-        simulation      = Simulation(timestep,simulationtype)
-        self.simulation = simulation
-
-
+        self.power          = Power(self.drone,self.weather,self.mission)
+        self.simulation     = Simulation(self.params['timestep'],self.params['simulationtype'])
+    
+    def simulate(self):
+        self.__setup()
         x               = self.params['xvals']
         y               = []
 
-        xplot = x
         yplot = []
 
         if "weathereffect" in self.params:
@@ -1136,14 +1137,14 @@ class model:
             if "weathereffect" in self.params:
                 if weathereffect == 'temperature':
                     print("weathereffect = temperature confirmed")
-                    weather.weatherlist[0].params["temperature"] = zvalue
+                    self.weather.weatherlist[0].params["temperature"] = zvalue
                 elif weathereffect == 'relativehumidity':
-                    weather.weatherlist[1].params["relativehummidity"] = zvalue
+                    self.weather.weatherlist[1].params["relativehummidity"] = zvalue
                 else:
                     raise(Exception("~~~~~ ERROR: weathereffect not a valid input ~~~~~"))
-                weather.update()
-                power.update(drone,weather,mission)
-                battery.update()
+                self.weather.update()
+                self.power.update(self.drone,self.weather,self.mission)
+                self.battery.update()
             
             # simulation.run(drone,battery,power,weather,mission)
 
@@ -1162,46 +1163,49 @@ class model:
             # else:
             #     raise(Exception("~~~~~ ERROR: desired y variable not found ~~~~~"))
 
+            xlabel = self.params['xlabel']
+            ylabel = self.params['ylabel']
+
             for xvalue in x:
                 # update value
                 ## determine x location
-                if xlabel in drone.params:
-                    drone.params[xlabel] = xvalue
-                    power.update(drone,weather,mission)
-                    battery.update()
-                elif xlabel in weather.params:
+                if xlabel in self.drone.params:
+                    self.drone.params['xlabel'] = xvalue
+                    self.power.update(self.drone,self.weather,self.mission)
+                    self.battery.update()
+                elif xlabel in self.weather.params:
                     if xlabel == 'temperature':
-                        weather.weatherlist[0].params[xlabel] = xvalue
+                        self.weather.weatherlist[0].params[xlabel] = xvalue
                     elif xlabel == 'relativehumidity':
-                        weather.weatherlist[1].params[xlabel] = xvalue
-                    weather.update()
-                    power.update(drone,weather,mission)
-                    battery.update()
-                elif xlabel in mission.params:
-                    mission.params[xlabel] = xvalue
-                    power.update(drone,weather,mission)
-                    battery.update()
+                        self.weather.weatherlist[1].params[xlabel] = xvalue
+                    self.weather.update()
+                    self.power.update(self.drone,self.weather,self.mission)
+                    self.battery.update()
+                elif xlabel in self.mission.params:
+                    self.mission.params[xlabel] = xvalue
+                    self.power.update(self.drone,self.weather,self.mission)
+                    self.battery.update()
                 elif xlabel in self.params:
                     self.params[xlabel] = xvalue
-                    power.update(drone,weather,mission)
-                    battery.update()
+                    self.power.update(self.drone,self.weather,self.mission)
+                    self.battery.update()
                 else:
                     raise(Exception("~~~~~ ERROR: desired x variable not set ~~~~~"))
             
-                simulation.run(drone,battery,power,weather,mission)
+                self.simulation.run(self.drone,self.battery,self.power,self.weather,self.mission)
 
-                self.__updateOutput([drone,battery,power,weather,mission,simulation])
+                self.__updateOutput([self.drone,self.battery,self.power,self.weather,self.mission,self.simulation])
 
-                if ylabel in drone.params:
-                    y.append(drone.params[ylabel])
-                elif ylabel in simulation.params:
-                    y.append(simulation.params[ylabel])
-                elif ylabel in weather.params:
-                    y.append(weather.params[ylabel])
-                elif ylabel in mission.params:
-                    y.append(mission.params[ylabel])
-                elif ylabel in power.params:
-                    y.append(power.params[ylabel])
+                if ylabel in self.drone.params:
+                    y.append(self.drone.params[ylabel])
+                elif ylabel in self.simulation.params:
+                    y.append(self.simulation.params[ylabel])
+                elif ylabel in self.weather.params:
+                    y.append(self.weather.params[ylabel])
+                elif ylabel in self.mission.params:
+                    y.append(self.mission.params[ylabel])
+                elif ylabel in self.power.params:
+                    y.append(self.power.params[ylabel])
                 elif ylabel in self.params:
                     y.append(self.params[ylabel])
                 else:
@@ -1210,53 +1214,65 @@ class model:
             yplot.append(y)
             y = []
 
-        print("x data includes:    ",xplot)
-        print("y data includes:    ",yplot)
+        # print("x data includes:    ",xplot)
+        # print("y data includes:    ",yplot)
 
-        print("")
+        # print("")
 
-        print("EXE.py:      Independent variable is ",xlabel)
-        print("EXE.py:      Desired Result is       ",desiredresult)
+        # print("EXE.py:      Independent variable is ",xlabel)
+        # print("EXE.py:      Desired Result is       ",self.params['ylabel'])
 
         if "weathereffect" in self.params:
             print("EXE.py:      Z iterator is           ",self.params['weathereffect'])
 
         self.params['yplot'] = yplot
-        if self.params['plot'] == True:
+        if self.plot == True:
             if self.params['validation'] == True:
                 self.validationPlot()
             else:
                 self.simulationPlot()
+        
+        self.printWeatherClasses("DEBUGGING")
 
-        return self.output
+        if self.verbose:
+            return self.output
+        else:
+            pass
+
+    def printWeatherClasses(self,name):
+        print("")
+        print("//////===     ",name,"     ===\\\\\\")
+        print("//////===     Weather Classes     ===\\\\\\")
+        print("///  drone:      ",self.drone.params)
+        print("///  power:      ",self.power.params)
+        print("///  weather:    ",self.weather.weatherlist)
+        print("///  mission:    ",self.mission.params)
+        print("///  simulation: ",self.simulation.params)
+        print("///  plotter:    ",self.plotter)
+        print("///  battery:    ",self.battery.params)
+        print("//////////////////////////////////////////")
 
     def simulationPlot(self):
-        if self.params['plot'] == True:
-            xlabel      = self.params['xlabel']
-            ylabel      = self.params['ylabel']
-            yplot       = self.params['yplot']
-            axistitle   = self.params['title']
-            plotter     = Plotter(self.params['xvals'],xlabel,yplot,ylabel,axistitle,len(self.params['weathervals']))
-            plotter.plot_line()
-        else: 
-            print('No plot functionality has been defined.')
+        xlabel      = self.params['xlabel']
+        ylabel      = self.params['ylabel']
+        yplot       = self.params['yplot']
+        axistitle   = self.params['title']
+        plotter     = Plotter(self.params['xvals'],xlabel,yplot,ylabel,axistitle,len(self.params['weathervals']))
+        plotter.plot_line()
 
     def validationPlot(self):
         xvalid = self.params['xvalid']
         yvalid = self.params['yvalid']
 
-        if self.params['plot'] == True:
-            xplot  = self.params['xvals']
-            xlabel = self.params['xlabel']
-            yplot  = self.params['yplot']
-            ylabel = self.params['ylabel']
-            axistitle = self.params['title'] + " Validation"
-            if 'weathervals' not in self.params:
-                self.params['weathervals'] = [0]
-            plotter = Plotter(xplot,xlabel,yplot,ylabel,axistitle,len(self.params['weathervals']))
-            plotter.plot_validation(xvalid,yvalid)
-        else: 
-            print('No plot functionality has been defined.')
+        xplot  = self.params['xvals']
+        xlabel = self.params['xlabel']
+        yplot  = self.params['yplot']
+        ylabel = self.params['ylabel']
+        axistitle = self.params['title'] + " Validation"
+        if 'weathervals' not in self.params:
+            self.params['weathervals'] = [0]
+        plotter = Plotter(xplot,xlabel,yplot,ylabel,axistitle,len(self.params['weathervals']))
+        plotter.plot_validation(xvalid,yvalid)
     
     def setDefaultParams(self):
         pass
