@@ -46,7 +46,7 @@ validationdatabase = [
             'timestep': 1,
             'plot': True,
             'xlabel': 'missionspeed',
-            'ylabel': 'alpha',
+            'ylabel': 'power',
             'title': 'Stolaroff',
             'simulationtype': 'simple',
             'model': 'abdilla',
@@ -54,7 +54,7 @@ validationdatabase = [
             # 'xbegin': 0.0,
             # 'xend': 15.0,
             # 'xnumber': 10,
-            'validation': False,
+            'validation': True,
             'validationcase': 'Stolaroff2018',
             'batterytechnology': 'current'
             }
@@ -81,7 +81,7 @@ validationdatabase = [
             'motorio': 0.65
             },
         'settings': {
-            'validation': False,
+            'validation': True,
             'validationcase': 'Ostler2009',
             'drone': True,
             'dronename': 'drone',
@@ -178,7 +178,7 @@ validationdatabase = [
             # 'xbegin': 0.0,
             # 'xend': 10.0,
             # 'xnumber': 100,
-            'validation': False,
+            'validation': True,
             'validationcase': 'FreeFLYAlta8',
             'batterytechnology': 'current'
             }
@@ -226,7 +226,7 @@ validationdatabase = [
             # 'xbegin': 0.0,
             # 'xend': 1.0,
             # 'xnumber': 20,
-            'validation': False,
+            'validation': True,
             'validationcase': 'FireFLY6Pro',
             'batterytechnology': 'current'
             }
@@ -274,7 +274,7 @@ validationdatabase = [
             # 'xbegin': 0.5,
             # 'xend': 1.5,
             # 'xnumber': 10,
-            'validation': False,
+            'validation': True,
             'validationcase': 'Dorling2017_4S',
             'batterytechnology': 'current'
             }
@@ -323,7 +323,7 @@ validationdatabase = [
             # 'xbegin': 0.5,
             # 'xend': 1.5,
             # 'xnumber': 10,
-            'validation': False,
+            'validation': True,
             'validationcase': 'Dorling2017_3S',
             'batterytechnology': 'current'
             }
@@ -381,7 +381,7 @@ validationdatabase = [
             # 'xbegin': 0.0,
             # 'xend': 16.0,
             # 'xnumber': 20,
-            'validation': False,
+            'validation': True,
             'validationcase': 'DiFranco2016',
             'batterytechnology': 'current'
             }
@@ -427,14 +427,14 @@ validationdatabase = [
             'plot': True,
             'xlabel': 'missionspeed',
             'ylabel': 'power',
-            'title': 'Stolaroff',
+            'title': 'Chang2016',
             'simulationtype': 'simple',
             'model': 'abdilla',
             'xvals': np.linspace(0.0,16.0,20).tolist(),
             # 'xbegin': 0.0,
             # 'xend': 16.0,
             # 'xnumber': 20,
-            'validation': False,
+            'validation': True,
             'validationcase': 'Chang2016',
             'batterytechnology': 'current'
             }
@@ -486,7 +486,7 @@ validationdatabase = [
             # 'xbegin': 0.4,
             # 'xend': 0.55,
             # 'xnumber': 20,
-            'validation': False,
+            'validation': True,
             'validationcase': 'Abdilla2015endurance',
             'batterytechnology': 'current'
             }

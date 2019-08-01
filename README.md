@@ -65,7 +65,18 @@ Settable dictionary keys with example values for `args` include the following:
 }
 ```
 
-These are explained further in **Settings**.
+These are explained further in **Settings**. After a `drone_awe.model` object is instantiated, settings can be changed by modifying the `input` class variable as:
+
+```python3
+m.input['xlabel'] = 'payload'
+m.input['validationcase'] = 'Stolaroff2018'
+```
+
+The simulation must then be re-run using:
+
+```python3
+m.simulate()
+```
 
 ### Plotting
 

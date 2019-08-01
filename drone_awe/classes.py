@@ -1101,18 +1101,8 @@ class model:
 
     def __init__(self,input,verbose=False,plot=False):
         self.input      = input
-        self.__resetParams()
         self.verbose    = verbose
         self.plot       = plot
-
-        if self.params['validation'] == True:
-            # validation = True
-            # validationcase = self.params['validationcase']
-            # validationdata = getParams(validationdatabase,validationcase) #specifies settings_list is in separate path
-            # self.params = validationdata['settings']
-            self.__setupValidation()
-        else:
-            self.__setupSimulation()
 
     def __resetParams(self):
         self.params = {
@@ -1171,6 +1161,16 @@ class model:
         self.drone          = Drone(self.params['dronename'],droneparams,conversions)
 
     def __prepareSimulation(self):
+        self.__resetParams()
+        if self.params['validation'] == True:
+            # validation = True
+            # validationcase = self.params['validationcase']
+            # validationdata = getParams(validationdatabase,validationcase) #specifies settings_list is in separate path
+            # self.params = validationdata['settings']
+            self.__setupValidation()
+        else:
+            self.__setupSimulation()
+
         xlabel               = self.params['xlabel']
 
         # ensure xlabel is an independent variable

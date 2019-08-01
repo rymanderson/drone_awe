@@ -46,7 +46,7 @@ validationdatabase = [
             'timestep': 1,
             'plot': True,
             'xlabel': 'missionspeed',
-            'ylabel': 'alpha',
+            'ylabel': 'power',
             'title': 'Stolaroff',
             'simulationtype': 'simple',
             'model': 'abdilla',
