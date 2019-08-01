@@ -1,0 +1,23 @@
+params = {
+'wingtype': 'rotary',
+'rotorquantity': 8,
+'diagonal': 1.325,
+'batterycells': 6,
+'batteryvoltage': 22.2,
+'batterycapacity': 10000,
+'batterytype': 'LiPo',
+'numbatteries': 2,
+'numbatteriesconnection': 'parallel',
+'max_takeoffweight': 18.1,
+'takeoffweight': 6.2,
+'max_payload': 9.1,
+'specific_power': 145,
+'props': '18x6_Folding',
+'motor_max_power_continuous': 350,
+'motor_max_power_peak': 950,
+'temperaturemin': -20,
+'temperaturemax': 45,
+'thrust_ratio_at_max_takeoffweight': '1.85:1',
+'rotordiameter': 0.4572,
+'payload': 0.0
+}

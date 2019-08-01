@@ -3,3 +3,8 @@ Simulation/ARPACK/
 *.pyc
 __pycache__/
 .vscode/
+*.save
+*.ipynb_checkpoints
+*.whl
+*.gz
+build/lib.linux-x86_64-2.7/
