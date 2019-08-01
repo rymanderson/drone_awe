@@ -967,7 +967,6 @@ class model:
         self.__resetParams()
         self.verbose    = verbose
         self.plot       = plot
-        self.__resetParams()
 
         if self.params['validation'] == True:
             # validation = True
@@ -1027,16 +1026,13 @@ class model:
         self.params             = validationdata['settings']
         self.params['xvalid']   = validationdata['xvalid']
         self.params['yvalid']   = validationdata['yvalid']
-        if self.drone != None:
-            print("~~~~~ ",self.drone.params)
         self.drone              = Drone(validationdata['settings']['dronename'],validationdata['drone'],conversions)
-        print("===== ",self.drone.params)
 
     def __setupSimulation(self):
         droneparams         = getParams(drones,self.params['dronename'])
         self.drone          = Drone(self.params['dronename'],droneparams,conversions)
 
-    def __setup(self):
+    def __prepareSimulation(self):
         xlabel               = self.params['xlabel']
 
         # ensure xlabel is an independent variable
@@ -1119,7 +1115,7 @@ class model:
         self.simulation     = Simulation(self.params['timestep'],self.params['simulationtype'])
     
     def simulate(self):
-        self.__setup()
+        self.__prepareSimulation()
         x               = self.params['xvals']
         y               = []
 
@@ -1232,14 +1228,12 @@ class model:
             else:
                 self.simulationPlot()
         
-        self.printWeatherClasses("DEBUGGING")
-
         if self.verbose:
             return self.output
         else:
             pass
 
-    def printWeatherClasses(self,name):
+    def __printWeatherClasses(self,name): # method for debugging
         print("")
         print("//////===     ",name,"     ===\\\\\\")
         print("//////===     Weather Classes     ===\\\\\\")
@@ -1293,4 +1287,3 @@ class model:
     def getValidationCases(self):
         # returns a list of validation cases with their associated data
         return validationdatabase
-

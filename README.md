@@ -12,7 +12,9 @@ pip install drone_awe
 
 ## Usage
 
-Base functionality is achieved by following the following format:
+### Basic Usage
+
+Base functionality is achieved by running the following:
 
 ```python3
 import drone_awe
@@ -28,7 +30,7 @@ m = drone_awe.model({})
 m.simulate()
 ```
 
-The default dictionary looks like:
+Settable dictionary keys with example values for `args` include the following:
 
 ```python3
 {
@@ -61,21 +63,40 @@ The default dictionary looks like:
     "weathereffect":"temperature",
     "weathervals":[10,20,30,40]
 }
-
 ```
 
-To access a dictionary containing all supported drones and experimental data for model validation, use the following methods:
+These are explained further in **Settings**.
+
+### Plotting
+
+An optional boolean may be set to produce a plot on runtime by running:
+
+```python3
+m = drone_awe.model({},plot=True)
+```
+
+when a `drone_awe.model` is instantiated. Alternatively, the `drone_awe.model`'s `plot` variable may be set at any time:
+
+```python3
+m.plot = True
+```
+
+### Settings
+
+The following subsections explain the use of various settings of a `drone_awe.model` object.
+
+#### `'dronename'`
+
+`'dronename'` must be set to a string that is defined in the drone database. To access a dictionary containing all supported drones, use the following methods:
 
 ```python3
 droneDictionary = m.getDrones()
-validationDictionary = m.getValidationCases()
 ```
 
-If a drone or validation case does not exist in the default dictionary, it may be appended to the model using the following methods:
+If a drone or validation case does not exist in the drone database, it may still be used by setting a custom dictionary:
 
 ```python3
-m.addDrone(droneDictionary)
-m.addValidationCase(validationCaseDictionary)
+m.drone = droneDictionary
 ```
 
 where `droneDictionary` is a dictionary with the same keys as the following:
@@ -114,9 +135,17 @@ where `droneDictionary` is a dictionary with the same keys as the following:
 }
 ```
 
-Note that not all parameters need be specified, but if a simulation is run that requires unspecified parameters, the model will not run.\\
+Note that not all parameters need be specified, but if a simulation is run that requires unspecified parameters, the model will not run.
 
-Additionally, `validationCaseDictionary` is a dictionary with the same keys as:
+#### `'validation'` and `'validationcase'`
+
+To view validation cases for `drone_awe` models, set `'validation'=True` and `'validationcase'` to a string contained in the validation case database. To access a dictionary containing all supported validation cases, run the following:
+
+```python3
+validationDictionary = m.getValidationCases()
+```
+
+Additionally, `validationCaseDictionary` is a dictionary with the following format:
 
 ```python3
 {
@@ -162,7 +191,6 @@ Additionally, `validationCaseDictionary` is a dictionary with the same keys as:
             "missionspeed": 10.0
         },
         'timestep': 1,
-        'plot': True,
         'xlabel': 'missionspeed',
         'ylabel': 'alpha',
         'title': 'Stolaroff',
@@ -175,6 +203,30 @@ Additionally, `validationCaseDictionary` is a dictionary with the same keys as:
         }
 }
 ```
+
+## Theory
+
+`Drone AWE` is intended to predict performance parameters of rotary and fixed-wing drones based on readily-available specifications. To accomplish this, the power requirements for a given flight maneuver is calculated and used to predict battery drain behavior. Then, parameters such as range and endurance can be calculated. Comprehensive state data is collected at each step of a simulation, providing a versatile data set as output for study.
+
+### Power
+
+#### Rotary Drones
+
+For rotary drones, power consumption is predicted in two steps. First, model parameters are calibrated based on known specifications, like maximum hover time and rotor diameter. Then, momentum theory is used to predict the power consumption.
+
+#### Calibration
+
+#### Momentum Theory
+
+According to rotor momentum theory, five equations govern the flight of a rotorcraft:
+
+1. $T = \sqrt{W^2 + D^2}$
+2. $tan(\alpha) = \frac{D}{W}$
+3. $D = \frac{1}{2} \rho V_\infty^2 C_D A_{\bot}$
+4. $v_i = \frac{T}{2 A_{rotor} N_{rotor} \rho \sqrt{V_\infty^2 cos^2(\alpha) + (V_\infty sin(\alpha) + v_i^2)}}$
+5. $A_{\bot} = A_{front} cos(\alpha) + A_{top} sin(\alpha)$
+
+#### Fixed-Wing Drones
 
 ## Classes
 
@@ -325,24 +377,27 @@ Properties and their respective units are converted within the simulation to SI 
 * Endurance or Flight time: _minutes [min]_
 * Altitude: _meters [m]_
 * mass: _kilograms [kg]_
-	* this is often referred to as take off weight, despite actually referring to mass <!-- I feel weird quoting a weight in mass units, but I put this here because the .param files seem to use kg. Which may be fine. Let me know if you have any thoughts. :)  Yeah, that is kind of strange. -->
+
+	* note that "takeoff weight" is measured in mass units <!-- I feel weird quoting a weight in mass units, but I put this here because the .param files seem to use kg. Which may be fine. Let me know if you have any thoughts. :)  Yeah, that is kind of strange. -->
 
 ### Miscellaneous
 
 * Temperature: _degrees Celcius [&deg;C]_
-* Wind Resistance: _meters per second [m/s]_ 
+* Wind Resistance: _meters per second [m/s]_
+
 	*refers to the maximum wind speed the drone can resist
+
 * Battery re-charge time: _minutes [min]_
 
 ## Parameter Files
 
 ### Simulation
 
-* The settings list file contains all the necessary simulation parameters the code will look through before running simulations. These include: 
+* The settings list file contains all the necessary simulation parameters the code will look through before running simulations. These include:
 
 	* validation (True/False)
 
-		* If validation is True, the program reads in the next value, validationcase, and looks for the settings file under that directory in params/Validation/, and ignores the rest of the current settings file. 
+		* If validation is True, the program reads in the next value, validationcase, and looks for the settings file under that directory in params/Validation/, and ignores the rest of the current settings file.
 
 	* validationcase
 		
@@ -379,12 +434,17 @@ Properties and their respective units are converted within the simulation to SI 
 		* xlabel
 		* ylabel
 		* axis title
-	* simulation type 
+
+	* simulation type
+
 		* simple is the only option for now
+
 	* range of vx-values
+
 		* xbegin
 		* xend
 		* xnumber
+
 			* the simulation will loop through xnumber of the model from xbeginning to xend, according to what is put as the xlabel (also the x-variable)
 
 NOTE: For the plotting x- and y-labels, choose from the following parameters to plot:
@@ -394,12 +454,15 @@ NOTE: For the plotting x- and y-labels, choose from the following parameters to 
 * payload
 
 ### Drone
+
 There are `.param` files in the Drone directory each contain parameters specific to each drone. They are labled with the company's name or abbreviation in lowercase letters followed by a dash (-) and then the name of the drone (e.g., dji-Mavic2). New drones needing to be tested can follow similar formats, with a space (`" "`) delimiter.
 
 ### Batteries
+
 Similar to the Drone `.param` files, battery `.param` files exist for each type of battery tested. These parameters assist in determining the discharge rate over time and amount of specific energy and power available for different types of batteries.
 
 ## functions.py - Commonly used functions
+
 * `getparams` reads in a .txt or .csv file and outputs a dictionary with keys from a specified list and values from the specified parameter file.
 * `getXandY()` reads in data from a validation case and saves the contents to lists for x and y. This function assumes the first row contains labels and ignores them.
 * `interpolate()` does a simple linear interpolation with inputs of 2 x-values, 2 y-values, and the x-value of the parameter you are seeking.
