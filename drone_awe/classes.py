@@ -1277,21 +1277,15 @@ class model:
 
         for zvalue in wvector:
             if "weathereffect" in self.params:
-                if weathereffect == 'temperature':
-                    # print("weathereffect = temperature confirmed")
-                    self.weather.weatherlist[0].params["temperature"] = zvalue
-                    self.weather.update(self.drone) #splitting up so as to only update drone class if rain occurs (which happens after weather.update)
-                elif weathereffect == 'relativehumidity':
-                    self.weather.weatherlist[1].params["relativehummidity"] = zvalue
-                    self.weather.update(self.drone)
-                elif weathereffect == 'dropsize' or weathereffect == 'liquidwatercontent':
-                    self.weather.weatherlist[2].params[weathereffect] = zvalue
-                    self.weather.update(self.drone)
-                    self.drone.update(self.weather)
-                else:
-                    raise(Exception("~~~~~ ERROR: weathereffect not a valid input ~~~~~"))
-                self.power.update(self.drone,self.weather,self.mission)
-                self.battery.update()
+                i = 0
+                for weatherclass in weather.weatherlist:
+                    if weathereffect in weatherclass.params:
+                        self.weather.weatherlist[i].params[weathereffect] = zvalue
+                        self.weather.update(self.drone)
+                        self.drone.update(self.weather)
+                        self.power.update(self.drone,self.weather,self.mission)
+                        self.battery.update()
+                    i += 1
             
             # simulation.run(drone,battery,power,weather,mission)
 
@@ -1321,18 +1315,15 @@ class model:
                     self.power.update(self.drone,self.weather,self.mission)
                     self.battery.update()
                 elif xlabel in self.weather.params:
-                    if xlabel == 'temperature':
-                        self.weather.weatherlist[0].params[xlabel] = xvalue
-                        self.weather.update(self.drone)
-                    elif xlabel == 'relativehumidity':
-                        self.weather.weatherlist[1].params[xlabel] = xvalue
-                        self.weather.update(self.drone)
-                    elif xlabel == 'dropsize' or xlabel == 'liquidwatercontent':
-                        self.weather.weatherlist[2].params[xlabel] = xvalue
-                        self.weather.update(self.drone)
-                        self.drone.update(self.weather)
-                    self.power.update(self.drone,self.weather,self.mission)
-                    self.battery.update()
+                    i = 0
+                    for weatherclass in weather.weatherlist:
+                        if weathereffect in weatherclass.params:
+                            self.weather.weatherlist[i].params[weathereffect] = xvalue
+                            self.weather.update(self.drone)
+                            self.drone.update(self.weather)
+                            self.power.update(self.drone,self.weather,self.mission)
+                            self.battery.update()
+                        i += 1
                 elif xlabel in self.mission.params:
                     self.mission.params[xlabel] = xvalue
                     self.power.update(self.drone,self.weather,self.mission)

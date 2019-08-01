@@ -1,3 +1,3 @@
 import drone_awe
-m = drone_awe.model({'validationcase':'Stolaroff2018','validation':True},plot=True)
-m.simulate()
+a = drone_awe.model({'validation':False,'rain':True,'dropsize':0.004,'liquidwatercontent':0.2},plot=True)
+a.simulate()
