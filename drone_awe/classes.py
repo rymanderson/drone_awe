@@ -8,9 +8,7 @@ from .drones import conversions
 from scipy.optimize import fsolve
 import gekko
 
-
 # insert classes here
-
 
 class Drone:
     'Class used to store key drone characteristics'
@@ -23,6 +21,7 @@ class Drone:
     def __init__(self, name, params, conversions):
         self.name                   = name
         self.params                 = params
+        self.params['takeoffweightoriginal'] = self.params['takeoffweight']
         # this input is obtained using functions.getParams() in exe.py
         self.conversions            = conversions
         self.__convertUnits()
@@ -76,6 +75,12 @@ class Drone:
 
     def __printParameters(self):
         print("DRONEIMPORT:     takeoffweight is: ",self.params['takeoffweight'])
+
+    def update(self,weather):
+        if "dropletforce" in weather.params:
+            self.params['takeoffweight'] = self.params['takeoffweightoriginal'] + \
+                (weather.params['dropletforce'] / weather.params['gravitationconstant'])
+            print("Takeoff weight adjusted due to rain.")
 
 
 class Battery:
@@ -510,26 +515,19 @@ class Weather:
         # self.temperature = self.temperaturesealevel - 71.5 + 2*np.log(1 + np.exp(35.75 - 3.25*self.altitude) + np.exp(-3 + 0.0003 * self.altitude**3))
         # self.pressure = self.pressure_sl * np.exp(-0.118 * self.altitude - (0.0015*self.altitude**2) / (1 - 0.018*self.altitude + 0.0011 * self.altitude**2))
 
-    def update(self):
+    def update(self,drone):
         # update independent parameters
         # print("Weatherlist:", self.weatherlist)
+        densityfactor = 1.0
         for weathertype in self.weatherlist:
             for param in weathertype.params:
                 self.params[param] = weathertype.params[param]
-        # update dependent parameters
-        densityfactor = []
-        for weathertype in self.weatherlist: 
-            densityfactor.append(weathertype.updateDensity(self))
-        airdensity = self.params['airdensitysealevel']
-        for x in densityfactor:
-            airdensity *= x
-        self.params['airdensity'] = airdensity 
-        # since weatherlist does not contain strings, we may need to 
-        # include a method for density in each weather class. For those 
-        # that do nothing to density, we simply return densityfactor = 1.0
-
-        # print('Need to add more here for wind, rain, etc.')
-        #affect efficiency, missionspeed (wind), lift, weight, etc.
+            if 'temperature' in weathertype.params or 'relativehumidity' in weathertype.params:
+                # update dependent parameters
+                densityfactor *= weathertype.updateDensity(self)
+            elif 'dropsize' in weathertype.params:
+                self.params['dropletforce'] = weathertype.update(self,drone)
+        self.params['airdensity'] *= densityfactor 
 
     def getStandardAtmosphere(self, altitude):
         '''This function currently assumes STP conditions at sea level and should probably be adjusted to use ground level conditions as a baseline'''
@@ -583,9 +581,9 @@ class Rain(WeatherType):
     '''
     Class used to define rain characteristics. Params variables include:
     * variable (parameter) [units] {example}
-    * LWC (liquid water content) [kg/m3]
-    * dropsize [m]
-    * WVC (water vapor content) []
+    * LWC (liquid water content) [g/m3]
+    * dropsize (refers to drpolet diameter) [m]
+    * rainfallrate [mm/h] - 1 mm of rain is equivalent to 1 L/m^2
 
     Rain is expected to affect:
     * lift
@@ -595,8 +593,147 @@ class Rain(WeatherType):
     '''
 
     def __init__(self, params):
-        paramnames = ['LWC', 'dropsize', 'WVC']
+        if 'liquidwatercontent' not in params:
+            if 'rainfallrate' not in params:
+                raise(Exception('ERROR: either liquidwatercontent (LWC) or rainfall rate must be specified.'))
+            R = params['rainfallrate']
+            if R < 0.5: #drizzle
+                params['liquidwatercontent'] = 30000*np.pi*10**-3/5.7**4 * R**0.84 #see Cao, pp. 89
+            elif R < 4.0: #moderate
+                params['liquidwatercontent'] = 7000*np.pi*10**-3/4.1**4 * R**0.84
+            elif R > 4.0: #heavy
+                params['liquidwatercontent'] = 1400*np.pi*10**-3/3**4 * R**0.84
+        elif 'rainfallrate' not in params:
+            liquidwatercontent = params['liquidwatercontent']
+            if liquidwatercontent < 0.05: #drizzle
+                params['rainfallrate'] = 1/((30000*np.pi*10**-3 / 5.7**4*liquidwatercontent)**(1/0.84))
+            elif liquidwatercontent < 0.25: #moderate
+                params['rainfallrate'] = 1/((7000*np.pi*10**-3 / 4.1**4*liquidwatercontent)**(1/0.84))
+            elif liquidwatercontent > 0.25: #heavy
+                params['rainfallrate'] = 1/((1400*np.pi*10**-3 / 3.0**4*liquidwatercontent)**(1/0.84))
+        paramnames = ['dropsize', 'rainfallrate', 'liquidwatercontent']
+
         WeatherType.__init__(self, params, paramnames)
+
+    def update(self, weather, drone):
+        
+        diameter = weather.weatherlist[2].params['dropsize']
+        liquidwatercontent = weather.weatherlist[2].params['dropsize'] / 1000 #convert to kg/m3
+        # print("Rain.update is in process.")
+        print("diameter =",diameter)
+        print("liquidwatercontent =",liquidwatercontent)
+
+        if diameter == 0 or liquidwatercontent == 0:
+            dropletforce = 0.0
+        else:
+            
+            # single droplet
+            diameter = weather.weatherlist[2].params['dropsize']
+            radius = diameter/2.0
+            dropletvolume = 4.0/3.0 * np.pi * radius**3 #sphere estimate
+            airdensity = weather.params['airdensity'] #kg/m^3
+            waterdensity = 1000 #kg/m^3
+            dropletmass = dropletvolume * waterdensity #kg
+            g = weather.params['gravitationconstant']
+            Cd = 0.5 #sphere estimate
+            area = np.pi * radius**2
+            terminalvelocity = np.sqrt(2*dropletmass*g / (Cd*airdensity*area)) 
+            # terminalvelocity2 = 9.58*(1-np.exp(-(diameter/1.77)**1.147)) #(from Cao et al.)
+            # print("terminalvelocity1",terminalvelocity)
+            # print("terminalvelocity2 =",terminalvelocity2)
+            
+            #determine raindrop incidence using rate - Method 1
+            # rate = self.params['rainfallrate']
+            # rate *= 0.001 #convert from L/m3/h to m3/m2/h
+            # rate /= 3600 #convert from m3/m3/h to m3/m2/s
+            # dronearea = drone.params['area']
+            # rate *= dronearea #m3 per drone area per second
+            # numdrops = rate / dropletvolume #number of drops per drone area per second
+
+            #Method 2 - using LWC
+            dronearea = drone.params['toparea']
+            numdrops = liquidwatercontent / dropletmass * dronearea * terminalvelocity #numsrops hitting drone per second
+
+            surfacetension = self.getSurfaceTension(weather)
+            webernumber = self.getWeberNumber(weather, terminalvelocity, diameter, surfacetension)
+
+            upperthreshold = 18.0**2 * diameter * (waterdensity/surfacetension)**0.5 * terminalvelocity**0.25 * numdrops**0.75
+            # print("rain upper threshold weber number is:",upperthreshold)
+
+            if webernumber < 5:
+                #raindrop sticks
+                C = 0.0
+            elif webernumber < 10:
+                #raindrop bounces back
+                C = 1.0
+            elif webernumber < upperthreshold:
+                #raindrop spreads
+                C = 0.0
+            else:
+                #raindrop splashes
+                C = 2/np.pi #estimate, (integral of sin(x) from 0 to pi) / pi
+            #calculate change in velocity
+            delta_velocity = terminalvelocity * (C+1)
+            
+            dropletforce = numdrops * (dropletmass*delta_velocity)
+
+            print("")
+            print("Rain Parameters:")
+            print("dropletmass is:", dropletmass)
+            print("dropletvolume is:", dropletvolume)
+            print("velocity is:", terminalvelocity)
+            print("webernumber is:", webernumber)
+            print("numdrops is:", numdrops)
+            print("dropletforce is:", dropletforce)
+            print("")
+
+        return dropletforce
+
+        # if drone.params['wingtype'] == 'fixed':
+        #     #TODO loss of lift, increase in drag
+
+    def getWeberNumber(self, weather, velocity, diameter, surfacetension):
+        density = 1000 #kg/m^3
+        webernumber = density * velocity**2 * diameter / surfacetension
+
+        return webernumber
+
+    def getSurfaceTension(self, weather):
+        Tlist = [0, 5, 10, 20, 30, 40, 50] #deg C
+        sigmalist = [7.56, 7.49, 7.42, 7.28, 7.12, 6.96, 6.79] #N/m
+        temperature = weather.weatherlist[0].params['temperature']
+
+        if temperature < Tlist[0]:
+            surfacetension = sigmalist[0]
+            print("temperature is too low to predict surface tension of raindrops. Assuming a surface tension at 0 degrees C.")
+        elif temperature > Tlist[-1]:
+            surfacetension = sigmalist[-1]
+            print("temperature is too high to predict surface tension of raindrops. Assuming a surface tension at 50 degrees C.")
+        else:
+            counter = 0
+            for temp in Tlist:
+                if temperature == temp:
+                    id1 = counter
+                    id2 = counter
+                    break
+                elif temperature < temp:
+                    id1 = counter - 1
+                    id2 = counter
+                    break
+                else:
+                    counter += 1
+            #interpolate
+            x1 = Tlist[id1]
+            x2 = Tlist[id2]
+            y1 = sigmalist[id1]
+            y2 = sigmalist[id2]
+            x = temperature
+            surfacetension = interpolate(x1,x2,y1,y2,x)
+
+        return surfacetension
+
+
+print("Successfully imported `Rain` class")
 
 
 class Temperature(WeatherType):
@@ -988,8 +1125,9 @@ class model:
             "startstateofcharge":100.0,
             "altitude":100.0,
             "rain":False,
-            "dropsize":1.0,
-            "liquidwatercontent":1.0,
+            "dropsize":0.0,
+            "liquidwatercontent":None, #one of this and rainfallrate needs to be specified for rain, but not both
+            "rainfallrate":None,
             "temperature":15.0,
             "wind":False,
             "windspeed":10.0,
@@ -1010,12 +1148,12 @@ class model:
             # "xbegin":0,
             # "xend":1,
             # "xnumber":5,
-            "xvals":[0,1,2,3,4,5],
-            "weathereffect":"temperature",
+            "xvals":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15],
+            "weathereffect":"dropsize",
             # "weatherbegin":10,
             # "weatherend":40,
             # "weathernumber":3
-            "weathervals":[10,20,30,40]
+            "weathervals":[0,.002,0.004,0.01]
         }
 
         for key in self.input:
@@ -1084,11 +1222,18 @@ class model:
         weatherlist.append(humidity)
 
         # Rain
-        #     dropsize            = self.params['dropsize']
-        #     liquidwatercontent  = self.params['liquidwatercontent']
-        #     # …
-        #     rain                = Rain(dropsize,liquidwatercontent)
-        #     weatherlist.append('rain')
+        dropsize            = self.params['dropsize']
+        print("Dropsize =",dropsize)
+        if self.params['liquidwatercontent'] != None:
+            liquidwatercontent  = self.params['liquidwatercontent']
+            print("LWC =",liquidwatercontent)
+            rainparams = {'dropsize':dropsize, 'liquidwatercontent':liquidwatercontent}
+        elif self.params['rainfallrate'] != None:
+            rainfallrate = self.params['rainfallrate']
+            rainparams = {'dropsize':dropsize, 'rainfallrate':rainfallrate}
+        # …
+        rain                = Rain(rainparams)
+        weatherlist.append(rain)
 
         # Wind
         #     speed       = self.params['windspeed']
@@ -1109,8 +1254,9 @@ class model:
 
         self.weather        = Weather(self.params['altitude'],weatherlist)
         print("Preparing to update weather:")
-        self.weather.update()
+        self.weather.update(self.drone)
         print("Weather updated.")
+        self.drone.update(self.weather)
         self.power          = Power(self.drone,self.weather,self.mission)
         self.simulation     = Simulation(self.params['timestep'],self.params['simulationtype'])
     
@@ -1132,13 +1278,18 @@ class model:
         for zvalue in wvector:
             if "weathereffect" in self.params:
                 if weathereffect == 'temperature':
-                    print("weathereffect = temperature confirmed")
+                    # print("weathereffect = temperature confirmed")
                     self.weather.weatherlist[0].params["temperature"] = zvalue
+                    self.weather.update(self.drone) #splitting up so as to only update drone class if rain occurs (which happens after weather.update)
                 elif weathereffect == 'relativehumidity':
                     self.weather.weatherlist[1].params["relativehummidity"] = zvalue
+                    self.weather.update(self.drone)
+                elif weathereffect == 'dropsize' or weathereffect == 'liquidwatercontent':
+                    self.weather.weatherlist[2].params[weathereffect] = zvalue
+                    self.weather.update(self.drone)
+                    self.drone.update(self.weather)
                 else:
                     raise(Exception("~~~~~ ERROR: weathereffect not a valid input ~~~~~"))
-                self.weather.update()
                 self.power.update(self.drone,self.weather,self.mission)
                 self.battery.update()
             
@@ -1172,9 +1323,14 @@ class model:
                 elif xlabel in self.weather.params:
                     if xlabel == 'temperature':
                         self.weather.weatherlist[0].params[xlabel] = xvalue
+                        self.weather.update(self.drone)
                     elif xlabel == 'relativehumidity':
                         self.weather.weatherlist[1].params[xlabel] = xvalue
-                    self.weather.update()
+                        self.weather.update(self.drone)
+                    elif xlabel == 'dropsize' or xlabel == 'liquidwatercontent':
+                        self.weather.weatherlist[2].params[xlabel] = xvalue
+                        self.weather.update(self.drone)
+                        self.drone.update(self.weather)
                     self.power.update(self.drone,self.weather,self.mission)
                     self.battery.update()
                 elif xlabel in self.mission.params:
