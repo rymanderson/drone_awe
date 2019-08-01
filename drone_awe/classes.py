@@ -88,9 +88,9 @@ class Battery:
 
     params = {
                 'capacity':None,        # Ampere-hours
-                'soc':None,             # state of charge (in percent nominal capacity)
-                'startsoc':None,        # state of charge at simulation start
-                'soh':None,             # state of health (actual capacity divided by ideal capacity)
+                'stateofcharge':None,             # state of charge (in percent nominal capacity)
+                'startstateofcharge':None,        # state of charge at simulation start
+                'stateofhealth':None,             # state of health (actual capacity divided by ideal capacity)
                 'batterytype':None,     # possible values include LiPo, Li-ion, NiCd, NiMH, SLA
                 'voltage':None,         # Volts; this is the instantaneous voltage
                 'voltagemean':None,     # Volts; average voltage used for time-invariant simulations
@@ -102,7 +102,7 @@ class Battery:
 
     # constructor
     # default value for soh is based on the assumption that batteries are retired at a soh of 80%
-    def __init__(self, drone, soh=90.0, startsoc=100.0, batterytechnology='current'):
+    def __init__(self, drone, stateofhealth=90.0, startstateofcharge=100.0, batterytechnology='current'):
         # import parameters from drone object
         self.batterytype = drone.params['batterytype']
         self.voltagemean = drone.params['batteryvoltage']
@@ -1081,8 +1081,11 @@ class Plotter:
 
 class model:
     '''
-    Drone Applications in Weather Environments \\
+    Drone Applications in Weather Environments
     Top-level class used by pip3 package to run simulations using python dictionary inputs.
+    Initialize using `model({})`
+    `model.simulate()` method returns `model.output` if `model.verbose=True`
+    `model.simulate()` method produces a matplotlib plot if `model.plot=True`
     '''
 
     input       = {}
@@ -1185,8 +1188,7 @@ class model:
                                 "winddirection",
                                 "relativehumidity",
                                 "payload",
-                                "missionspeed",
-                                "model"
+                                "missionspeed"
                                 ]
         if xlabel not in independentvariables:
             raise(Exception("~~~~~ ERROR: desired x variable is not independent ~~~~~"))
@@ -1384,6 +1386,8 @@ class model:
             else:
                 self.simulationPlot()
         
+        self.output['zvals'] = self.params['weathervals']
+        
         if self.verbose:
             return self.output
         else:
@@ -1434,12 +1438,3 @@ class model:
                     self.output[param] = []
                 if param != "model":
                     self.output[param].append(myclass.params[param])
-
-    # These methods are written for Danielito
-    def getDrones(self):
-        # returns a list of dictionaries describing drones with their parameters
-        return drones
-
-    def getValidationCases(self):
-        # returns a list of validation cases with their associated data
-        return validationdatabase
