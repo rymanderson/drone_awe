@@ -1,3 +1,3 @@
 import classes
-m = classes.awe({'plot':False})
+m = classes.model({'plot':False})
 m.simulate()
