@@ -416,7 +416,7 @@ class Power:
                                                   drone.params['rotorquantity'] / 2 / \
                                                   self.params['area']/weather.params['airdensity'])
         self.params['velocityinduced']          = self.params['velocityinducedhover']
-        self.params['thrust']                   = drone.params['totalweight']
+        self.params['thrust']                   = drone.params['totalweight'] + weather.params['extrathrust']
         self.params['alpha']                    = 0.0
         self.params['alpha_gekko']                    = 0.0
         self.params['drag']                     = 0.0
@@ -483,7 +483,8 @@ class Weather:
         'temperaturesealevel': 288.15, #15 deg C
         'temperature': None,
         'humidity': None,
-        'altitude':None
+        'altitude':None,
+        'extrathrust':0.0
     }
 
     # airdensity      = 1.225 #kg/m^3
@@ -526,7 +527,7 @@ class Weather:
                 # update dependent parameters
                 densityfactor *= weathertype.updateDensity(self)
             elif 'dropsize' in weathertype.params:
-                self.params['dropletforce'] = weathertype.update(self,drone)
+                self.params['extrathrust'] = weathertype.update(self,drone)
         self.params['airdensity'] *= densityfactor 
 
     def getStandardAtmosphere(self, altitude):
@@ -598,11 +599,11 @@ class Rain(WeatherType):
                 raise(Exception('ERROR: either liquidwatercontent (LWC) or rainfall rate must be specified.'))
             R = params['rainfallrate']
             if R < 0.5: #drizzle
-                params['liquidwatercontent'] = 30000*np.pi*10**-3/5.7**4 * R**0.84 #see Cao, pp. 89
+                params['liquidwatercontent'] = 30000*np.pi * 10**-3 / (5.7**4) * R**0.84 #see Cao, pp. 89
             elif R < 4.0: #moderate
-                params['liquidwatercontent'] = 7000*np.pi*10**-3/4.1**4 * R**0.84
+                params['liquidwatercontent'] = 7000*np.pi * 10**-3 / (4.1**4) * R**0.84
             elif R > 4.0: #heavy
-                params['liquidwatercontent'] = 1400*np.pi*10**-3/3**4 * R**0.84
+                params['liquidwatercontent'] = 1400*np.pi * 10**-3 / (3**4) * R**0.84
         elif 'rainfallrate' not in params:
             liquidwatercontent = params['liquidwatercontent']
             if liquidwatercontent < 0.05: #drizzle
@@ -1316,7 +1317,7 @@ class model:
                     self.battery.update()
                 elif xlabel in self.weather.params:
                     i = 0
-                    for weatherclass in weather.weatherlist:
+                    for weatherclass in self.weather.weatherlist:
                         if weathereffect in weatherclass.params:
                             self.weather.weatherlist[i].params[weathereffect] = xvalue
                             self.weather.update(self.drone)
