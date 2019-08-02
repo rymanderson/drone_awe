@@ -10,11 +10,6 @@ drones = [
         'rangemax': 0,
         'rangemaxspeed': 0,
         'temperaturemin,': -10,
-        'batterytype': 'LiPo',
-        'batterycapacity': 3500,
-        'batteryvoltage': 11.1,
-        'batterycells': 3,
-        'batterymass': 0.262,
         'waterproof': 'no',
         'rotorquantity': 4,
         'rotordiameter': 0.254,
@@ -22,17 +17,20 @@ drones = [
         'payload': 0.0,
         'length': 0.280,
         'width': 0.140,
-        'height': 0.100
+        'height': 0.100,
+        'battery': {
+            'batterytype': 'LiPo',
+            'batterycapacity': 3500,
+            'batteryvoltage': 11.1,
+            'batterycells': 3,
+            'batterymass': 0.262
+        }
     },
     {
         'id': '3DR-Solo',
         'wingtype': 'rotary',
         'rotorquantity': 4,
         'takeoffweight': 1.5,
-        'batterytype': 'LiPo',
-        'batterycapacity': 5200,
-        'batteryvoltage': 14.8,
-        'batterymass': 0.5,
         'endurancemax': 25,
         'altitudemax': 100,
         'max_payload': 0.5,
@@ -42,7 +40,13 @@ drones = [
         'temperaturemin': 0,
         'temperaturemax': 45,
         'max_humidity': 85,
-        'props': '10x4.5'
+        'props': '10x4.5',
+        'battery': {
+            'batterytype': 'LiPo',
+            'batterycapacity': 5200,
+            'batteryvoltage': 14.8,
+            'batterymass': 0.5            
+        }
     },
     {
         'id': 'aerovironment-Puma3AE',
@@ -51,7 +55,9 @@ drones = [
         'takeoffweight': 6.8,
         'span': 2.8,
         'altitudemax': 152,
-        'batterytype': 'LE'
+        'battery': {
+            'batterytype': 'LE'            
+        }
     },
     {
         'id': 'aeryon-skyrangerR70',
@@ -66,7 +72,9 @@ drones = [
         'temperaturemax': 50,
         'waterproof': 'yes',
         'takeoffweight': 4.5,
-        'num_batteries': 4
+        'battery': {
+            'num_batteries': 4            
+        }
     },
     {
         'id': 'asctec-Falcon8',
@@ -76,14 +84,16 @@ drones = [
         'endurancemax': 22,
         'speedmax': 15,
         'windspeedmax': 12,
-        'batterytype': 'LiPo',
-        'batterycells': 3,
-        'batterycapacity': 6250,
-        'batterymass': 0.426,
         'temperaturemin': -5,
         'temperaturemax': 35,
         'rotorquantity': 8,
-        'rotordiameter': 0.2
+        'rotordiameter': 0.2,
+        'battery': {
+            'batterytype': 'LiPo',
+            'batterycells': 3,
+            'batterycapacity': 6250,
+            'batterymass': 0.426            
+        }
     },
     {
         'id': 'dji-Mavic2',
@@ -116,7 +126,10 @@ drones = [
         'payload': 0.0,
         'length': 0.322,
         'width': 0.242,
-        'height': 0.084
+        'height': 0.084,
+        'battery': {
+            
+        }
     },
     {
         'id': 'dji-Phantom4RTK',
@@ -136,7 +149,10 @@ drones = [
         'batteryenergy': 89.2,
         'props': '9450s Quick Release',
         'batteryrechargetime': 60,
-        'rotorquantity': 4
+        'rotorquantity': 4,
+        'battery': {
+            
+        }
     },
     {
         'id': 'freefly-alta8',
@@ -158,7 +174,10 @@ drones = [
         'motor_max_power_peak': 950,
         'temperaturemin': -20,
         'temperaturemax': 45,
-        'thrust_ratio_at_max_takeoffweight': '1.85:1'
+        'thrust_ratio_at_max_takeoffweight': '1.85:1',
+        'battery': {
+            
+        }
     },
     {
         'id': 'precisionhawk-FireFLY6Pro',
@@ -169,7 +188,10 @@ drones = [
         'max_payload': 0.7,
         'cruise_speed': 18,
         'VTOL': 'yes',
-        'batterytype': 'LiHV'
+        'batterytype': 'LiHV',
+        'battery': {
+            
+        }
     },
     {
         'id': 'senseFly-ebeeX',
@@ -185,7 +207,10 @@ drones = [
         'batterymass': 0.4,
         'batteryrechargetime': 40,
         'windspeedmax': 12.8,
-        'VTOL': 'no'
+        'VTOL': 'no',
+        'battery': {
+            
+        }
     },
     {
         'id': 'yuneec-TyphoonHPlus',
@@ -201,7 +226,10 @@ drones = [
         'batteryvoltage': 14.8,
         'batterycapacity': 5400,
         'temperaturemin': 0,
-        'temperaturemax': 40
+        'temperaturemax': 40,
+        'battery': {
+            
+        }
     }
 ]
 

@@ -10,21 +10,23 @@ validationdatabase = [
             'wingtype': 'rotary',
             'rotorquantity': 4,
             'takeoffweight': 1.3,
-            'batterytype': 'LiPo',
-            'batteryvoltage': 11.1,
-            'batterymass': 0.262,
+            
             'props': '10x4.7',
             'endurancemaxhover': 16,
             'payloadmax': 0.4,
-            'batterycapacity': 5500,
-            'payload': 0.0,
             'rotordiameter': 0.254,
-            'batterycells': 3,
             'length': 0.280,
             'width': 0.140,
             'height': 0.100,
-            'waterproof': 'no'
-            },
+            'waterproof': 'no',
+            'battery':{
+                'batterytype': 'LiPo',
+                'batteryvoltage': 11.1,
+                'batterymass': 0.262,
+                'batterycapacity': 5500,
+                'batterycells': 3
+            }
+        },
         'settings': {
             'dronename': 'drone',
             'stateofhealth': 100.0,
@@ -41,7 +43,9 @@ validationdatabase = [
             'relativehumidity': 85.0,
             'icing': False,
             "mission": {
-                "missionspeed": 10.0
+                "missionspeed": 10.0,
+                "heading": 0.0,
+                "payload": 0.0
             },
             'timestep': 1,
             'plot': True,
@@ -69,17 +73,18 @@ validationdatabase = [
             'wingarea': 0.321,
             'wingspan': 1.06,
             'rotorquantity': 1,
-            'batteryvoltage': 11.1,
-            'batterycapacity': 1500,
-            'batterytype': 'LiPo',
-            'numbatteries': 2,
-            'numbatteriesconnection': 'parallel',
             'takeoffweight': 0.95,
             'props': '7x4',
             'rotordiameter': 0.1778,
-            'payload': 0.0,
-            'motorio': 0.65
-            },
+            'motorio': 0.65,
+            'battery': {
+                'batteryvoltage': 11.1,
+                'batterycapacity': 1500,
+                'batterytype': 'LiPo',
+                'numbatteries': 2,
+                'numbatteriesconnection': 'parallel'
+            }
+        },
         'settings': {
             'validation': True,
             'validationcase': 'Ostler2009',
@@ -99,7 +104,9 @@ validationdatabase = [
             'relativehumidity': 89.0,
             'icing': False,        
             "mission": {
-                "missionspeed": 10.0
+                "missionspeed": 10.0,
+                "heading": 0.0,
+                "payload": 0.0
             },
             'timestep': 1,
             'plot': True,
@@ -130,12 +137,6 @@ validationdatabase = [
             'wingtype': 'rotary',
             'rotorquantity': 8,
             'diagonal': 1.325,
-            'batterycells': 6,
-            'batteryvoltage': 22.2,
-            'batterycapacity': 10000,
-            'batterytype': 'LiPo',
-            'numbatteries': 2,
-            'numbatteriesconnection': 'parallel',
             'max_takeoffweight': 18.1,
             'takeoffweight': 6.2,
             'max_payload': 9.1,
@@ -147,8 +148,15 @@ validationdatabase = [
             'temperaturemax': 45,
             'thrust_ratio_at_max_takeoffweight': '1.85:1',
             'rotordiameter': 0.4572,
-            'payload': 0.0
-            },
+            'battery': {
+                'batterycells': 6,
+                'batteryvoltage': 22.2,
+                'batterycapacity': 10000,
+                'batterytype': 'LiPo',
+                'numbatteries': 2,
+                'numbatteriesconnection': 'parallel',
+            }
+        },
         'settings': {
             'drone': True,
             'dronename': 'drone',
@@ -166,7 +174,9 @@ validationdatabase = [
             'relativehumidity': 89.0,
             'icing': False,
             "mission": {
-                "missionspeed": 10.0
+                "missionspeed": 10.0,
+                "heading": 0.0,
+                "payload": 0.0
             },
             'timestep': 1,
             'plot': True,
@@ -196,7 +206,9 @@ validationdatabase = [
             'max_payload': 0.7,
             'cruise_speed': 18,
             'VTOL': 'yes',
-            'batterytype': 'LiHV'
+            'battery': {
+                'batterytype': 'LiHV'
+            }
             },
         'settings': {
             'dronename': 'drone',
@@ -214,7 +226,9 @@ validationdatabase = [
             'relativehumidity': 0.0,
             'icing': False,
             "mission": {
-                "missionspeed": 10.0
+                "missionspeed": 10.0,
+                "heading": 0.0,
+                "payload": 0.0
             },
             'timestep': 1,
             'plot': True,
@@ -240,11 +254,13 @@ validationdatabase = [
             'wingtype': 'rotary',
             'rotorquantity': 6,
             'takeoffweight': 1.5,
-            'batterytype': 'LiPo',
-            'batteryvoltage': 14.8,
-            'batterymass': 0.5,
-            'props': '10x4.7'
+            'battery': {
+                'batterytype': 'LiPo',
+                'batteryvoltage': 14.8,
+                'batterymass': 0.5
             },
+            'props': '10x4.7'
+        },
         'settings': {
             'dronename': 'drone',
             'stateofhealth': 90.0,
@@ -261,7 +277,9 @@ validationdatabase = [
             'relativehumidity': 0.0,
             'icing': False,
             "mission": {
-                "missionspeed": 10.0
+                "missionspeed": 10.0,
+                "heading": 0.0,
+                "payload": 0.0
             },
             'timestep': 1,
             'plot': True,
@@ -288,12 +306,14 @@ validationdatabase = [
             'wingtype': 'rotary',
             'rotorquantity': 6,
             'takeoffweight': 1.5,
-            'batterytype': 'LiPo',
-            'batteryvoltage': 14.8,
-            'batterymass': 0.5,
             'props': '10x4.7',
-            'endurancemax': 15
-            },
+            'endurancemax': 15,
+            'battery': {
+                'batterytype': 'LiPo',
+                'batteryvoltage': 14.8,
+                'batterymass': 0.5
+            }
+        },
         'settings': {
             'dronename': 'drone',
             'stateofhealth': 90.0,
@@ -310,7 +330,9 @@ validationdatabase = [
             'relativehumidity': 0.0,
             'icing': False,
             "mission": {
-                "missionspeed": 10.0
+                "missionspeed": 10.0,
+                "heading": 0.0,
+                "payload": 0.0
             },
             'timestep': 1,
             'plot': True,
@@ -337,21 +359,22 @@ validationdatabase = [
             'wingtype': 'rotary',
             'rotorquantity': 4,
             'takeoffweight': 1.3,
-            'batterytype': 'LiPo',
-            'batteryvoltage': 11.1,
-            'batterymass': 0.262,
             'props': '10x4.7',
             'endurancemaxhover': 16,
             'payloadmax': 0.4,
-            'batterycapacity': 5500,
-            'payload': 0.0,
             'rotordiameter': 0.254,
-            'batterycells': 3,
             'length': 0.280,
             'width': 0.140,
             'height': 0.100,
-            'waterproof': 'no'
-            },
+            'waterproof': 'no',
+            'battery': {
+                'batterytype': 'LiPo',
+                'batteryvoltage': 11.1,
+                'batterymass': 0.262,
+                'batterycapacity': 5500,
+                'batterycells': 3
+            }
+        },
         'settings': {
             'dronename': 'drone',
             'stateofhealth': 100.0,
@@ -368,7 +391,9 @@ validationdatabase = [
             'relativehumidity': 0.0,
             'icing': False,
             "mission": {
-                "missionspeed": 10.0
+                "missionspeed": 10.0,
+                "heading": 0.0,
+                "payload": 0.0
             },
             'timestep': 1,
             'plot': True,
@@ -395,16 +420,17 @@ validationdatabase = [
             'wingtype': 'rotary',
             'rotorquantity': 4,
             'takeoffweight': 1.3,
-            'batterytype': 'LiPo',
-            'batteryvoltage': 11.1,
-            'batterymass': 0.262,
             'props': '10x4.7',
             'endurancemax': 15,
             'payloadmax': 0.4,
-            'batterycapacity': 5500,
-            'payload': 0.095,
-            'rotordiameter': 0.254
-            },
+            'rotordiameter': 0.254,
+            'battery': {
+                'batterytype': 'LiPo',
+                'batteryvoltage': 11.1,
+                'batterymass': 0.262,
+                'batterycapacity': 5500
+            }
+        },
         'settings': {
             'dronename': 'drone',
             'stateofhealth': 100.0,
@@ -421,7 +447,9 @@ validationdatabase = [
             'relativehumidity': 0.0,
             'icing': False,
             "mission": {
-                "missionspeed": 10.0
+                "missionspeed": 10.0,
+                "heading": 0.0,
+                'payload': 0.095
             },
             'timestep': 1,
             'plot': True,
@@ -450,12 +478,13 @@ validationdatabase = [
             'endurancemax': 12.0,
             'rangemax': 50.0,
             'takeoffweight': 1.81,
-            'batterycapacity': 2200.0,
-            'batteryvoltage': 11.1,
-            'batterytype': 'LiPo',
-            'batterymass': 0.191,
-            'payload': 0.0,
-            'rotordiameter': 0.2
+            'rotordiameter': 0.2,
+            'battery': {
+                'batterycapacity': 2200.0,
+                'batteryvoltage': 11.1,
+                'batterytype': 'LiPo',
+                'batterymass': 0.191
+            }
             },
         'settings': {
             'dronename': 'drone',
@@ -473,7 +502,9 @@ validationdatabase = [
             'relativehumidity': 0.0,
             'icing': False,
             "mission": {
-                "missionspeed": 10.0
+                "missionspeed": 10.0,
+                "heading": 0.0,
+                "payload": 0.0
             },
             'timestep': 1,
             'plot': True,
