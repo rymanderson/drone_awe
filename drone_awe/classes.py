@@ -11,7 +11,11 @@ import gekko
 # insert classes here
 
 class Drone:
-    'Class used to store key drone characteristics'
+    '''
+    Class used to store key drone characteristics.
+    Class instances are used only to instantiate other classes;
+    i.e., Drone class objects are never referenced during a single simulation step
+    '''
 
     name            = None
     params          = None
@@ -63,6 +67,7 @@ class Drone:
 
     def __convertUnits(self):
         if not self.correctunits:
+            print("~~~ converting units")
             for spec in self.conversions:
                 if spec in self.params:
                     self.params[spec] = self.params[spec] * \
@@ -88,9 +93,9 @@ class Battery:
 
     params = {
                 'capacity':None,        # Ampere-hours
-                'soc':None,             # state of charge (in percent nominal capacity)
-                'startsoc':None,        # state of charge at simulation start
-                'soh':None,             # state of health (actual capacity divided by ideal capacity)
+                'stateofcharge':None,             # state of charge (in percent nominal capacity)
+                'startstateofcharge':None,        # state of charge at simulation start
+                'stateofhealth':None,             # state of health (actual capacity divided by ideal capacity)
                 'batterytype':None,     # possible values include LiPo, Li-ion, NiCd, NiMH, SLA
                 'voltage':None,         # Volts; this is the instantaneous voltage
                 'voltagemean':None,     # Volts; average voltage used for time-invariant simulations
@@ -102,21 +107,21 @@ class Battery:
 
     # constructor
     # default value for soh is based on the assumption that batteries are retired at a soh of 80%
-    def __init__(self, drone, soh=90.0, startsoc=100.0, batterytechnology='current'):
+    def __init__(self, drone, stateofhealth=90.0, startstateofcharge=100.0, batterytechnology='current'):
         # import parameters from drone object
         self.batterytype = drone.params['batterytype']
         self.voltagemean = drone.params['batteryvoltage']
 
         #update capacity based on future technology if needed
         self.params['batterytechnology'] = batterytechnology
-        self.defineCapacity(drone)
+        self.__defineCapacity(drone)
 
         # update parameters
         self.update()
 
         # estimate list lengths for prior memory allocation
 
-    def defineCapacity(self,drone):
+    def __defineCapacity(self,drone):
         print("defineCapacity:  batterytechnology is: ",self.params['batterytechnology'])
         if self.params['batterytechnology'] == 'current':
             self.capacity = drone.params['batterycapacity']
@@ -156,7 +161,8 @@ class Power:
 
     # variables that won't change for a simulation set go here
     consts = {
-        'model':None
+        'model':None,
+        'powerModel':None
     }
 
     # methods go here:
@@ -164,19 +170,17 @@ class Power:
         self.__initializeParameters(drone,weather)                
         self.__getDragCoefficient(drone)                # hopefully constant across different rotary drones
         self.__setupModel(drone,weather,mission)
-        
-        # print("power.update(): power is            ",self.params['power'])
-        # print("power.update(): drag coefficient is ",self.params['dragcoefficient'])
-    def update(self, drone, weather, mission):
+
         if drone.params['wingtype'] == 'rotary':
             # self.__getPowerAbdilla(drone, weather, mission)
-            self.__getPowerMomentum(drone, weather, mission)
+            self.consts['powerModel'] = self.__getPowerMomentum
         elif drone.params['wingtype'] == 'fixed':
-            self.__getPowerTraub(drone, weather, mission)
+            self.consts['powerModel'] = self.__getPowerTraub
         else:
-            # raise Exception(f"~~~~~ ERROR: model { model } not available ~~~~~") #
-            raise Exception("~~~~~ ERROR: model '" +
-                            self.params['model'] + "' not available ~~~~~")
+            print("POWER: ~~~~~ ERROR: no power model defined for drone.params['wingtype']")
+        
+    def update(self, drone, weather, mission):
+        self.consts['powerModel'](drone, weather, mission)
 
     # def update(self, drone, weather, mission):
     #     self.__getDragCoefficient(drone)
@@ -734,9 +738,6 @@ class Rain(WeatherType):
         return surfacetension
 
 
-print("Successfully imported `Rain` class")
-
-
 class Temperature(WeatherType):
     '''
     Class used to define temperature characteristics. Params variables include:
@@ -1082,8 +1083,10 @@ class Plotter:
 
 class model:
     '''
-    Drone Applications in Weather Environments \\
+    Drone Applications in Weather Environments
     Top-level class used by pip3 package to run simulations using python dictionary inputs.
+    `model.simulate()` returns `model.output` if `model.verbose=True`
+    `model.simulate()` produces a plot if `model.plot=True`
     '''
 
     input       = {}
@@ -1094,8 +1097,8 @@ class model:
     power       = None
     simulation  = None
     mission     = None
-    plotter     = None
     battery     = None
+    plotter     = None
 
     verbose     = False # returns self.output after simulation
     plot        = False # toggles plotting feature
@@ -1115,9 +1118,8 @@ class model:
             "stateofhealth":90.0,
             "startstateofcharge":100.0,
             "altitude":100.0,
-            "rain":False,
             "dropsize":0.0,
-            "liquidwatercontent":None, #one of this and rainfallrate needs to be specified for rain, but not both
+            "liquidwatercontent":0.0, #one of this and rainfallrate needs to be specified for rain, but not both
             "rainfallrate":None,
             "temperature":15.0,
             "wind":False,
@@ -1144,7 +1146,7 @@ class model:
             # "weatherbegin":10,
             # "weatherend":40,
             # "weathernumber":3
-            "weathervals":[0,.002,0.004,0.01]
+            "weathervals":[0,.002,0.004,0.01] # must contain only unique elements
         }
 
         for key in self.input:
@@ -1186,8 +1188,7 @@ class model:
                                 "winddirection",
                                 "relativehumidity",
                                 "payload",
-                                "missionspeed",
-                                "model"
+                                "missionspeed"
                                 ]
         if xlabel not in independentvariables:
             raise(Exception("~~~~~ ERROR: desired x variable is not independent ~~~~~"))
@@ -1267,17 +1268,16 @@ class model:
         y               = []
 
         yplot = []
-
-        if "weathereffect" in self.params:
-            weathereffect = self.params["weathereffect"]
-            wvector = self.params['weathervals']
-        else:
-            weathernumber = int(1)
-            wvector = range(weathernumber) # only iterate once
-            # wvector = [0]
+        if 'weathereffect' not in self.params:
+            self.params['weathereffect']    = 'undefined'
+            self.params['weathervals']      = [0]
+        weathereffect   = self.params["weathereffect"]
+        wvector         = self.params['weathervals']
 
         for zvalue in wvector:
-            if "weathereffect" in self.params:
+            if weathereffect == 'undefined':
+                pass
+            else:
                 i = 0
                 for weatherclass in weather.weatherlist:
                     if weathereffect in weatherclass.params:
@@ -1287,6 +1287,24 @@ class model:
                         self.power.update(self.drone,self.weather,self.mission)
                         self.battery.update()
                     i += 1
+
+            # if weathereffect == 'undefined':
+            #     pass
+            # elif weathereffect == 'temperature':
+            #     # print("weathereffect = temperature confirmed")
+            #     self.weather.weatherlist[0].params["temperature"] = zvalue
+            #     self.weather.update(self.drone) #splitting up so as to only update drone class if rain occurs (which happens after weather.update)
+            # elif weathereffect == 'relativehumidity':
+            #     self.weather.weatherlist[1].params["relativehummidity"] = zvalue
+            #     self.weather.update(self.drone)
+            # elif weathereffect == 'dropsize' or weathereffect == 'liquidwatercontent':
+            #     self.weather.weatherlist[2].params[weathereffect] = zvalue
+            #     self.weather.update(self.drone)
+            #     self.drone.update(self.weather)
+            # else:
+            #     raise(Exception("~~~~~ ERROR: weathereffect not a valid input ~~~~~"))
+            # self.power.update(self.drone,self.weather,self.mission)
+            # self.battery.update()
             
             # simulation.run(drone,battery,power,weather,mission)
 
@@ -1336,9 +1354,8 @@ class model:
                 else:
                     raise(Exception("~~~~~ ERROR: desired x variable not set ~~~~~"))
             
-                self.simulation.run(self.drone,self.battery,self.power,self.weather,self.mission)
-
-                self.__updateOutput([self.drone,self.battery,self.power,self.weather,self.mission,self.simulation])
+                self.simulation.run(self.drone,self.battery,self.power,self.weather,self.mission)                
+                self.__updateOutput([self.drone,self.battery,self.power,self.weather,self.mission,self.simulation],wvector.index(zvalue))
 
                 if ylabel in self.drone.params:
                     y.append(self.drone.params[ylabel])
@@ -1368,6 +1385,9 @@ class model:
 
         if "weathereffect" in self.params:
             print("EXE.py:      Z iterator is           ",self.params['weathereffect'])
+            self.output['zvals'] = self.params['weathervals']
+        else:
+            self.output['zvals'] = "undefined"
 
         self.params['yplot'] = yplot
         if self.plot == True:
@@ -1381,7 +1401,7 @@ class model:
         else:
             pass
 
-    def __printWeatherClasses(self,name): # method for debugging
+    def printWeatherClasses(self,name): # method for debugging
         print("")
         print("//////===     ",name,"     ===\\\\\\")
         print("//////===     Weather Classes     ===\\\\\\")
@@ -1419,19 +1439,13 @@ class model:
     def setDefaultParams(self):
         pass
 
-    def __updateOutput(self,classes):
+    def __updateOutput(self,classes,zindex):
+        print("__updateOutput ===== zindex = ",zindex)
         for myclass in classes:
             for param in myclass.params:
                 if param not in self.output and param != "model":
                     self.output[param] = []
+                    for index in range(len(self.params['weathervals'])):
+                        self.output[param].append([])
                 if param != "model":
-                    self.output[param].append(myclass.params[param])
-
-    # These methods are written for Danielito
-    def getDrones(self):
-        # returns a list of dictionaries describing drones with their parameters
-        return drones
-
-    def getValidationCases(self):
-        # returns a list of validation cases with their associated data
-        return validationdatabase
+                    self.output[param][zindex].append(myclass.params[param])

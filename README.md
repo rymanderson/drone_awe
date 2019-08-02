@@ -101,7 +101,7 @@ The following subsections explain the use of various settings of a `drone_awe.mo
 `'dronename'` must be set to a string that is defined in the drone database. To access a dictionary containing all supported drones, use the following methods:
 
 ```python3
-droneDictionary = m.getDrones()
+droneDictionary = drone_awe.drones
 ```
 
 If a drone or validation case does not exist in the drone database, it may still be used by setting a custom dictionary:
@@ -153,7 +153,7 @@ Note that not all parameters need be specified, but if a simulation is run that 
 To view validation cases for `drone_awe` models, set `'validation'=True` and `'validationcase'` to a string contained in the validation case database. To access a dictionary containing all supported validation cases, run the following:
 
 ```python3
-validationDictionary = m.getValidationCases()
+validationDictionary = drone_awe.validationdata()
 ```
 
 Additionally, `validationCaseDictionary` is a dictionary with the following format:
