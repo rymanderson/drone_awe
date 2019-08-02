@@ -1267,32 +1267,30 @@ class model:
         y               = []
 
         yplot = []
-
-        if "weathereffect" in self.params:
-            weathereffect = self.params["weathereffect"]
-            wvector = self.params['weathervals']
-        else:
-            weathernumber = int(1)
-            wvector = range(weathernumber) # only iterate once
-            # wvector = [0]
+        if 'weathereffect' not in self.params:
+            self.params['weathereffect']    = 'undefined'
+            self.params['weathervals']      = [0]
+        weathereffect   = self.params["weathereffect"]
+        wvector         = self.params['weathervals']
 
         for zvalue in wvector:
-            if 'weathereffect' in self.params:
-                if weathereffect == 'temperature':
-                    # print("weathereffect = temperature confirmed")
-                    self.weather.weatherlist[0].params["temperature"] = zvalue
-                    self.weather.update(self.drone) #splitting up so as to only update drone class if rain occurs (which happens after weather.update)
-                elif weathereffect == 'relativehumidity':
-                    self.weather.weatherlist[1].params["relativehummidity"] = zvalue
-                    self.weather.update(self.drone)
-                elif weathereffect == 'dropsize' or weathereffect == 'liquidwatercontent':
-                    self.weather.weatherlist[2].params[weathereffect] = zvalue
-                    self.weather.update(self.drone)
-                    self.drone.update(self.weather)
-                else:
-                    raise(Exception("~~~~~ ERROR: weathereffect not a valid input ~~~~~"))
-                self.power.update(self.drone,self.weather,self.mission)
-                self.battery.update()
+            if weathereffect == 'undefined':
+                pass
+            elif weathereffect == 'temperature':
+                # print("weathereffect = temperature confirmed")
+                self.weather.weatherlist[0].params["temperature"] = zvalue
+                self.weather.update(self.drone) #splitting up so as to only update drone class if rain occurs (which happens after weather.update)
+            elif weathereffect == 'relativehumidity':
+                self.weather.weatherlist[1].params["relativehummidity"] = zvalue
+                self.weather.update(self.drone)
+            elif weathereffect == 'dropsize' or weathereffect == 'liquidwatercontent':
+                self.weather.weatherlist[2].params[weathereffect] = zvalue
+                self.weather.update(self.drone)
+                self.drone.update(self.weather)
+            else:
+                raise(Exception("~~~~~ ERROR: weathereffect not a valid input ~~~~~"))
+            self.power.update(self.drone,self.weather,self.mission)
+            self.battery.update()
             
             # simulation.run(drone,battery,power,weather,mission)
 
@@ -1345,8 +1343,7 @@ class model:
                 else:
                     raise(Exception("~~~~~ ERROR: desired x variable not set ~~~~~"))
             
-                self.simulation.run(self.drone,self.battery,self.power,self.weather,self.mission)
-
+                self.simulation.run(self.drone,self.battery,self.power,self.weather,self.mission)                
                 self.__updateOutput([self.drone,self.battery,self.power,self.weather,self.mission,self.simulation],wvector.index(zvalue))
 
                 if ylabel in self.drone.params:
@@ -1432,9 +1429,12 @@ class model:
         pass
 
     def __updateOutput(self,classes,zindex):
+        print("__updateOutput ===== zindex = ",zindex)
         for myclass in classes:
             for param in myclass.params:
                 if param not in self.output and param != "model":
-                    self.output[param] = [[]]
+                    self.output[param] = []
+                    for index in range(len(self.params['weathervals'])):
+                        self.output[param].append([])
                 if param != "model":
                     self.output[param][zindex].append(myclass.params[param])
