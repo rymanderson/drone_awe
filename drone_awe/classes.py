@@ -247,6 +247,23 @@ class Power:
                                 + 2*weight**2*k \
                                 / (density*cruisespeed*wingarea)
 
+    def getPowerFixed(self, drone, weather, mission):
+        CLfactor = weather.params['LDadjustment'][0]
+        CDfactor = weather.params['LDadjustment'][1]
+
+        LD = 10 #assuming we know this or estimate this
+
+        L = drone.params['takeoffweight']
+        D = L / LD
+
+        L *= CLfactor
+        D += CDfactor
+
+        LD = L/D
+
+        self.params['power'] = weather.params['gravitationconstant'] * drone.params['takeoffweight'] * mission.params['missionspeed'] / LD
+
+
     def __updateEfficiencyPropulsive(self, drone, weather, mission):
         # default value:
         if 'endurancemax' not in drone.params or 'endurancemaxspeed' not in drone.params:
@@ -524,15 +541,18 @@ class Weather:
         # update independent parameters
         # print("Weatherlist:", self.weatherlist)
         densityfactor = 1.0
-        for weathertype in self.weatherlist:
-            for param in weathertype.params:
-                self.params[param] = weathertype.params[param]
-            if 'temperature' in weathertype.params or 'relativehumidity' in weathertype.params:
+        for weatherclass in self.weatherlist:
+            for param in weatherclass.params:
+                self.params[param] = weatherclass.params[param]
+            if 'temperature' in weatherclass.params or 'relativehumidity' in weatherclass.params:
                 # update dependent parameters
-                densityfactor *= weathertype.updateDensity(self)
-            elif 'dropsize' in weathertype.params:
-                self.params['extrathrust'] = weathertype.update(self,drone)
+                densityfactor *= weatherclass.updateDensity(self)
+            elif 'dropsize' in weatherclass.params:
+                self.params['extrathrust'] = weatherclass.update(self,drone)
+                if drone.params['wingtype'] == 'fixed':
+                    self.params['LDadjustment'] = weatherclass.updateLD(self) #list with [CLfactor, CD factor]
         self.params['airdensity'] *= densityfactor 
+        self.weatherlist[-1].warning(self)
 
     def getStandardAtmosphere(self, altitude):
         '''This function currently assumes STP conditions at sea level and should probably be adjusted to use ground level conditions as a baseline'''
@@ -736,6 +756,12 @@ class Rain(WeatherType):
             surfacetension = interpolate(x1,x2,y1,y2,x)
 
         return surfacetension
+
+    def updateLD(self):
+        CLfactor = 0.94 #94% of original value
+        CDfactor = 0.01 #added on to original value 
+        #if CD needs to be percentage, increasing by 20% is about average, although less acurate than an addition. 
+        return [CLfactor, CDfactor]
 
 
 class Temperature(WeatherType):
@@ -948,10 +974,23 @@ class Ice(WeatherType):
     NOTE: Ice is very dangerous and difficult to model
     '''
 
-    def __init__(self, params):
-        paramnames = ['']
-        WeatherType.__init__(self, params, paramnames)
-        print("Too complicated. Stop now while you can!")  # haha seriously!
+    def __init__(self):
+        pass
+    
+    def warning(self,weather):
+        for weatherclass in weather.weatherlist:
+            if 'temperature' in weatherclass.params:
+                temperature = weatherclass.params['temperature']
+            elif 'relativehumidty' in weatherclass.params:
+                relativehumidity = weatherclass.params['relativehumidity']
+        
+        if temperature < 5:
+            if relativehumidity <= 0:
+                print("WARNING: Cold temperatures may result in dangerous icing conditions. Avoid routes near clouds and/or rain.")
+            elif relativehumidity < 30:
+                print("WARNING: Cold temperatures and moderate humidity could result in dangerous icing conditions. Be cautious when flying.")
+            else:
+                print("WARNING: Cold temperatures and high humidity will likely result in dangerous icing conditions. Take extreme caution if flying.")
 
 
 class Mission:
@@ -1251,8 +1290,8 @@ class model:
         # print(str(weatherlist)[1:-1]) 
 
         # weatherparams   = []
-        # for weathertype in weatherlist:
-        #     weatherparams = weatherparams + weathertype.params
+        # for weatherclass in weatherlist:
+        #     weatherparams = weatherparams + weatherclass.params
 
         self.weather        = Weather(self.params['altitude'],weatherlist)
         print("Preparing to update weather:")
@@ -1279,7 +1318,7 @@ class model:
                 pass
             else:
                 i = 0
-                for weatherclass in weather.weatherlist:
+                for weatherclass in self.weather.weatherlist:
                     if weathereffect in weatherclass.params:
                         self.weather.weatherlist[i].params[weathereffect] = zvalue
                         self.weather.update(self.drone)
