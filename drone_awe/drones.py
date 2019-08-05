@@ -111,12 +111,14 @@ drones = [
         'temperaturemin': -10,
         # 'endurancemax': 40,
         'chargerpowerrating': 60,
-        'batterytype': 'LiPo',
-        'batterycapacity': 3850,
-        'batteryvoltage': 15.4,
-        'batterycells': 4,
-        'batteryenergy': 59.29,
-        'batterymass': 0.297,
+        'battery': {
+            'batterytype': 'LiPo',
+            'batterycapacity': 3850,
+            'batteryvoltage': 15.4,
+            'batterycells': 4,
+            'batteryenergy': 59.29,
+            'batterymass': 0.297
+        },
         'waterproof': 'no',
         'windspeedmax': 10.8,
         'batteryrechargetime': 90,
@@ -126,10 +128,7 @@ drones = [
         'payload': 0.0,
         'length': 0.322,
         'width': 0.242,
-        'height': 0.084,
-        'battery': {
-            
-        }
+        'height': 0.084
     },
     {
         'id': 'dji-Phantom4RTK',
@@ -141,17 +140,16 @@ drones = [
         'temperaturemin': 0,
         'temperaturemax': 40,
         'endurancemax': 30,
-        'batterytype': 'LiPo',
-        'batterymass': 0.468,
-        'batterycells': 4,
-        'batteryvoltage': 15.2,
-        'batterycapacity': 5870,
-        'batteryenergy': 89.2,
         'props': '9450s Quick Release',
-        'batteryrechargetime': 60,
         'rotorquantity': 4,
         'battery': {
-            
+            'batterytype': 'LiPo',
+            'batterymass': 0.468,
+            'batterycells': 4,
+            'batteryvoltage': 15.2,
+            'batterycapacity': 5870,
+            'batteryenergy': 89.2,            
+            'batteryrechargetime': 60
         }
     },
     {
@@ -159,12 +157,6 @@ drones = [
         'wingtype': 'rotary',
         'rotorquantity': 8,
         'diagonal': 1.325,
-        'batterycells': 6,
-        'batteryvoltage': 22.2,
-        'batterycapacity': 10000,
-        'batterytype': 'LiPo',
-        'num_batteries': 2,
-        'numbatteriesconnection': 'parallel',
         'max_takeoffweight': 18.1,
         'empty_weight': 6.2,
         'max_payload': 9.1,
@@ -176,7 +168,12 @@ drones = [
         'temperaturemax': 45,
         'thrust_ratio_at_max_takeoffweight': '1.85:1',
         'battery': {
-            
+            'batterycells': 6,
+            'batteryvoltage': 22.2,
+            'batterycapacity': 10000,
+            'batterytype': 'LiPo',
+            'num_batteries': 2,
+            'numbatteriesconnection': 'parallel'    
         }
     },
     {
@@ -188,9 +185,8 @@ drones = [
         'max_payload': 0.7,
         'cruise_speed': 18,
         'VTOL': 'yes',
-        'batterytype': 'LiHV',
         'battery': {
-            
+        'batterytype': 'LiHV'            
         }
     },
     {
@@ -200,16 +196,15 @@ drones = [
         'takeoffweight': 1.4,
         'speedmax': 30,
         'endurancemax': 90,
-        'batterytype': 'LiPo',
-        'batterycapacity': 4900,
-        'batteryvoltage': 14.8,
-        'batterycells': 4,
-        'batterymass': 0.4,
-        'batteryrechargetime': 40,
         'windspeedmax': 12.8,
         'VTOL': 'no',
         'battery': {
-            
+            'batterytype': 'LiPo',
+            'batterycapacity': 4900,
+            'batteryvoltage': 14.8,
+            'batterycells': 4,
+            'batterymass': 0.4,
+            'batteryrechargetime': 40     
         }
     },
     {
@@ -221,14 +216,13 @@ drones = [
         'endurancemax': 28,
         'speedmax': 13.4112,
         'altitudemax': 500,
-        'batterytype': 'LiPo',
-        'batterycells': 4,
-        'batteryvoltage': 14.8,
-        'batterycapacity': 5400,
         'temperaturemin': 0,
         'temperaturemax': 40,
         'battery': {
-            
+            'batterytype': 'LiPo',
+            'batterycells': 4,
+            'batteryvoltage': 14.8,
+            'batterycapacity': 5400    
         }
     }
 ]
@@ -237,13 +231,13 @@ conversions = {
     'speedmax': 1.0,
     'altitudemax': 1.0,
     'endurancemax': 60.0,
-    'endurancemaxhover': 60.0,
     'chargerpowerrating': 1.0,
     'batterycapacity': 3.6,
     'batteryvoltage': 1.0,
     'batteryenergy': 3600.0,
     'batterymass': 1.0,
     'batteryrechargetime': 60.0,
+    'endurancemaxhover': 60.0,
     'windspeedmax': 1.0,
     'rotordiameter': 1.0
 }
