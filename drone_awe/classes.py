@@ -92,51 +92,51 @@ class Battery:
 
     params = {
                 'batterycapacity': None,           # Ampere-hours
-                'stateofcharge': None,             # state of charge (in percent nominal capacity)
-                'startstateofcharge': None,        # state of charge at simulation start
-                'stateofhealth': None,             # state of health (actual capacity divided by ideal capacity)
+                'stateofcharge': 100,             # state of charge (in percent nominal capacity)
+                'startstateofcharge': 100,        # state of charge at simulation start
+                'stateofhealth': 100,             # state of health (actual capacity divided by ideal capacity)
                 'batterytype': None,     # possible values include LiPo, Li-ion, NiCd, NiMH, SLA
                 'voltage': None,         # Volts; this is the instantaneous voltage
                 'voltagemean': None,     # Volts; average voltage used for time-invariant simulations
                 'voltagecharged': None,  # Volts
                 'voltagedead': None,     # Volts
                 'current': None,         # Amperes; this is the instantaneous current
-                'batterytechnology': None # current, near-future, or far-future
+                'batterytechnology': 'current' # current, near-future, or far-future
             }
 
     # constructor
     # default value for soh is based on the assumption that batteries are retired at a soh of 80%
-    def __init__(self, drone, stateofhealth=90.0, startstateofcharge=100.0, batterytechnology='current'):
-        # import parameters from drone object
-        self.params['batterytype'] = drone.params['battery']['batterytype']
-        self.params['voltagemean'] = drone.params['battery']['batteryvoltage']
-
-        #update capacity based on future technology if needed
-        self.params['batterytechnology'] = batterytechnology
-        self.__defineCapacity(drone)
-
+    def __init__(self, drone, stateofhealth=100.0, startstateofcharge=100.0, batterytechnology='current'):
         # update parameters
-        self.update()
+        self.update(drone)
 
         # estimate list lengths for prior memory allocation
 
-    def __defineCapacity(self,drone):
+    def __defineCapacity(self):
         print("defineCapacity:  batterytechnology is: ",self.params['batterytechnology'])
         if self.params['batterytechnology'] == 'current':
-            self.params['batterycapacity'] = drone.params['battery']['batterycapacity']
+            self.params['batterycapacity'] = self.params['batterycapacity']
         elif self.params['batterytechnology'] == 'near-future':
             print("Assuming a LiPo battery capacity increase of 3.5% per year for 5 years.")
-            self.params['batterycapacity'] = drone.params['battery']['batterycapacity'] * (1.035**5) # capacity increases by 3-4% each year, this assumes 3.5% for 5 years. It may be an option to let the user specify a timeline, but past 5 years I don't know if that growth in capacity is sustainable.
+            self.params['batterycapacity'] = self.params['batterycapacity'] * (1.035**5) # capacity increases by 3-4% each year, this assumes 3.5% for 5 years. It may be an option to let the user specify a timeline, but past 5 years I don't know if that growth in capacity is sustainable.
         elif self.params['batterytechnology'] == 'far-future': #Li-air batteries
             print("Assuming Lithium-air batteries with a capacity of ____ mAh.")
             self.params['batterycapacity'] = drone.params['batterycapacity'] * 10 # estimate for now - ten times the capacity
         else:
             raise(Exception("ERROR: Incompatible battery technology input."))
 
-    def update(self):
-        # print("still working on Battery.update method")
-        pass
+    def update(self,drone):
+        # import required parameters from drone object
+        self.params['batterycapacity'] = drone.params['battery']['batterycapacity']
+        self.params['voltagemean'] = drone.params['battery']['batteryvoltage']
+        # import optional parameters from drone object
+        for param in ['batterytechnology','batterytype','batterycells']:
+            if param in drone.params['battery']:
+                self.params[param] = drone.params['battery'][param]
 
+        #update capacity based on future technology if needed
+        self.__defineCapacity()
+        
     # time-variant methods go here:
     def updateLoad(self, power):
         self.current = power.params['power'] / self.params['voltage']
@@ -561,24 +561,23 @@ class Weather:
         # self.temperature = temperaturesealevel
         # self.temperature = self.temperaturesealevel - 71.5 + 2*np.log(1 + np.exp(35.75 - 3.25*self.altitude) + np.exp(-3 + 0.0003 * self.altitude**3))
         # self.pressure = self.pressure_sl * np.exp(-0.118 * self.altitude - (0.0015*self.altitude**2) / (1 - 0.018*self.altitude + 0.0011 * self.altitude**2))
-        
-        # TODO: set weatherlist params in weather.params directly HERE
+
+        # set self.params        
+        for weathertype in weatherlist:
+            for param in weathertype.params:
+                self.params[param] = weathertype.params[param]
 
     def update(self,drone):
         # update independent parameters
         # print("Weatherlist:", self.weatherlist)
-
+        
+        # update weather effects:
         densityfactor = 1.0
-        for weatherclass in self.weatherlist:
-            for param in weatherclass.params:
-                self.params[param] = weatherclass.params[param]
-            if 'temperature' in weatherclass.params or 'relativehumidity' in weatherclass.params:
-                # update dependent parameters
-                densityfactor *= weatherclass.updateDensity(self)
-            elif 'dropsize' in weatherclass.params:
-                self.params['extrathrust'] = weatherclass.update(self,drone)
-                if drone.params['wingtype'] == 'fixed':
-                    self.params['LDadjustment'] = weatherclass.updateLD(self) #list with [CLfactor, CD factor]
+        densityfactor *= self.__updateDensityTemperature()
+        densityfactor *= self.__updateDensityHumidity()
+        self.params['extrathrust'] = self.__updateRain(drone.params['toparea'])
+        if drone.params['wingtype'] == 'fixed':
+            self.params['LDadjustment'] = weatherclass.updateLD() #list with [CLfactor, CD factor]
         self.params['airdensity'] *= densityfactor 
         self.__warning()
 
@@ -614,7 +613,7 @@ class Weather:
 
     # Rain Methods:
 
-    def __updateRain(self, weather, drone):
+    def __updateRain(self, dronearea):
         
         diameter = self.params['dropsize']
         liquidwatercontent = self.params['liquidwatercontent'] / 1000 #convert to kg/m3
@@ -627,13 +626,13 @@ class Weather:
         else:
             
             # single droplet
-            diameter = weather.weatherlist[2].params['dropsize']
+            diameter = self.params['dropsize']
             radius = diameter/2.0
             dropletvolume = 4.0/3.0 * np.pi * radius**3 #sphere estimate
-            airdensity = weather.params['airdensity'] #kg/m^3
+            airdensity = self.params['airdensity'] #kg/m^3
             waterdensity = 1000 #kg/m^3
             dropletmass = dropletvolume * waterdensity #kg
-            g = weather.params['gravitationconstant']
+            g = self.params['gravitationconstant']
             Cd = 0.5 #sphere estimate
             area = np.pi * radius**2
             terminalvelocity = np.sqrt(2*dropletmass*g / (Cd*airdensity*area)) 
@@ -650,7 +649,6 @@ class Weather:
             # numdrops = rate / dropletvolume #number of drops per drone area per second
 
             #Method 2 - using LWC
-            dronearea = drone.params['toparea']
             numdrops = liquidwatercontent / dropletmass * dronearea * terminalvelocity #numsrops hitting drone per second
 
             surfacetension = self.__getSurfaceTension()
@@ -757,7 +755,7 @@ class Weather:
     
     # Humidity Methods:
 
-    def __updateDensityHumidity(self,weather): # 2D linear interpolation based on Yue (2017)
+    def __updateDensityHumidity(self): # 2D linear interpolation based on Yue (2017)
         relativehumiditylist = [0.0,25.0,50.0,70.0,90.0] #percentage
         temperaturelist = [15.0,20.0,25.0,30.0,35.0] #may need to convert this to kelvin
 
@@ -776,10 +774,10 @@ class Weather:
         #                             [0.99592, 0.97714, 0.95837, 0.93959, 0.92163],\
         #                             [0.99429, 0.97551, 0.95592, 0.93714, 0.91755]]) # increasing humditiy in rows, temp in columns
 
-        relativehumidity = weather.weatherlist[1].params['relativehumidity']
+        relativehumidity = self.params['relativehumidity']
         # temperature = weather.params['temperaturesealevel']
         # temperature = 288.15 - 273.15 #convert to celcius - need to update this if temperature is altered
-        temperature = weather.weatherlist[0].params['temperature'] #already to celcius
+        temperature = self.params['temperature'] #already to celcius
         # print("Temperature is",temperature)
         # determine 4 closest points before doing a 2D interpolation
 
@@ -1414,6 +1412,7 @@ class model:
 
     verbose     = False # returns self.output after simulation
     plot        = False # toggles plotting feature
+    debug       = True  # toggles debugging logs
 
     def __init__(self,input,verbose=False,plot=False):
         self.input      = input
@@ -1456,11 +1455,11 @@ class model:
             # "xend":1,
             # "xnumber":5,
             "xvals":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15],
-            "weathereffect":"dropsize",
+            "zlabel":"dropsize",
             # "weatherbegin":10,
             # "weatherend":40,
             # "weathernumber":3
-            "weathervals":[0,.002,0.004,0.01] # must contain only unique elements
+            "zvals":[0,.002,0.004,0.01] # must contain only unique elements
         }
 
         for key in self.input:
@@ -1588,65 +1587,68 @@ class model:
         self.__prepareSimulation()
         x               = self.params['xvals']
         y               = []
-
         yplot = []
-        if 'weathereffect' not in self.params or self.params['weathereffect'] is None:
-            self.params['weathereffect']    = 'undefined'
-            self.params['weathervals']      = [0]
-        weathereffect   = self.params["weathereffect"]
-        wvector         = self.params['weathervals']
 
-        for zvalue in wvector:
-            if weathereffect == 'undefined':
-                break
-            else:
-                i = 0
-                for weatherclass in self.classes['weather'].weatherlist:
-                    if weathereffect in weatherclass.params:
-                        self.classes['weather'].weatherlist[i].params[weathereffect] = zvalue
-                        # self.classes['weather'].update(self.classes['drone'])
-                        # self.classes['drone'].update(self.classes['weather'])
-                        # self.classes['power'].update(self.classes['drone'],self.classes['weather'],self.classes['mission'])
-                        # self.classes['battery'].update()
-                    i += 1
+        if self.params['zlabel'] is None:
+            self.params['zvals']      = [0]
 
-            # if weathereffect == 'undefined':
-            #     pass
-            # elif weathereffect == 'temperature':
-            #     # print("weathereffect = temperature confirmed")
-            #     self.weather.weatherlist[0].params["temperature"] = zvalue
-            #     self.weather.update(self.classes['drone']) #splitting up so as to only update drone class if rain occurs (which happens after weather.update)
-            # elif weathereffect == 'relativehumidity':
-            #     self.weather.weatherlist[1].params["relativehummidity"] = zvalue
-            #     self.weather.update(self.classes['drone'])
-            # elif weathereffect == 'dropsize' or weathereffect == 'liquidwatercontent':
-            #     self.weather.weatherlist[2].params[weathereffect] = zvalue
-            #     self.weather.update(self.classes['drone'])
-            #     self.classes['drone'].update(self.weather)
-            # else:
-            #     raise(Exception("~~~~~ ERROR: weathereffect not a valid input ~~~~~"))
-            # self.classes['power'].update(self.classes['drone'],self.weather,self.classes['mission'])
-            # self.classes['battery'].update()
-            
-            # simulation.run(drone,battery,power,weather,mission)
+        for zvalue in self.params['zvals']:
+            if self.params['zlabel']:
+                for myclass in self.classes:
+                    if self.params['zlabel'] in self.classes[myclass].params:
+                        self.classes[myclass].params[self.params['zlabel']] = zvalue
+                        foundz = True
+                        break
+                if foundz == False:
+                    raise(Exception("MODEL: ~~~~~ ERROR: manipulated z variable not set"))
+                else:
+                    print("MODEL: ===== SUCCESS: manipulated z variable set")
+                    print("MODEL: ----- missionspeed = ",self.classes['mission'].params['missionspeed'])
 
-            # if ylabel in drone.params:
-            #     y.append(drone.params[ylabel])
-            # elif ylabel in simulation.params:
-            #     y.append(simulation.params[ylabel])
-            # elif ylabel in weather.params:
-            #     y.append(weather.params[ylabel])
-            # elif ylabel in mission.params:
-            #     y.append(mission.params[ylabel])
-            # elif ylabel in power.params:
-            #     y.append(power.params[ylabel]*180.0/np.pi)
-            # elif ylabel in self.params:
-            #     y.append(self.params[ylabel])
-            # else:
-            #     raise(Exception("~~~~~ ERROR: desired y variable not found ~~~~~"))
+            # i = 0
+            # for weatherclass in self.classes['weather'].weatherlist:
+            #     if weathereffect in weatherclass.params:
+            #         self.classes['weather'].weatherlist[i].params[weathereffect] = zvalue
+            #         # self.classes['weather'].update(self.classes['drone'])
+            #         # self.classes['drone'].update(self.classes['weather'])
+            #         # self.classes['power'].update(self.classes['drone'],self.classes['weather'],self.classes['mission'])
+            #         # self.classes['battery'].update()
+            #     i += 1
 
-            xlabel = self.params['xlabel']
-            ylabel = self.params['ylabel']
+        # if weathereffect == 'undefined':
+        #     pass
+        # elif weathereffect == 'temperature':
+        #     # print("weathereffect = temperature confirmed")
+        #     self.weather.weatherlist[0].params["temperature"] = zvalue
+        #     self.weather.update(self.classes['drone']) #splitting up so as to only update drone class if rain occurs (which happens after weather.update)
+        # elif weathereffect == 'relativehumidity':
+        #     self.weather.weatherlist[1].params["relativehummidity"] = zvalue
+        #     self.weather.update(self.classes['drone'])
+        # elif weathereffect == 'dropsize' or weathereffect == 'liquidwatercontent':
+        #     self.weather.weatherlist[2].params[weathereffect] = zvalue
+        #     self.weather.update(self.classes['drone'])
+        #     self.classes['drone'].update(self.weather)
+        # else:
+        #     raise(Exception("~~~~~ ERROR: weathereffect not a valid input ~~~~~"))
+        # self.classes['power'].update(self.classes['drone'],self.weather,self.classes['mission'])
+        # self.classes['battery'].update()
+        
+        # simulation.run(drone,battery,power,weather,mission)
+
+        # if ylabel in drone.params:
+        #     y.append(drone.params[ylabel])
+        # elif ylabel in simulation.params:
+        #     y.append(simulation.params[ylabel])
+        # elif ylabel in weather.params:
+        #     y.append(weather.params[ylabel])
+        # elif ylabel in mission.params:
+        #     y.append(mission.params[ylabel])
+        # elif ylabel in power.params:
+        #     y.append(power.params[ylabel]*180.0/np.pi)
+        # elif ylabel in self.params:
+        #     y.append(self.params[ylabel])
+        # else:
+        #     raise(Exception("~~~~~ ERROR: desired y variable not found ~~~~~"))
 
             foundx = False
             for xvalue in x:
@@ -1657,9 +1659,9 @@ class model:
                         break
             
                 if foundx == False:
-                    raise(Exception("MODEL: ~~~~~ ERROR: control variable not set"))
+                    raise(Exception("MODEL: ~~~~~ ERROR: manipulated x variable not set"))
                 else:
-                    print("MODEL: ===== SUCCESS: manipulated variable set")
+                    print("MODEL: ===== SUCCESS: manipulated x variable set")
                     print("MODEL: ----- missionspeed = ",self.classes['mission'].params['missionspeed'])
 
                 # update value
@@ -1687,7 +1689,7 @@ class model:
                 #     self.classes['power'].update(self.classes['drone'],self.classes['weather'],self.classes['mission'])
                 #     self.classes['battery'].update()
 
-                self.classes['battery'].update()
+                self.classes['battery'].update(self.classes['drone'])
                 self.classes['weather'].update(self.classes['drone'])
                 self.classes['mission'].update()
                 self.classes['power'].update(self.classes['drone'],self.classes['weather'],self.classes['mission'])
@@ -1696,12 +1698,12 @@ class model:
                 # self.classes['simulation'].run(self.classes['drone'],self.classes['battery'],self.classes['power'],self.classes['weather'],self.classes['mission'])
                 self.__runSimpleModel()
                 print("=========================   FINISHED   ========================")
-                self.__updateOutput([self.classes['drone'],self.classes['battery'],self.classes['power'],self.classes['weather'],self.classes['mission'],self.classes['simulation']],wvector.index(zvalue))
+                self.__updateOutput([self.classes['drone'],self.classes['battery'],self.classes['power'],self.classes['weather'],self.classes['mission'],self.classes['simulation']],self.params['zvals'].index(zvalue))
 
                 sety = False
                 for myclass in self.classes:
                     if self.params['ylabel'] in self.classes[myclass].params:
-                        y.append(self.classes[myclass].params[ylabel])
+                        y.append(self.classes[myclass].params[self.params['ylabel']])
                         sety = True
                         break
                 if sety == False:
@@ -1720,9 +1722,9 @@ class model:
         # print("EXE.py:      Independent variable is ",xlabel)
         # print("EXE.py:      Desired Result is       ",self.params['ylabel'])
 
-        if "weathereffect" in self.params:
-            print("EXE.py:      Z iterator is           ",self.params['weathereffect'])
-            self.output['zvals'] = self.params['weathervals']
+        if self.params['zlabel']:   
+            print("EXE.py:      Z iterator is           ",self.params['zlabel'])
+            self.output['zvals'] = self.params['zvals']
         else:
             self.output['zvals'] = "undefined"
 
@@ -1762,7 +1764,7 @@ class model:
         ylabel      = self.params['ylabel']
         yplot       = self.params['yplot']
         axistitle   = self.params['title']
-        plotter     = Plotter(self.params['xvals'],xlabel,yplot,ylabel,axistitle,len(self.params['weathervals']))
+        plotter     = Plotter(self.params['xvals'],xlabel,yplot,ylabel,axistitle,len(self.params['zvals']))
         plotter.plot_line()
 
     def validationPlot(self):
@@ -1787,7 +1789,7 @@ class model:
             for param in myclass.params:
                 if param not in self.output and param != "model" and param != "powerModel":
                     self.output[param] = []
-                    for index in range(len(self.params['weathervals'])):
+                    for index in range(len(self.params['zvals'])):
                         self.output[param].append([])
                 if param != "model" and param != "powerModel":
                     self.output[param][zindex].append(myclass.params[param])
