@@ -402,7 +402,7 @@ validationdatabase = [
             'title': 'DiFranco',
             'simulationtype': 'simple',
             'model': 'abdilla',
-            'xvals': np.linspace(0.0,16.0,20).tolist(),
+            'xvals': np.linspace(0.0,10.0,3).tolist(),#np.linspace(0.0,16.0,20).tolist(),
             # 'xbegin': 0.0,
             # 'xend': 16.0,
             # 'xnumber': 20,
