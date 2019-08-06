@@ -126,10 +126,10 @@ class Battery:
             self.params['batterycapacity'] = drone.params['battery']['batterycapacity']
         elif self.params['batterytechnology'] == 'near-future':
             print("Assuming a LiPo battery capacity increase of 3.5% per year for 5 years.")
-            self.capacity = drone.params['batterycapacity'] * (1.035**5) # capacity increases by 3-4% each year, this assumes 3.5% for 5 years. It may be an option to let the user specify a timeline, but past 5 years I don't know if that growth in capacity is sustainable.
+            self.params['batterycapacity'] = drone.params['battery']['batterycapacity'] * (1.035**5) # capacity increases by 3-4% each year, this assumes 3.5% for 5 years. It may be an option to let the user specify a timeline, but past 5 years I don't know if that growth in capacity is sustainable.
         elif self.params['batterytechnology'] == 'far-future': #Li-air batteries
             print("Assuming Lithium-air batteries with a capacity of ____ mAh.")
-            self.capacity = drone.params['batterycapacity'] * 10 # estimate for now - ten times the capacity
+            self.params['batterycapacity'] = drone.params['batterycapacity'] * 10 # estimate for now - ten times the capacity
         else:
             raise(Exception("ERROR: Incompatible battery technology input."))
 
@@ -1268,6 +1268,9 @@ class Mission:
     def __init__(self, params):
         self.params = params
 
+    def update(self):
+        pass
+
 
 class Simulation:
     'Class used to run simulations'
@@ -1472,8 +1475,8 @@ class model:
         self.correctunits       = True
 
     def __setupSimulation(self):
-        droneparams         = getParams(drones,self.params['dronename'])
-        self.classes['drone']          = Drone(self.params['dronename'],droneparams,conversions,self.correctunits)
+        droneparams             = getParams(drones,self.params['dronename'])
+        self.classes['drone']   = Drone(self.params['dronename'],droneparams,conversions,self.correctunits)
         self.correctunits       = True
 
     def __prepareSimulation(self):
@@ -1595,16 +1598,16 @@ class model:
 
         for zvalue in wvector:
             if weathereffect == 'undefined':
-                pass
+                break
             else:
                 i = 0
                 for weatherclass in self.classes['weather'].weatherlist:
                     if weathereffect in weatherclass.params:
                         self.classes['weather'].weatherlist[i].params[weathereffect] = zvalue
-                        self.classes['weather'].update(self.classes['drone'])
-                        self.classes['drone'].update(self.classes['weather'])
-                        self.classes['power'].update(self.classes['drone'],self.classes['weather'],self.classes['mission'])
-                        self.classes['battery'].update()
+                        # self.classes['weather'].update(self.classes['drone'])
+                        # self.classes['drone'].update(self.classes['weather'])
+                        # self.classes['power'].update(self.classes['drone'],self.classes['weather'],self.classes['mission'])
+                        # self.classes['battery'].update()
                     i += 1
 
             # if weathereffect == 'undefined':
@@ -1651,59 +1654,60 @@ class model:
                     if self.params['xlabel'] in self.classes[myclass].params:
                         self.classes[myclass].params[self.params['xlabel']] = xvalue
                         foundx = True
+                        break
             
                 if foundx == False:
                     raise(Exception("MODEL: ~~~~~ ERROR: control variable not set"))
                 else:
-                    print("MODEL: ===== SUCCESS: control variable set")
+                    print("MODEL: ===== SUCCESS: manipulated variable set")
                     print("MODEL: ----- missionspeed = ",self.classes['mission'].params['missionspeed'])
 
                 # update value
                 ## determine x location
-                if xlabel in self.classes['drone'].params:
-                    self.classes['drone'].params['xlabel'] = xvalue
-                    self.classes['power'].update(self.classes['drone'],self.weather,self.classes['mission'])
-                    self.classes['battery'].update()
-                elif xlabel in self.classes['weather'].params:
-                    i = 0
-                    for weatherclass in self.classes['weather'].weatherlist:
-                        if weathereffect in weatherclass.params:
-                            self.classes['weather'].weatherlist[i].params[weathereffect] = xvalue
-                            self.classes['weather'].update(self.classes['drone'])
-                            self.classes['drone'].update(self.classes['weather'])
-                            self.classes['power'].update(self.classes['drone'],self.classes['weather'],self.classes['mission'])
-                            self.classes['battery'].update()
-                        i += 1
-                elif xlabel in self.classes['mission'].params:
-                    self.classes['mission'].params[xlabel] = xvalue
-                    self.classes['power'].update(self.classes['drone'],self.classes['weather'],self.classes['mission'])
-                    self.classes['battery'].update()
-                elif xlabel in self.params:
-                    self.params[xlabel] = xvalue
-                    self.classes['power'].update(self.classes['drone'],self.classes['weather'],self.classes['mission'])
-                    self.classes['battery'].update()
-                else:
-                    raise(Exception("~~~~~ ERROR: desired x variable not set ~~~~~"))
+                # if xlabel in self.classes['drone'].params:
+                #     self.classes['drone'].params['xlabel'] = xvalue
+                #     self.classes['power'].update(self.classes['drone'],self.weather,self.classes['mission'])
+                #     self.classes['battery'].update()
+                # elif xlabel in self.classes['weather'].params:
+                #     i = 0
+                #     for weatherclass in self.classes['weather'].weatherlist:
+                #         if weathereffect in weatherclass.params:
+                #             self.classes['weather'].weatherlist[i].params[weathereffect] = xvalue
+                #             self.classes['weather'].update(self.classes['drone'])
+                #             self.classes['drone'].update(self.classes['weather'])
+                #             self.classes['power'].update(self.classes['drone'],self.classes['weather'],self.classes['mission'])
+                #             self.classes['battery'].update()
+                #         i += 1
+                # elif xlabel in self.classes['mission'].params:
+                #     self.classes['mission'].params[xlabel] = xvalue
+                #     self.classes['power'].update(self.classes['drone'],self.classes['weather'],self.classes['mission'])
+                #     self.classes['battery'].update()
+                # elif xlabel in self.params:
+                #     self.params[xlabel] = xvalue
+                #     self.classes['power'].update(self.classes['drone'],self.classes['weather'],self.classes['mission'])
+                #     self.classes['battery'].update()
+
+                self.classes['battery'].update()
+                self.classes['weather'].update(self.classes['drone'])
+                self.classes['mission'].update()
+                self.classes['power'].update(self.classes['drone'],self.classes['weather'],self.classes['mission'])
+
                 print("========================= ABOUT TO RUN ========================")
                 # self.classes['simulation'].run(self.classes['drone'],self.classes['battery'],self.classes['power'],self.classes['weather'],self.classes['mission'])
                 self.__runSimpleModel()
                 print("=========================   FINISHED   ========================")
                 self.__updateOutput([self.classes['drone'],self.classes['battery'],self.classes['power'],self.classes['weather'],self.classes['mission'],self.classes['simulation']],wvector.index(zvalue))
 
-                if ylabel in self.classes['drone'].params:
-                    y.append(self.classes['drone'].params[ylabel])
-                elif ylabel in self.classes['simulation'].params:
-                    y.append(self.classes['simulation'].params[ylabel])
-                elif ylabel in self.classes['weather'].params:
-                    y.append(self.classes['weather'].params[ylabel])
-                elif ylabel in self.classes['mission'].params:
-                    y.append(self.classes['mission'].params[ylabel])
-                elif ylabel in self.classes['power'].params:
-                    y.append(self.classes['power'].params[ylabel])
-                elif ylabel in self.params:
-                    y.append(self.params[ylabel])
+                sety = False
+                for myclass in self.classes:
+                    if self.params['ylabel'] in self.classes[myclass].params:
+                        y.append(self.classes[myclass].params[ylabel])
+                        sety = True
+                        break
+                if sety == False:
+                    raise(Exception("MODEL: ~~~~~ ERROR: control variable not set"))
                 else:
-                    raise(Exception("~~~~~ ERROR: desired y variable not found ~~~~~"))
+                    print("MODEL: ===== SUCCESS: dependent variable set")
 
             yplot.append(y)
             y = []
@@ -1727,7 +1731,7 @@ class model:
             if self.params['validation'] == True:
                 self.validationPlot()
             else:
-                self.classes['simulation'].simulationPlot()
+                self.simulationPlot()
         
         if self.verbose:
             return self.output
