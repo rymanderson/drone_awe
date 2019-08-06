@@ -160,11 +160,14 @@ class Power:
         'powerModel': None
     }
 
+    log = {
+        'SUCCESS': [],
+        'WARNING': [],
+        'ERROR' : []
+    }
+
     # methods go here:
-    def __init__(self, drone, weather, mission):
-        print("drone is ",drone)
-        print("weather is",weather)
-        print("mission is",mission)
+    def __init__(self, drone, weather, mission, debug==False):
         self.__initializeParameters(drone,weather,mission)         
         self.__setDragCoefficient()                # hopefully constant across different rotary drones
         # self.__setupModel(mission.params['missionspeed'],weather.params['airdensity'],drone.params['rotorarea'],drone.params['rotorquantity'],drone.params['frontalarea'],drone.params['toparea'])
@@ -175,10 +178,13 @@ class Power:
         elif drone.params['wingtype'] == 'fixed':
             self.params['powerModel'] = self.__setPowerTraub
         else:
-            print("POWER: ~~~~~ ERROR: no power model defined for drone.params['wingtype']")
+            self.__updateLog('ERROR','No power model defined for ' + drone.params['wingtype'])
+            if self.debug == True:
+                print("POWER: ~~~~~ ERROR: no power model defined for drone.params['wingtype']")
 
     def __initializeParameters(self,drone,weather,mission):
-        print("POWER: ===== mission.params = ",mission.params)
+        if self.debug == True:
+            print("POWER: ===== mission.params = ",mission.params)
         self.__updateWeight(drone.params['takeoffweight'],weather.params['gravitationconstant'],weather.params['weightadjustment'],mission.params['payload'])
         self.__updateVelocityInducedHover(self.params['effectiveweight'],drone.params['rotorquantity'],drone.params['rotorarea'],weather.params['airdensity'])
         self.params['velocityinduced']          = self.params['velocityinducedhover']
@@ -292,9 +298,11 @@ class Power:
         self.params['power']                = (self.params['thrust']*self.params['velocityinduced'] + \
                                                 self.params['drag']*mission.params['missionspeed'] + \
                                                 self.params['bladeprofilepower'])/self.params['efficiencypropulsive']
-        self.__printParameters(drone,weather,mission)
+        if self.debug == True:
+            self.__printParameters(drone,weather,mission)
 
     def __setPowerTraub(self, drone, weather, mission): #fixed-wing power model
+        ### TODO Start here setting log / debug tools for POWER class
         density = weather.params['airdensity']
         cruisespeed = mission.params['missionspeed']
         if 'wingarea' in drone.params:
@@ -511,6 +519,9 @@ class Power:
     def __setBladeProfilePower(self):
         self.params['bladeprofilepower'] = 0.0
 
+    def __updateLog(self,entrytype,message):
+        self.log[entrytype].push(message)
+        # entrytype can be `SUCCESS`, `WARNING`, or `ERROR`
 
 class Weather:
     '''
@@ -532,6 +543,13 @@ class Weather:
         'altitude': None,
         'weightadjustment': 0.0
     }
+
+    log     = {
+        'SUCCESS': [],
+        'WARNING': [],
+        'ERROR': []
+    }
+    debug   = False
 
     # airdensity      = 1.225 #kg/m^3
     # gravity         = 9.806655 #m/s^2
@@ -555,9 +573,10 @@ class Weather:
     # How about this: we assume that we know the pressure/density/temperature at ground level.
 
     # methods go here:
-    def __init__(self, altitude, weatherlist):  # keeping it simple to begin with
-        self.weatherlist = weatherlist
-        self.altitude = altitude
+    def __init__(self, altitude, weatherlist, debug=False):  # keeping it simple to begin with
+        self.weatherlist    = weatherlist
+        self.altitude       = altitude
+        self.debug          = debug
         # self.temperature = temperaturesealevel
         # self.temperature = self.temperaturesealevel - 71.5 + 2*np.log(1 + np.exp(35.75 - 3.25*self.altitude) + np.exp(-3 + 0.0003 * self.altitude**3))
         # self.pressure = self.pressure_sl * np.exp(-0.118 * self.altitude - (0.0015*self.altitude**2) / (1 - 0.018*self.altitude + 0.0011 * self.altitude**2))
@@ -617,9 +636,10 @@ class Weather:
         
         diameter = self.params['dropsize']
         liquidwatercontent = self.params['liquidwatercontent'] / 1000 #convert to kg/m3
-        # print("Rain.update is in process.")
-        print("diameter =",diameter)
-        print("liquidwatercontent =",liquidwatercontent)
+        if self.debug == True:
+            print("Rain.update is in process.")
+            print("diameter =",diameter)
+            print("liquidwatercontent =",liquidwatercontent)
 
         if diameter == 0 or liquidwatercontent == 0:
             dropletforce = 0.0
@@ -674,15 +694,16 @@ class Weather:
             
             dropletforce = numdrops * (dropletmass*delta_velocity)
 
-            print("")
-            print("Rain Parameters:")
-            print("dropletmass is:", dropletmass)
-            print("dropletvolume is:", dropletvolume)
-            print("velocity is:", terminalvelocity)
-            print("webernumber is:", webernumber)
-            print("numdrops is:", numdrops)
-            print("dropletforce is:", dropletforce)
-            print("")
+            if self.debug == True:
+                print("")
+                print("Rain Parameters:")
+                print("dropletmass is:", dropletmass)
+                print("dropletvolume is:", dropletvolume)
+                print("velocity is:", terminalvelocity)
+                print("webernumber is:", webernumber)
+                print("numdrops is:", numdrops)
+                print("dropletforce is:", dropletforce)
+                print("")
 
         return dropletforce
 
@@ -699,10 +720,14 @@ class Weather:
 
         if temperature < Tlist[0]:
             surfacetension = sigmalist[0]
-            print("temperature is too low to predict surface tension of raindrops. Assuming a surface tension at 0 degrees C.")
+            self.__updateLog('WARNING','Temperature is too low to predict surface tension of raindrops. Assuming a surface tension at 0 degrees C.')
+            if self.debug == True:
+                print("temperature is too low to predict surface tension of raindrops. Assuming a surface tension at 0 degrees C.")
         elif temperature > Tlist[-1]:
             surfacetension = sigmalist[-1]
-            print("temperature is too high to predict surface tension of raindrops. Assuming a surface tension at 50 degrees C.")
+            self.__updateLog('WARNING','temperature is too high to predict surface tension of raindrops. Assuming a surface tension at 50 degrees C.')
+            if self.debug == True:
+                print("temperature is too high to predict surface tension of raindrops. Assuming a surface tension at 50 degrees C.")
         else:
             counter = 0
             for temp in Tlist:
@@ -732,11 +757,17 @@ class Weather:
 
         if self.params['temperature'] < 5:
             if self.params['relativehumidity'] <= 0:
-                print("WARNING: Cold temperatures may result in dangerous icing conditions. Avoid routes near clouds and/or rain.")
+                self.__updateLog('WARNING','Cold temperatures may result in dangerous icing conditions. Avoid routes near clouds and/or rain.')
+                if self.debug == True:
+                    print("WARNING: Cold temperatures may result in dangerous icing conditions. Avoid routes near clouds and/or rain.")
             elif self.params['relativehumidity'] < 30:
-                print("WARNING: Cold temperatures and moderate humidity could result in dangerous icing conditions. Be cautious when flying.")
+                self.__updateLog('WARNING','Cold temperatures and moderate humidity could result in dangerous icing conditions. Be cautious when flying.')
+                if self.debug == True:
+                    print("WARNING: Cold temperatures and moderate humidity could result in dangerous icing conditions. Be cautious when flying.")
             else:
-                print("WARNING: Cold temperatures and high humidity will likely result in dangerous icing conditions. Take extreme caution if flying.")
+                self.__updateLog('WARNING','Cold temperatures and high humidity will likely result in dangerous icing conditions. Take extreme caution if flying.')
+                if self.debug == True:
+                    print("WARNING: Cold temperatures and high humidity will likely result in dangerous icing conditions. Take extreme caution if flying.")
 
     # Temperature Methods:
 
@@ -783,16 +814,22 @@ class Weather:
 
         if temperature < temperaturelist[0]:
             temperature = temperaturelist[0]
-            print("WARNING: Temperature is below interpolation bounds. Humidy effects are assumed to be as if the temperature is",temperaturelist[0],"degrees C")
+            self.__updateLog('WARNING','Temperature is below interpolation bounds. Humidity effects are assumed to be as if the temperature is'+str(temperaturelist[0])+'degrees C')
+            if self.debug == True:
+                print("WARNING: Temperature is below interpolation bounds. Humidity effects are assumed to be as if the temperature is",temperaturelist[0],"degrees C")
         elif temperature > temperaturelist[-1]:
             temperature = temperaturelist[-1]
-            print("WARNING: Temperature is below interpolation bounds. Humidy effects are assumed to be as if the temperature is",temperaturelist[0],"degrees C")
+            self.__updateLog('WARNING','Temperature is below interpolation bounds. Humidity effects are assumed to be as if the temperature is'+str(temperaturelist[0])+'degrees C')
+            if self.debug == True:
+                print("WARNING: Temperature is below interpolation bounds. Humidity effects are assumed to be as if the temperature is",temperaturelist[0],"degrees C")
         
         if relativehumidity < 0.0 or relativehumidity > 100.0:
+            self.__updateLog('ERROR','Relative humidity is outside of available bounds')
             raise(Exception("~~~~~ ERROR: relative humidity is outside of available bounds ~~~~~"))
         elif relativehumidity > relativehumiditylist[-1]:
             relativehumidity = relativehumiditylist[-1]
-            print("WARNING: Humidity is above interpolation bounds. Humidy effects are assumed to be as if the temperature is",relativehumiditylist[-1],"%")
+            self.__updateLog('WARNING','Humidity is above interpolation bounds. Humidity effects are assumed to be as if the temperature is'+str(relativehumiditylist[-1])+"%")
+            print("WARNING: Humidity is above interpolation bounds. Humidity effects are assumed to be as if the temperature is",relativehumiditylist[-1],"%")
 
         counter = 0
         for temp in temperaturelist:
@@ -844,6 +881,9 @@ class Weather:
 
         return humidityeffect
 
+    def __updateLog(self,entrytype,message):
+        self.log[entrytype].push(message)
+        # entrytype can be `SUCCESS`, `WARNING`, or `ERROR`
 
 
 class WeatherType:
@@ -1098,16 +1138,16 @@ class Humidity(WeatherType):
 
         if temperature < temperaturelist[0]:
             temperature = temperaturelist[0]
-            print("WARNING: Temperature is below interpolation bounds. Humidy effects are assumed to be as if the temperature is",temperaturelist[0],"degrees C")
+            print("WARNING: Temperature is below interpolation bounds. Humidity effects are assumed to be as if the temperature is",temperaturelist[0],"degrees C")
         elif temperature > temperaturelist[-1]:
             temperature = temperaturelist[-1]
-            print("WARNING: Temperature is below interpolation bounds. Humidy effects are assumed to be as if the temperature is",temperaturelist[0],"degrees C")
+            print("WARNING: Temperature is below interpolation bounds. Humidity effects are assumed to be as if the temperature is",temperaturelist[0],"degrees C")
         
         if relativehumidity < 0.0 or relativehumidity > 100.0:
             raise(Exception("~~~~~ ERROR: relative humidity is outside of available bounds ~~~~~"))
         elif relativehumidity > relativehumiditylist[-1]:
             relativehumidity = relativehumiditylist[-1]
-            print("WARNING: Humidity is above interpolation bounds. Humidy effects are assumed to be as if the temperature is",relativehumiditylist[-1],"%")
+            print("WARNING: Humidity is above interpolation bounds. Humidity effects are assumed to be as if the temperature is",relativehumiditylist[-1],"%")
 
         counter = 0
         for temp in temperaturelist:
@@ -1262,6 +1302,8 @@ class Mission:
         'payload': 0.0,
         'missionspeed': 10.0
     }
+
+    log = []
 
     def __init__(self, params):
         self.params = params
