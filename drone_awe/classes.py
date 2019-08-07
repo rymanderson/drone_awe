@@ -319,10 +319,9 @@ class Power:
         
         LD = 10 #placeholder, this could be a user input
 
-        L = drone.params['takeoffweight'] * weather.params['gravitationconstant']
-        D = L / LD
-
         if 'LDadjustment' in weather.params: #this probably can be its own method
+            L = drone.params['effectivetakeoffweight'] * weather.params['gravitationconstant']
+            D = L / LD
             CLfactor = weather.params['LDadjustment'][0]
             CDfactor = weather.params['LDadjustment'][1]
             L *= CLfactor
@@ -331,7 +330,7 @@ class Power:
 
         propulsiveefficiency = .4 #placeholder
 
-        self.params['power'] = propulsiveefficiency * weather.params['gravitationconstant'] * drone.params['takeoffweight'] * mission.params['missionspeed'] / LD
+        self.params['power'] = weather.params['gravitationconstant'] * drone.params['effectivetakeoffweight'] * mission.params['missionspeed'] / (propulsiveefficiency * LD)
 
 
     # def __updateEfficiencyPropulsive(self, drone, weather, mission):

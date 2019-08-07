@@ -1,4 +1,4 @@
-wingtype rotor
+wingtype rotary
 rotorquantity 8
 max_takeoffweight 2.3
 max_payload 0.8
