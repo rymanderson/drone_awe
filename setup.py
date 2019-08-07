@@ -11,7 +11,8 @@ setuptools.setup(
     description="A versatile modeling package for drone performance in various weather environments.",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    download_url="https://github.com/rymanderson/Drone-Models.git",
+    download_url="https://github.com/rymanderson/drone_awe.git",
+    url="https://github.com/rymanderson/drone_awe",
     packages=setuptools.find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3",

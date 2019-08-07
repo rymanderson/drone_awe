@@ -2,11 +2,11 @@ Metadata-Version: 2.1
 Name: drone-awe
 Version: 0.0.3
 Summary: A versatile modeling package for drone performance in various weather environments.
-Home-page: UNKNOWN
+Home-page: https://github.com/rymanderson/drone_awe
 Author: Tyler Critchfield and Ryan Anderson
 Author-email: rymanderson@gmail.com
 License: UNKNOWN
-Download-URL: https://github.com/rymanderson/Drone-Models.git
+Download-URL: https://github.com/rymanderson/drone_awe.git
 Description: # Drone-AWE: Drone Applications in Weather Environments
         
         This repository is being developed to advance the state of the art of drone performance predictions under a wide range of weather and battery conditions with mission planning in mind. An interactive GUI is available at http://droneecon.com. This README will explain general usage as well as the underlying theory for the models used, as currently implemented. Note that *Drone-AWE* is a work in progress (see **Future Work**). This document will explain general usage for the latter, as well as the engineering theory at work behind the scenes.
@@ -110,7 +110,7 @@ Description: # Drone-AWE: Drone Applications in Weather Environments
         `'dronename'` must be set to a string that is defined in the drone database. To access a dictionary containing all supported drones, use the following methods:
         
         ```python3
-        droneDictionary = m.getDrones()
+        droneDictionary = drone_awe.drones
         ```
         
         If a drone or validation case does not exist in the drone database, it may still be used by setting a custom dictionary:
@@ -162,7 +162,7 @@ Description: # Drone-AWE: Drone Applications in Weather Environments
         To view validation cases for `drone_awe` models, set `'validation'=True` and `'validationcase'` to a string contained in the validation case database. To access a dictionary containing all supported validation cases, run the following:
         
         ```python3
-        validationDictionary = m.getValidationCases()
+        validationDictionary = drone_awe.validationdata()
         ```
         
         Additionally, `validationCaseDictionary` is a dictionary with the following format:
