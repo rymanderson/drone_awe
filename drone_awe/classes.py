@@ -161,7 +161,7 @@ class Battery:
             self.__updateLog('NOTE','Assuming Lithium-air batteries with a capacity of ____ mAh.')
             if self.debug:
                 print("Assuming Lithium-air batteries with a capacity of ____ mAh.")
-            self.params['batterycapacity'] = drone.params['batterycapacity'] * 10 # estimate for now - ten times the capacity
+            self.params['batterycapacity'] = self.params['batterycapacity'] * 10 # estimate for now - ten times the capacity
         else:
             self.__updateLog('ERROR','Incompatible battery technology input')
             raise(Exception("ERROR: Incompatible battery technology input."))

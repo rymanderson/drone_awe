@@ -224,7 +224,7 @@ When simulating a fixed-wing drone, the current model requires input parameters 
 #### Battery parameters
 
 #### `'batterytechnology'`
-`'batterytechnology'` must be set to one of the following options: `'current'`, `'near-future'`, or `'far-future'`. `'current'` will use the current battery capacity as specified in `drone.params`. The other two options project a future battery capacity based on current advances, which average an increase in battery capacity of about 3-4% per year. `'near-future'` assumes a capacity that has increased by 3.5% per year for five years, and `'far-future'` assumes a capacity that has increased by 3.5% per year for ten years.
+`'batterytechnology'` must be set to one of the following options: `'current'`, `'near-future'`, or `'far-future'`. `'current'` will use the current battery capacity as specified in `drone.params`. `'near-future'` projects a future capacity in five years based on an increase of 3.5% of battery capacity each year. `'far-future'` projects battery capacity for lithium-air batteries, about ten times the capacity of current LiPo batteries.
 
 #### `'stateofhealth'` and `'stateofcharge'`
 `'stateofhealth'` refers to the amount of capacity contained within the battery relative to its initial capacity at first use. 100% would be a new battery. LiPo batteries (most commonly used battery for drones) are typically retired when their state of health falls to 80-85%. At lower states of health, the battery capacity is decreased and cycles through a full charge more quickly.
