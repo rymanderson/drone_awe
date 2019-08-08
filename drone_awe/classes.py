@@ -21,8 +21,16 @@ class Drone:
     params          = None
     conversions     = None
     correctunits    = None
+    debug           = False
+    log = {
+        'SUCCESS': [],
+        'WARNING': [],
+        'NOTE': [],
+        'ERROR': []
+    }
 
-    def __init__(self, name, params, conversions, correctunits):
+    def __init__(self, name, params, conversions, correctunits, debug=False):
+        self.debug = debug
         self.name                   = name
         self.params                 = params
         self.params['takeoffweightoriginal'] = self.params['takeoffweight']
@@ -37,8 +45,11 @@ class Drone:
             self.params['endurancemaxrange'] = self.params['rangemax'] / self.params['rangemaxspeed']
         if 'endurancemaxhover' not in self.params and 'endurancemax' in self.params:
             self.params['endurancemaxhover'] = self.params['endurancemax'] * 0.9
-            print("Drone.__init__:  'endurancemaxhover' not found; assuming 90%% of 'endurancemax'")
+            self.__updateLog('WARNING','`endurancemaxhover` not found; assuming 90%% of `endurancemax`.')
+            if self.debug:
+                print("Drone.__init__:  'endurancemaxhover' not found; assuming 90%% of 'endurancemax'")
         if 'rotordiameter' not in self.params:
+            self.__updateLog('ERROR','Rotor diameter not found.')
             raise(Exception("DRONE: ~~~~~ ERROR: rotor diameter not found"))
         if 'rotorarea' not in self.params:
             self.params['rotorarea'] = np.pi*self.params['rotordiameter']**2/4
@@ -53,15 +64,19 @@ class Drone:
             elif self.params['battery']['numbatteriesconnection'] == 'series':
                 self.params['battery']['batteryvoltage'] *= self.params['nummbatteries'] #increase voltage in series
             else:
-                 raise(Exception("DRONE: ~~~~~ ERROR: incorrect battery connection parameter applied"))
+                self.__updateLog('ERROR','Incorrect battery connection parameter applied.')
+                raise(Exception("DRONE: ~~~~~ ERROR: incorrect battery connection parameter applied"))
         # print parameters for debugging
         # self.__printParameters()
 
     def __convertUnits(self):
-        print("DRONE: ----- drone.correctunits = ",self.correctunits)
-        print("DRONE: ----- drone.params contains: ",self.params)
+        if self.debug:
+            print("DRONE: ----- drone.correctunits = ",self.correctunits)
+            print("DRONE: ----- drone.params contains: ",self.params)
         if not self.correctunits:
-            print("DRONE: ===== converting units")
+            self.__updateLog('NOTE','Converting units.')
+            if self.debug:
+                print("DRONE: ===== converting units")
             for spec in self.conversions:
                 if spec in self.params:
                     self.params[spec] = self.params[spec] * \
@@ -70,11 +85,16 @@ class Drone:
                     self.params['battery'][spec] = self.params['battery'][spec] * \
                         self.conversions[spec]
                 else:
-                    print("DRONE: ===== no units to convert")
+                    self.__updateLog('NOTE','No units to convert.')
+                    if self.debug:
+                        print("DRONE: ===== no units to convert")
             self.correctunits = True
-            print("DRONE: 22222 drone.correctunits = ",self.correctunits)
+            if self.debug:
+                print("DRONE: 22222 drone.correctunits = ",self.correctunits)
         else:
-            print("~~~~~ WARNING: problem converting units: skipping ~~~~~")
+            self.__updateLog('WARNING','Problem converting units: skipping.')
+            if self.debug:
+                print("~~~~~ WARNING: problem converting units: skipping ~~~~~")
 
     def __printParameters(self):
         print("DRONEIMPORT:     takeoffweight is: ",self.params['takeoffweight'])
@@ -84,8 +104,13 @@ class Drone:
         if "dropletforce" in weather.params:
             self.params['takeoffweight'] = self.params['takeoffweightoriginal'] + \
                 (weather.params['dropletforce'] / weather.params['gravitationconstant'])
-            print("Takeoff weight adjusted due to rain.")
-
+            self.__updateLog('NOTE','Takeoff weight adjusted due to rain.')
+            if self.debug:
+                print("Takeoff weight adjusted due to rain.")
+    
+    def __updateLog(self,entrytype,message):
+            self.log[entrytype].append(message)
+            # entrytype can be `SUCCESS`, `WARNING`, or `ERROR`
 
 class Battery:
     'Class used to track battery characteristics and performance during simulation'
@@ -104,25 +129,41 @@ class Battery:
                 'batterytechnology': 'current' # current, near-future, or far-future
             }
 
+    debug = False
+    log = {
+        'SUCCESS': [],
+        'WARNING': [],
+        'NOTE': [],
+        'ERROR': []
+    }
+
     # constructor
     # default value for soh is based on the assumption that batteries are retired at a soh of 80%
-    def __init__(self, drone, stateofhealth=100.0, startstateofcharge=100.0, batterytechnology='current'):
+    def __init__(self, drone, stateofhealth=100.0, startstateofcharge=100.0, batterytechnology='current', debug=False):
         # update parameters
+        self.debug = debug
         self.update(drone)
 
         # estimate list lengths for prior memory allocation
 
     def __defineCapacity(self):
-        print("defineCapacity:  batterytechnology is: ",self.params['batterytechnology'])
+        self.__updateLog('NOTE','Assuming a LiPo battery capacity increase of 3.5% per year for 5 years.')
+        if self.debug:
+            print("defineCapacity:  batterytechnology is: ",self.params['batterytechnology'])
         if self.params['batterytechnology'] == 'current':
             self.params['batterycapacity'] = self.params['batterycapacity']
         elif self.params['batterytechnology'] == 'near-future':
-            print("Assuming a LiPo battery capacity increase of 3.5% per year for 5 years.")
+            self.__updateLog('NOTE','Assuming a LiPo battery capacity increase of 3.5% per year for 5 years.')
+            if self.debug:
+                print("Assuming a LiPo battery capacity increase of 3.5% per year for 5 years.")
             self.params['batterycapacity'] = self.params['batterycapacity'] * (1.035**5) # capacity increases by 3-4% each year, this assumes 3.5% for 5 years. It may be an option to let the user specify a timeline, but past 5 years I don't know if that growth in capacity is sustainable.
         elif self.params['batterytechnology'] == 'far-future': #Li-air batteries
-            print("Assuming Lithium-air batteries with a capacity of ____ mAh.")
+            self.__updateLog('NOTE','Assuming Lithium-air batteries with a capacity of ____ mAh.')
+            if self.debug:
+                print("Assuming Lithium-air batteries with a capacity of ____ mAh.")
             self.params['batterycapacity'] = drone.params['batterycapacity'] * 10 # estimate for now - ten times the capacity
         else:
+            self.__updateLog('ERROR','Incompatible battery technology input')
             raise(Exception("ERROR: Incompatible battery technology input."))
 
     def update(self,drone):
@@ -145,6 +186,10 @@ class Battery:
         self.soc = self.soc - power.params['power'] * timestep
         self.current = power.params['power'] / self.params['voltage']
 
+    def __updateLog(self,entrytype,message):
+        self.log[entrytype].append(message)
+        # entrytype can be `SUCCESS`, `WARNING`, or `ERROR`
+
 
 class Power:
     'Class used to predict the drone\'s power requirement'
@@ -160,11 +205,16 @@ class Power:
         'powerModel': None
     }
 
+    log = {
+        'SUCCESS': [],
+        'NOTE': [],
+        'WARNING': [],
+        'ERROR' : []
+    }
+
     # methods go here:
-    def __init__(self, drone, weather, mission):
-        print("drone is ",drone)
-        print("weather is",weather)
-        print("mission is",mission)
+    def __init__(self, drone, weather, mission, debug=False):
+        self.debug = debug
         self.__initializeParameters(drone,weather,mission)         
         self.__setDragCoefficient()                # hopefully constant across different rotary drones
         # self.__setupModel(mission.params['missionspeed'],weather.params['airdensity'],drone.params['rotorarea'],drone.params['rotorquantity'],drone.params['frontalarea'],drone.params['toparea'])
@@ -175,10 +225,13 @@ class Power:
         elif drone.params['wingtype'] == 'fixed':
             self.params['powerModel'] = self.__setPowerTraub
         else:
-            print("POWER: ~~~~~ ERROR: no power model defined for drone.params['wingtype']")
+            self.__updateLog('ERROR','No power model defined for ' + drone.params['wingtype'])
+            if self.debug:
+                print("POWER: ~~~~~ ERROR: no power model defined for drone.params['wingtype']")
 
     def __initializeParameters(self,drone,weather,mission):
-        print("POWER: ===== mission.params = ",mission.params)
+        if self.debug:
+            print("POWER: ===== mission.params = ",mission.params)
         self.__updateWeight(drone.params['takeoffweight'],weather.params['gravitationconstant'],weather.params['weightadjustment'],mission.params['payload'])
         self.__updateVelocityInducedHover(self.params['effectiveweight'],drone.params['rotorquantity'],drone.params['rotorarea'],weather.params['airdensity'])
         self.params['velocityinduced']          = self.params['velocityinducedhover']
@@ -292,7 +345,8 @@ class Power:
         self.params['power']                = (self.params['thrust']*self.params['velocityinduced'] + \
                                                 self.params['drag']*mission.params['missionspeed'] + \
                                                 self.params['bladeprofilepower'])/self.params['efficiencypropulsive']
-        self.__printParameters(drone,weather,mission)
+        if self.debug:
+            self.__printParameters(drone,weather,mission)
 
     def __setPowerTraub(self, drone, weather, mission): #fixed-wing power model
         density = weather.params['airdensity']
@@ -302,9 +356,11 @@ class Power:
         elif 'wingspan' in drone.params and 'chord' in drone.params:
             wingarea = drone.params['wingspan'] * drone.params['chord']
         else:
+            self.__updateLog('ERROR','Wing area needed to calculate power')
             raise(Exception("~~~~~ ERROR: wing area needed to calculate power ~~~~~"))
         if 'wingspan' not in drone.params:
-            raise(Exception("~~~~~ ERROR: wing span needed to calculate power ~~~~~"))
+            self.__updateLog('ERROR','Wingspan needed to calculate power')
+            raise(Exception("~~~~~ ERROR: wingspan needed to calculate power ~~~~~"))
         else:
             span = drone.params['wingspan']
         self.__setDragCoefficient()
@@ -374,16 +430,17 @@ class Power:
         # see also: http://www.aerospaceweb.org/design/helicopter/momentum.shtml
 
     def __setupModel(self,velocityinfinity,airdensity,rotorarea,rotorquantity,frontalarea,toparea): #
-        self.__print5('__solveModel BEFORE ')
+        if self.debug:
+            self.__print5('__solveModel BEFORE ')
 
-        print('POWER: ----- frontalarea = ',frontalarea)
-        print('POWER: ----- toparea       ',toparea)
-        print('POWER: ----- velocityinf   ',velocityinfinity)
-        print('POWER: ----- airdensity    ',airdensity)
-        print('POWER: ----- rotorarea     ',rotorarea)
-        print('POWER: ----- rotorquantity ',rotorquantity)
-        print('')
-        print('')
+            print('POWER: ----- frontalarea = ',frontalarea)
+            print('POWER: ----- toparea       ',toparea)
+            print('POWER: ----- velocityinf   ',velocityinfinity)
+            print('POWER: ----- airdensity    ',airdensity)
+            print('POWER: ----- rotorarea     ',rotorarea)
+            print('POWER: ----- rotorquantity ',rotorquantity)
+            print('')
+            print('')
 
         effectiveweight   = self.params['effectiveweight']
         dragcoefficient   = self.params['dragcoefficient']
@@ -467,15 +524,16 @@ class Power:
         self.params['drag']             = m.drag.value[0]
         self.params['dragarea']             = m.dragarea.value[0]
 
-        self.__print5('__solveModel AFTER')
-        print('POWER: ----- frontalarea = ',frontalarea)
-        print('POWER: ----- toparea       ',toparea)
-        print('POWER: ----- velocityinf   ',velocityinfinity)
-        print('POWER: ----- airdensity    ',airdensity)
-        print('POWER: ----- rotorarea     ',rotorarea)
-        print('POWER: ----- rotorquantity ',rotorquantity)
-        print('')
-        print('')
+        if self.debug:
+            self.__print5('__solveModel AFTER')
+            print('POWER: ----- frontalarea = ',frontalarea)
+            print('POWER: ----- toparea       ',toparea)
+            print('POWER: ----- velocityinf   ',velocityinfinity)
+            print('POWER: ----- airdensity    ',airdensity)
+            print('POWER: ----- rotorarea     ',rotorarea)
+            print('POWER: ----- rotorquantity ',rotorquantity)
+            print('')
+            print('')
 
     def __print5(self,functionname):
         print('')
@@ -510,6 +568,9 @@ class Power:
     def __setBladeProfilePower(self):
         self.params['bladeprofilepower'] = 0.0
 
+    def __updateLog(self,entrytype,message):
+        self.log[entrytype].append(message)
+        # entrytype can be `SUCCESS`, `WARNING`, or `ERROR`, `NOTE`
 
 class Weather:
     '''
@@ -531,6 +592,14 @@ class Weather:
         'altitude': None,
         'weightadjustment': 0.0
     }
+
+    log     = {
+        'SUCCESS': [],
+        'WARNING': [],
+        'ERROR': [],
+        'NOTE': []
+    }
+    debug   = False
 
     # airdensity      = 1.225 #kg/m^3
     # gravity         = 9.806655 #m/s^2
@@ -554,9 +623,10 @@ class Weather:
     # How about this: we assume that we know the pressure/density/temperature at ground level.
 
     # methods go here:
-    def __init__(self, altitude, weatherlist):  # keeping it simple to begin with
-        self.weatherlist = weatherlist
-        self.altitude = altitude
+    def __init__(self, altitude, weatherlist, debug=False):  # keeping it simple to begin with
+        self.weatherlist    = weatherlist
+        self.altitude       = altitude
+        self.debug          = debug
         # self.temperature = temperaturesealevel
         # self.temperature = self.temperaturesealevel - 71.5 + 2*np.log(1 + np.exp(35.75 - 3.25*self.altitude) + np.exp(-3 + 0.0003 * self.altitude**3))
         # self.pressure = self.pressure_sl * np.exp(-0.118 * self.altitude - (0.0015*self.altitude**2) / (1 - 0.018*self.altitude + 0.0011 * self.altitude**2))
@@ -616,9 +686,10 @@ class Weather:
         
         diameter = self.params['dropsize']
         liquidwatercontent = self.params['liquidwatercontent'] / 1000 #convert to kg/m3
-        # print("Rain.update is in process.")
-        print("diameter =",diameter)
-        print("liquidwatercontent =",liquidwatercontent)
+        if self.debug:
+            print("Rain.update is in process.")
+            print("diameter =",diameter)
+            print("liquidwatercontent =",liquidwatercontent)
 
         if diameter == 0 or liquidwatercontent == 0:
             dropletforce = 0.0
@@ -673,15 +744,16 @@ class Weather:
             
             dropletforce = numdrops * (dropletmass*delta_velocity)
 
-            print("")
-            print("Rain Parameters:")
-            print("dropletmass is:", dropletmass)
-            print("dropletvolume is:", dropletvolume)
-            print("velocity is:", terminalvelocity)
-            print("webernumber is:", webernumber)
-            print("numdrops is:", numdrops)
-            print("dropletforce is:", dropletforce)
-            print("")
+            if self.debug:
+                print("")
+                print("Rain Parameters:")
+                print("dropletmass is:", dropletmass)
+                print("dropletvolume is:", dropletvolume)
+                print("velocity is:", terminalvelocity)
+                print("webernumber is:", webernumber)
+                print("numdrops is:", numdrops)
+                print("dropletforce is:", dropletforce)
+                print("")
 
         return dropletforce
 
@@ -698,10 +770,14 @@ class Weather:
 
         if temperature < Tlist[0]:
             surfacetension = sigmalist[0]
-            print("temperature is too low to predict surface tension of raindrops. Assuming a surface tension at 0 degrees C.")
+            self.__updateLog('WARNING','Temperature is too low to predict surface tension of raindrops. Assuming a surface tension at 0 degrees C.')
+            if self.debug:
+                print("temperature is too low to predict surface tension of raindrops. Assuming a surface tension at 0 degrees C.")
         elif temperature > Tlist[-1]:
             surfacetension = sigmalist[-1]
-            print("temperature is too high to predict surface tension of raindrops. Assuming a surface tension at 50 degrees C.")
+            self.__updateLog('WARNING','temperature is too high to predict surface tension of raindrops. Assuming a surface tension at 50 degrees C.')
+            if self.debug:
+                print("temperature is too high to predict surface tension of raindrops. Assuming a surface tension at 50 degrees C.")
         else:
             counter = 0
             for temp in Tlist:
@@ -731,11 +807,17 @@ class Weather:
 
         if self.params['temperature'] < 5:
             if self.params['relativehumidity'] <= 0:
-                print("WARNING: Cold temperatures may result in dangerous icing conditions. Avoid routes near clouds and/or rain.")
+                self.__updateLog('WARNING','Cold temperatures may result in dangerous icing conditions. Avoid routes near clouds and/or rain.')
+                if self.debug:
+                    print("WARNING: Cold temperatures may result in dangerous icing conditions. Avoid routes near clouds and/or rain.")
             elif self.params['relativehumidity'] < 30:
-                print("WARNING: Cold temperatures and moderate humidity could result in dangerous icing conditions. Be cautious when flying.")
+                self.__updateLog('WARNING','Cold temperatures and moderate humidity could result in dangerous icing conditions. Be cautious when flying.')
+                if self.debug:
+                    print("WARNING: Cold temperatures and moderate humidity could result in dangerous icing conditions. Be cautious when flying.")
             else:
-                print("WARNING: Cold temperatures and high humidity will likely result in dangerous icing conditions. Take extreme caution if flying.")
+                self.__updateLog('WARNING','Cold temperatures and high humidity will likely result in dangerous icing conditions. Take extreme caution if flying.')
+                if self.debug:
+                    print("WARNING: Cold temperatures and high humidity will likely result in dangerous icing conditions. Take extreme caution if flying.")
 
     # Temperature Methods:
 
@@ -782,16 +864,22 @@ class Weather:
 
         if temperature < temperaturelist[0]:
             temperature = temperaturelist[0]
-            print("WARNING: Temperature is below interpolation bounds. Humidy effects are assumed to be as if the temperature is",temperaturelist[0],"degrees C")
+            self.__updateLog('WARNING','Temperature is below interpolation bounds. Humidity effects are assumed to be as if the temperature is'+str(temperaturelist[0])+'degrees C')
+            if self.debug:
+                print("WARNING: Temperature is below interpolation bounds. Humidity effects are assumed to be as if the temperature is",temperaturelist[0],"degrees C")
         elif temperature > temperaturelist[-1]:
             temperature = temperaturelist[-1]
-            print("WARNING: Temperature is below interpolation bounds. Humidy effects are assumed to be as if the temperature is",temperaturelist[0],"degrees C")
+            self.__updateLog('WARNING','Temperature is below interpolation bounds. Humidity effects are assumed to be as if the temperature is'+str(temperaturelist[0])+'degrees C')
+            if self.debug:
+                print("WARNING: Temperature is below interpolation bounds. Humidity effects are assumed to be as if the temperature is",temperaturelist[0],"degrees C")
         
         if relativehumidity < 0.0 or relativehumidity > 100.0:
+            self.__updateLog('ERROR','Relative humidity is outside of available bounds')
             raise(Exception("~~~~~ ERROR: relative humidity is outside of available bounds ~~~~~"))
         elif relativehumidity > relativehumiditylist[-1]:
             relativehumidity = relativehumiditylist[-1]
-            print("WARNING: Humidity is above interpolation bounds. Humidy effects are assumed to be as if the temperature is",relativehumiditylist[-1],"%")
+            self.__updateLog('WARNING','Humidity is above interpolation bounds. Humidity effects are assumed to be as if the temperature is'+str(relativehumiditylist[-1])+"%")
+            print("WARNING: Humidity is above interpolation bounds. Humidity effects are assumed to be as if the temperature is",relativehumiditylist[-1],"%")
 
         counter = 0
         for temp in temperaturelist:
@@ -843,6 +931,9 @@ class Weather:
 
         return humidityeffect
 
+    def __updateLog(self,entrytype,message):
+        self.log[entrytype].append(message)
+        # entrytype can be `SUCCESS`, `WARNING`, or `ERROR`
 
 
 class WeatherType:
@@ -901,128 +992,128 @@ class Rain(WeatherType):
 
         WeatherType.__init__(self, params, paramnames)
 
-    def update(self, weather, drone):
+    # def update(self, weather, drone):
         
-        diameter = weather.weatherlist[2].params['dropsize']
-        liquidwatercontent = weather.weatherlist[2].params['dropsize'] / 1000 #convert to kg/m3
-        # print("Rain.update is in process.")
-        print("diameter =",diameter)
-        print("liquidwatercontent =",liquidwatercontent)
+    #     diameter = weather.weatherlist[2].params['dropsize']
+    #     liquidwatercontent = weather.weatherlist[2].params['dropsize'] / 1000 #convert to kg/m3
+    #     # print("Rain.update is in process.")
+    #     print("diameter =",diameter)
+    #     print("liquidwatercontent =",liquidwatercontent)
 
-        if diameter == 0 or liquidwatercontent == 0:
-            dropletforce = 0.0
-        else:
+    #     if diameter == 0 or liquidwatercontent == 0:
+    #         dropletforce = 0.0
+    #     else:
             
-            # single droplet
-            diameter = weather.weatherlist[2].params['dropsize']
-            radius = diameter/2.0
-            dropletvolume = 4.0/3.0 * np.pi * radius**3 #sphere estimate
-            airdensity = weather.params['airdensity'] #kg/m^3
-            waterdensity = 1000 #kg/m^3
-            dropletmass = dropletvolume * waterdensity #kg
-            g = weather.params['gravitationconstant']
-            Cd = 0.5 #sphere estimate
-            area = np.pi * radius**2
-            terminalvelocity = np.sqrt(2*dropletmass*g / (Cd*airdensity*area)) 
-            # terminalvelocity2 = 9.58*(1-np.exp(-(diameter/1.77)**1.147)) #(from Cao et al.)
-            # print("terminalvelocity1",terminalvelocity)
-            # print("terminalvelocity2 =",terminalvelocity2)
+    #         # single droplet
+    #         diameter = weather.weatherlist[2].params['dropsize']
+    #         radius = diameter/2.0
+    #         dropletvolume = 4.0/3.0 * np.pi * radius**3 #sphere estimate
+    #         airdensity = weather.params['airdensity'] #kg/m^3
+    #         waterdensity = 1000 #kg/m^3
+    #         dropletmass = dropletvolume * waterdensity #kg
+    #         g = weather.params['gravitationconstant']
+    #         Cd = 0.5 #sphere estimate
+    #         area = np.pi * radius**2
+    #         terminalvelocity = np.sqrt(2*dropletmass*g / (Cd*airdensity*area)) 
+    #         # terminalvelocity2 = 9.58*(1-np.exp(-(diameter/1.77)**1.147)) #(from Cao et al.)
+    #         # print("terminalvelocity1",terminalvelocity)
+    #         # print("terminalvelocity2 =",terminalvelocity2)
             
-            #determine raindrop incidence using rate - Method 1
-            # rate = self.params['rainfallrate']
-            # rate *= 0.001 #convert from L/m3/h to m3/m2/h
-            # rate /= 3600 #convert from m3/m3/h to m3/m2/s
-            # dronearea = drone.params['area']
-            # rate *= dronearea #m3 per drone area per second
-            # numdrops = rate / dropletvolume #number of drops per drone area per second
+    #         #determine raindrop incidence using rate - Method 1
+    #         # rate = self.params['rainfallrate']
+    #         # rate *= 0.001 #convert from L/m3/h to m3/m2/h
+    #         # rate /= 3600 #convert from m3/m3/h to m3/m2/s
+    #         # dronearea = drone.params['area']
+    #         # rate *= dronearea #m3 per drone area per second
+    #         # numdrops = rate / dropletvolume #number of drops per drone area per second
 
-            #Method 2 - using LWC
-            dronearea = drone.params['toparea']
-            numdrops = liquidwatercontent / dropletmass * dronearea * terminalvelocity #numsrops hitting drone per second
+    #         #Method 2 - using LWC
+    #         dronearea = drone.params['toparea']
+    #         numdrops = liquidwatercontent / dropletmass * dronearea * terminalvelocity #numsrops hitting drone per second
 
-            surfacetension = self.getSurfaceTension(weather)
-            webernumber = self.getWeberNumber(weather, terminalvelocity, diameter, surfacetension)
+    #         surfacetension = self.getSurfaceTension(weather)
+    #         webernumber = self.getWeberNumber(weather, terminalvelocity, diameter, surfacetension)
 
-            upperthreshold = 18.0**2 * diameter * (waterdensity/surfacetension)**0.5 * terminalvelocity**0.25 * numdrops**0.75
-            # print("rain upper threshold weber number is:",upperthreshold)
+    #         upperthreshold = 18.0**2 * diameter * (waterdensity/surfacetension)**0.5 * terminalvelocity**0.25 * numdrops**0.75
+    #         # print("rain upper threshold weber number is:",upperthreshold)
 
-            if webernumber < 5:
-                #raindrop sticks
-                C = 0.0
-            elif webernumber < 10:
-                #raindrop bounces back
-                C = 1.0
-            elif webernumber < upperthreshold:
-                #raindrop spreads
-                C = 0.0
-            else:
-                #raindrop splashes
-                C = 2/np.pi #estimate, (integral of sin(x) from 0 to pi) / pi
-            #calculate change in velocity
-            delta_velocity = terminalvelocity * (C+1)
+    #         if webernumber < 5:
+    #             #raindrop sticks
+    #             C = 0.0
+    #         elif webernumber < 10:
+    #             #raindrop bounces back
+    #             C = 1.0
+    #         elif webernumber < upperthreshold:
+    #             #raindrop spreads
+    #             C = 0.0
+    #         else:
+    #             #raindrop splashes
+    #             C = 2/np.pi #estimate, (integral of sin(x) from 0 to pi) / pi
+    #         #calculate change in velocity
+    #         delta_velocity = terminalvelocity * (C+1)
             
-            dropletforce = numdrops * (dropletmass*delta_velocity)
+    #         dropletforce = numdrops * (dropletmass*delta_velocity)
 
-            print("")
-            print("Rain Parameters:")
-            print("dropletmass is:", dropletmass)
-            print("dropletvolume is:", dropletvolume)
-            print("velocity is:", terminalvelocity)
-            print("webernumber is:", webernumber)
-            print("numdrops is:", numdrops)
-            print("dropletforce is:", dropletforce)
-            print("")
+    #         print("")
+    #         print("Rain Parameters:")
+    #         print("dropletmass is:", dropletmass)
+    #         print("dropletvolume is:", dropletvolume)
+    #         print("velocity is:", terminalvelocity)
+    #         print("webernumber is:", webernumber)
+    #         print("numdrops is:", numdrops)
+    #         print("dropletforce is:", dropletforce)
+    #         print("")
 
-        return dropletforce
+    #     return dropletforce
 
-        # if drone.params['wingtype'] == 'fixed':
-        #     #TODO loss of lift, increase in drag
+    #     # if drone.params['wingtype'] == 'fixed':
+    #     #     #TODO loss of lift, increase in drag
 
-    def getWeberNumber(self, weather, velocity, diameter, surfacetension):
-        density = 1000 #kg/m^3
-        webernumber = density * velocity**2 * diameter / surfacetension
+    # def getWeberNumber(self, weather, velocity, diameter, surfacetension):
+    #     density = 1000 #kg/m^3
+    #     webernumber = density * velocity**2 * diameter / surfacetension
 
-        return webernumber
+    #     return webernumber
 
-    def getSurfaceTension(self, weather):
-        Tlist = [0, 5, 10, 20, 30, 40, 50] #deg C
-        sigmalist = [7.56, 7.49, 7.42, 7.28, 7.12, 6.96, 6.79] #N/m
-        temperature = weather.weatherlist[0].params['temperature']
+    # def getSurfaceTension(self, weather):
+    #     Tlist = [0, 5, 10, 20, 30, 40, 50] #deg C
+    #     sigmalist = [7.56, 7.49, 7.42, 7.28, 7.12, 6.96, 6.79] #N/m
+    #     temperature = weather.weatherlist[0].params['temperature']
 
-        if temperature < Tlist[0]:
-            surfacetension = sigmalist[0]
-            print("temperature is too low to predict surface tension of raindrops. Assuming a surface tension at 0 degrees C.")
-        elif temperature > Tlist[-1]:
-            surfacetension = sigmalist[-1]
-            print("temperature is too high to predict surface tension of raindrops. Assuming a surface tension at 50 degrees C.")
-        else:
-            counter = 0
-            for temp in Tlist:
-                if temperature == temp:
-                    id1 = counter
-                    id2 = counter
-                    break
-                elif temperature < temp:
-                    id1 = counter - 1
-                    id2 = counter
-                    break
-                else:
-                    counter += 1
-            #interpolate
-            x1 = Tlist[id1]
-            x2 = Tlist[id2]
-            y1 = sigmalist[id1]
-            y2 = sigmalist[id2]
-            x = temperature
-            surfacetension = interpolate(x1,x2,y1,y2,x)
+    #     if temperature < Tlist[0]:
+    #         surfacetension = sigmalist[0]
+    #         print("temperature is too low to predict surface tension of raindrops. Assuming a surface tension at 0 degrees C.")
+    #     elif temperature > Tlist[-1]:
+    #         surfacetension = sigmalist[-1]
+    #         print("temperature is too high to predict surface tension of raindrops. Assuming a surface tension at 50 degrees C.")
+    #     else:
+    #         counter = 0
+    #         for temp in Tlist:
+    #             if temperature == temp:
+    #                 id1 = counter
+    #                 id2 = counter
+    #                 break
+    #             elif temperature < temp:
+    #                 id1 = counter - 1
+    #                 id2 = counter
+    #                 break
+    #             else:
+    #                 counter += 1
+    #         #interpolate
+    #         x1 = Tlist[id1]
+    #         x2 = Tlist[id2]
+    #         y1 = sigmalist[id1]
+    #         y2 = sigmalist[id2]
+    #         x = temperature
+    #         surfacetension = interpolate(x1,x2,y1,y2,x)
 
-        return surfacetension
+    #     return surfacetension
 
-    def updateLD(self):
-        CLfactor = 0.94 #94% of original value
-        CDfactor = 0.01 #added on to original value 
-        #if CD needs to be percentage, increasing by 20% is about average, although less acurate than an addition. 
-        return [CLfactor, CDfactor]
+    # def updateLD(self):
+    #     CLfactor = 0.94 #94% of original value
+    #     CDfactor = 0.01 #added on to original value 
+    #     #if CD needs to be percentage, increasing by 20% is about average, although less acurate than an addition. 
+    #     return [CLfactor, CDfactor]
 
 
 class Temperature(WeatherType):
@@ -1040,17 +1131,17 @@ class Temperature(WeatherType):
         paramnames = ['temperature']
         WeatherType.__init__(self, params, paramnames)
     
-    def updateDensity(self,weather):
-        newtemperature = weather.weatherlist[0].params['temperature'] +273.15 #convert to kelvin
-        oldtemperature = weather.params['temperaturesealevel'] #convert to kelvin
-        # print("old temperature is",oldtemperature)
-        # print("new temperature is",newtemperature)
-        # print("Self.params['temperature'] is",self.params['temperature'])
-        olddensity = weather.params['airdensity']
-        # print("old density is",olddensity)
-        newdensity = olddensity * ((oldtemperature-newtemperature)/oldtemperature + 1) #inverse relationship
-        temperatureeffect = newdensity / olddensity
-        return temperatureeffect
+    # def updateDensity(self,weather):
+    #     newtemperature = weather.weatherlist[0].params['temperature'] +273.15 #convert to kelvin
+    #     oldtemperature = weather.params['temperaturesealevel'] #convert to kelvin
+    #     # print("old temperature is",oldtemperature)
+    #     # print("new temperature is",newtemperature)
+    #     # print("Self.params['temperature'] is",self.params['temperature'])
+    #     olddensity = weather.params['airdensity']
+    #     # print("old density is",olddensity)
+    #     newdensity = olddensity * ((oldtemperature-newtemperature)/oldtemperature + 1) #inverse relationship
+    #     temperatureeffect = newdensity / olddensity
+    #     return temperatureeffect
 
 
 class Humidity(WeatherType):
@@ -1069,93 +1160,93 @@ class Humidity(WeatherType):
         paramnames = ['relativehumidity']    #, 'absolutehumidity'] - most of the time it is only given in relative terms
         WeatherType.__init__(self, params, paramnames)
 
-    def updateDensity(self,weather): # 2D linear interpolation based on Yue (2017)
-        relativehumiditylist = [0.0,25.0,50.0,70.0,90.0] #percentage
-        temperaturelist = [15.0,20.0,25.0,30.0,35.0] #may need to convert this to kelvin
+    # def updateDensity(self,weather): # 2D linear interpolation based on Yue (2017)
+    #     relativehumiditylist = [0.0,25.0,50.0,70.0,90.0] #percentage
+    #     temperaturelist = [15.0,20.0,25.0,30.0,35.0] #may need to convert this to kelvin
 
-        #humidity effects only
-        humidityarray = np.array([[1.0, 1.0, 1.0, 1.0, 1.0],\
-                                    [0.99837, 0.99751, 0.99662, 0.99656, 0.99389],\
-                                    [0.99673, 0.99585, 0.99409, 0.99055, 0.98866],\
-                                    [0.99592, 0.99419, 0.99155, 0.98883, 0.98517],\
-                                    [0.99429, 0.99252, 0.98902, 0.98625, 0.98080]]) # increasing humditiy in rows, temp in columns
+    #     #humidity effects only
+    #     humidityarray = np.array([[1.0, 1.0, 1.0, 1.0, 1.0],\
+    #                                 [0.99837, 0.99751, 0.99662, 0.99656, 0.99389],\
+    #                                 [0.99673, 0.99585, 0.99409, 0.99055, 0.98866],\
+    #                                 [0.99592, 0.99419, 0.99155, 0.98883, 0.98517],\
+    #                                 [0.99429, 0.99252, 0.98902, 0.98625, 0.98080]]) # increasing humditiy in rows, temp in columns
 
 
-        # temperature and humidity effects included
-        # humidityarray = np.array([[1.0, 0.98286, 0.96653, 0.95020, 0.93551],\
-        #                             [0.99837, 0.98041, 0.96327, 0.94694, 0.92980],\
-        #                             [0.99673, 0.97878, 0.96082, 0.94122, 0.92490],\
-        #                             [0.99592, 0.97714, 0.95837, 0.93959, 0.92163],\
-        #                             [0.99429, 0.97551, 0.95592, 0.93714, 0.91755]]) # increasing humditiy in rows, temp in columns
+    #     # temperature and humidity effects included
+    #     # humidityarray = np.array([[1.0, 0.98286, 0.96653, 0.95020, 0.93551],\
+    #     #                             [0.99837, 0.98041, 0.96327, 0.94694, 0.92980],\
+    #     #                             [0.99673, 0.97878, 0.96082, 0.94122, 0.92490],\
+    #     #                             [0.99592, 0.97714, 0.95837, 0.93959, 0.92163],\
+    #     #                             [0.99429, 0.97551, 0.95592, 0.93714, 0.91755]]) # increasing humditiy in rows, temp in columns
 
-        relativehumidity = weather.weatherlist[1].params['relativehumidity']
-        # temperature = weather.params['temperaturesealevel']
-        # temperature = 288.15 - 273.15 #convert to celcius - need to update this if temperature is altered
-        temperature = weather.weatherlist[0].params['temperature'] #already to celcius
-        # print("Temperature is",temperature)
-        # determine 4 closest points before doing a 2D interpolation
+    #     relativehumidity = weather.weatherlist[1].params['relativehumidity']
+    #     # temperature = weather.params['temperaturesealevel']
+    #     # temperature = 288.15 - 273.15 #convert to celcius - need to update this if temperature is altered
+    #     temperature = weather.weatherlist[0].params['temperature'] #already to celcius
+    #     # print("Temperature is",temperature)
+    #     # determine 4 closest points before doing a 2D interpolation
 
-        if temperature < temperaturelist[0]:
-            temperature = temperaturelist[0]
-            print("WARNING: Temperature is below interpolation bounds. Humidy effects are assumed to be as if the temperature is",temperaturelist[0],"degrees C")
-        elif temperature > temperaturelist[-1]:
-            temperature = temperaturelist[-1]
-            print("WARNING: Temperature is below interpolation bounds. Humidy effects are assumed to be as if the temperature is",temperaturelist[0],"degrees C")
+    #     if temperature < temperaturelist[0]:
+    #         temperature = temperaturelist[0]
+    #         print("WARNING: Temperature is below interpolation bounds. Humidity effects are assumed to be as if the temperature is",temperaturelist[0],"degrees C")
+    #     elif temperature > temperaturelist[-1]:
+    #         temperature = temperaturelist[-1]
+    #         print("WARNING: Temperature is below interpolation bounds. Humidity effects are assumed to be as if the temperature is",temperaturelist[0],"degrees C")
         
-        if relativehumidity < 0.0 or relativehumidity > 100.0:
-            raise(Exception("~~~~~ ERROR: relative humidity is outside of available bounds ~~~~~"))
-        elif relativehumidity > relativehumiditylist[-1]:
-            relativehumidity = relativehumiditylist[-1]
-            print("WARNING: Humidity is above interpolation bounds. Humidy effects are assumed to be as if the temperature is",relativehumiditylist[-1],"%")
+    #     if relativehumidity < 0.0 or relativehumidity > 100.0:
+    #         raise(Exception("~~~~~ ERROR: relative humidity is outside of available bounds ~~~~~"))
+    #     elif relativehumidity > relativehumiditylist[-1]:
+    #         relativehumidity = relativehumiditylist[-1]
+    #         print("WARNING: Humidity is above interpolation bounds. Humidity effects are assumed to be as if the temperature is",relativehumiditylist[-1],"%")
 
-        counter = 0
-        for temp in temperaturelist:
-            if temperature == temp:
-                idT1 = counter
-                idT2 = counter
-                break
-            elif temperature < temp:
-                idT1 = counter - 1
-                idT2 = counter
-                break
-            else:
-                counter += 1
-        counter = 0
-        for hum in relativehumiditylist:
-            if relativehumidity == hum:
-                idH1 = counter
-                idH2 = counter
-                break
-            elif relativehumidity < hum:
-                idH1 = counter - 1
-                idH2 = counter
-                break
-            else:
-                counter += 1
+    #     counter = 0
+    #     for temp in temperaturelist:
+    #         if temperature == temp:
+    #             idT1 = counter
+    #             idT2 = counter
+    #             break
+    #         elif temperature < temp:
+    #             idT1 = counter - 1
+    #             idT2 = counter
+    #             break
+    #         else:
+    #             counter += 1
+    #     counter = 0
+    #     for hum in relativehumiditylist:
+    #         if relativehumidity == hum:
+    #             idH1 = counter
+    #             idH2 = counter
+    #             break
+    #         elif relativehumidity < hum:
+    #             idH1 = counter - 1
+    #             idH2 = counter
+    #             break
+    #         else:
+    #             counter += 1
 
-        #interpolate temperature at each humidity index
-        x1 = temperaturelist[idT1]
-        x2 = temperaturelist[idT2]
-        y1 = humidityarray[idH1,idT1]
-        y2 = humidityarray[idH1,idT2]
-        x = temperature
-        tempid1 = interpolate(x1,x2,y1,y2,x)
+    #     #interpolate temperature at each humidity index
+    #     x1 = temperaturelist[idT1]
+    #     x2 = temperaturelist[idT2]
+    #     y1 = humidityarray[idH1,idT1]
+    #     y2 = humidityarray[idH1,idT2]
+    #     x = temperature
+    #     tempid1 = interpolate(x1,x2,y1,y2,x)
         
-        x1 = temperaturelist[idT1]
-        x2 = temperaturelist[idT2]
-        y1 = humidityarray[idH2,idT1]
-        y2 = humidityarray[idH2,idT2]
-        x = temperature
-        tempid2 = interpolate(x1,x2,y1,y2,x)
+    #     x1 = temperaturelist[idT1]
+    #     x2 = temperaturelist[idT2]
+    #     y1 = humidityarray[idH2,idT1]
+    #     y2 = humidityarray[idH2,idT2]
+    #     x = temperature
+    #     tempid2 = interpolate(x1,x2,y1,y2,x)
 
-        #now interpolate based on humidity
-        x1 = relativehumiditylist[idH1]
-        x2 = relativehumiditylist[idH2]
-        y1 = tempid1
-        y2 = tempid2
-        x = relativehumidity
-        humidityeffect = interpolate(x1,x2,y1,y2,x)
-        return humidityeffect
+    #     #now interpolate based on humidity
+    #     x1 = relativehumiditylist[idH1]
+    #     x2 = relativehumiditylist[idH2]
+    #     y1 = tempid1
+    #     y2 = tempid2
+    #     x = relativehumidity
+    #     humidityeffect = interpolate(x1,x2,y1,y2,x)
+    #     return humidityeffect
 
 
 class Wind(WeatherType):
@@ -1238,20 +1329,20 @@ class Ice(WeatherType):
     def __init__(self):
         pass
     
-    def warning(self,weather):
-        for weatherclass in weather.weatherlist:
-            if 'temperature' in weatherclass.params:
-                temperature = weatherclass.params['temperature']
-            elif 'relativehumidty' in weatherclass.params:
-                relativehumidity = weatherclass.params['relativehumidity']
+    # def warning(self,weather):
+    #     for weatherclass in weather.weatherlist:
+    #         if 'temperature' in weatherclass.params:
+    #             temperature = weatherclass.params['temperature']
+    #         elif 'relativehumidty' in weatherclass.params:
+    #             relativehumidity = weatherclass.params['relativehumidity']
         
-        if temperature < 5:
-            if relativehumidity <= 0:
-                print("WARNING: Cold temperatures may result in dangerous icing conditions. Avoid routes near clouds and/or rain.")
-            elif relativehumidity < 30:
-                print("WARNING: Cold temperatures and moderate humidity could result in dangerous icing conditions. Be cautious when flying.")
-            else:
-                print("WARNING: Cold temperatures and high humidity will likely result in dangerous icing conditions. Take extreme caution if flying.")
+    #     if temperature < 5:
+    #         if relativehumidity <= 0:
+    #             print("WARNING: Cold temperatures may result in dangerous icing conditions. Avoid routes near clouds and/or rain.")
+    #         elif relativehumidity < 30:
+    #             print("WARNING: Cold temperatures and moderate humidity could result in dangerous icing conditions. Be cautious when flying.")
+    #         else:
+    #             print("WARNING: Cold temperatures and high humidity will likely result in dangerous icing conditions. Take extreme caution if flying.")
 
 
 class Mission:
@@ -1262,11 +1353,24 @@ class Mission:
         'missionspeed': 10.0
     }
 
-    def __init__(self, params):
+    log     = {
+        'SUCCESS': [],
+        'WARNING': [],
+        'ERROR': [],
+        'NOTE': []
+    }
+    debug = False
+
+    def __init__(self, params, debug=False):
         self.params = params
+        self.debug  = debug
 
     def update(self):
         pass
+
+    def __updateLog(self,entrytype,message):
+        self.log[entrytype].append(message)
+        # entrytype can be `SUCCESS`, `WARNING`, or `ERROR`
 
 
 class Simulation:
@@ -1285,12 +1389,20 @@ class Simulation:
         'endurance':None
     }
 
+    log         = {
+        'SUCCESS': [],
+        'WARNING': [],
+        'ERROR': [],
+        'NOTE': []
+    }
+
+    debug = False
+
     # methods go here:
-    def __init__(self, timestep, simulationtype): #, desiredresult):
+    def __init__(self, timestep, simulationtype, debug=False): #, desiredresult):
         # get parameters from `settings.txt`
         self.params['simulationtype'] = simulationtype
-        # self.params['desiredresult'] = desiredresult
-        # print("Desired Result is        ", self.params['desiredresult'])
+        self.debug = debug
 
     def run(self, drone, battery, power, weather, mission):
         if self.params['simulationtype'] == 'simple':
@@ -1301,31 +1413,12 @@ class Simulation:
             # insert another model here
             pass
         else:
+            self.__updateLog('ERROR','Simulation model not available.')
             raise(Exception("~~~~~ ERROR: simulation model not available ~~~~~"))
 
-    def __runSimpleModel(self, drone, battery, power, weather, mission):
-
-        self.params['endurance']    = battery.params['batterycapacity'] * battery.params['voltagemean'] / \
-                                      power.params['power']  # simple endurance model
-        cruisespeed                 = mission.params["missionspeed"]
-        self.params['range']        = self.params['endurance'] * cruisespeed
-
-    def __model2(self, drone, battery, power, weather):
-        print('Model 2 is still in development')
-
-    def __model3(self, drone, battery, power, weather):
-        print('Model 3 is still in development')
-
-    # # time-invariant methods go here (indicated by suffix *_ti):
-    # def getEndurance_ti(self, power):
-    #         # check that objects are time-invariant
-    #         if power.timevariant == True:
-    #                 print("")
-    #                 sys.exit("ERR: attempted to run a time-invariant simulation with a time-variant `Power` object")
-    #         else:
-    #                 # calculate endurance
-    #                 return self.capacity * self.voltage_mean / power.params['power']
-
+    def __updateLog(self,entrytype,message):
+        self.log[entrytype].append(message)
+        # entrytype can be `SUCCESS`, `WARNING`, or `ERROR`
 
 class Plotter:
     'Class used to make plots of simulation results'
@@ -1411,12 +1504,33 @@ class model:
 
     verbose     = False # returns self.output after simulation
     plot        = False # toggles plotting feature
-    debug       = True  # toggles debugging logs
+    debug       = {
+        'drone': False,
+        'weather': False,
+        'battery': False,
+        'mission': False,
+        'model': False
+    }  # toggles debugging logs
 
-    def __init__(self,input,verbose=False,plot=False):
+    log         = {
+        'SUCCESS': [],
+        'WARNING': [],
+        'ERROR': [],
+        'NOTE': []
+    }
+
+    outputlog   = {
+        'log': [],
+        'xlabel': None,
+        'zlabel': None
+    }
+
+    def __init__(self,input,verbose=False,plot=False,debug={}):
         self.input      = input
         self.verbose    = verbose
         self.plot       = plot
+        for entry in debug:
+            self.debug[entry] = debug[entry]
 
     def __resetParams(self):
         self.params = {
@@ -1430,7 +1544,7 @@ class model:
             "stateofhealth":90.0,
             "startstateofcharge":100.0,
             "dropsize":0.0,
-            "liquidwatercontent":0.0, #one of this and rainfallrate needs to be specified for rain, but not both
+            "liquidwatercontent":1.0, #one of this and rainfallrate needs to be specified for rain, but not both
             "rainfallrate":None,
             "temperature":15.0,
             "wind":False,
@@ -1471,12 +1585,12 @@ class model:
         self.params             = validationdata['settings']
         self.params['xvalid']   = validationdata['xvalid']
         self.params['yvalid']   = validationdata['yvalid']
-        self.classes['drone']              = Drone(validationdata['settings']['dronename'],validationdata['drone'],conversions,self.correctunits)
+        self.classes['drone']              = Drone(validationdata['settings']['dronename'],validationdata['drone'],conversions,self.correctunits,self.debug['drone'])
         self.correctunits       = True
 
     def __setupSimulation(self):
         droneparams             = getParams(drones,self.params['dronename'])
-        self.classes['drone']   = Drone(self.params['dronename'],droneparams,conversions,self.correctunits)
+        self.classes['drone']   = Drone(self.params['dronename'],droneparams,conversions,self.correctunits,debug=self.debug['drone'])
         self.correctunits       = True
 
     def __prepareSimulation(self):
@@ -1489,8 +1603,6 @@ class model:
             self.__setupValidation()
         else:
             self.__setupSimulation()
-
-        xlabel               = self.params['xlabel']
 
         # ensure xlabel is an independent variable
         independentvariables = [
@@ -1506,7 +1618,8 @@ class model:
                                 "payload",
                                 "missionspeed"
                                 ]
-        if xlabel not in independentvariables:
+        if self.params['xlabel'] not in independentvariables:
+            self.__updateLog('ERROR','Desired x variable is not independent.')
             raise(Exception("~~~~~ ERROR: desired x variable is not independent ~~~~~"))
 
         weatherlist         = []
@@ -1515,14 +1628,14 @@ class model:
         stateofhealth       = self.params['stateofhealth']
         startstateofcharge  = self.params['startstateofcharge']
         batterytechnology   = self.params['batterytechnology']
-        self.classes['battery']        = Battery(self.classes['drone'],stateofhealth,startstateofcharge, batterytechnology)
+        self.classes['battery']        = Battery(self.classes['drone'],stateofhealth,startstateofcharge, batterytechnology,debug=self.debug['battery'])
 
         # instantiate mission
         missionparams       = self.params['mission']
-        self.classes['mission']        = Mission(missionparams)
+        self.classes['mission']        = Mission(missionparams,debug=self.debug['mission'])
 
         # Temperature
-        if xlabel == 'temperature':
+        if self.params['xlabel'] == 'temperature':
             newtemperature  = self.params['xvals'][0]
         else:
             newtemperature  = self.params['temperature']
@@ -1531,7 +1644,7 @@ class model:
         weatherlist.append(temperature)
 
         # Humidity
-        if xlabel == 'humidity':
+        if self.params['xlabel'] == 'humidity':
             relativehumidity = self.params['xvals'][0]
         else:
             relativehumidity = self.params['relativehumidity']
@@ -1541,10 +1654,12 @@ class model:
 
         # Rain
         dropsize            = self.params['dropsize']
-        print("Dropsize =",dropsize)
+        if self.debug['model']:
+            print("MODEL: ----- Dropsize = ",dropsize)
         if self.params['liquidwatercontent'] != None:
             liquidwatercontent  = self.params['liquidwatercontent']
-            print("LWC =",liquidwatercontent)
+            if self.debug['model']:
+                print("MODEL: ----- LWC = ",liquidwatercontent)
             rainparams = {'dropsize':dropsize, 'liquidwatercontent':liquidwatercontent}
         elif self.params['rainfallrate'] != None:
             rainfallrate = self.params['rainfallrate']
@@ -1570,28 +1685,33 @@ class model:
         # for weatherclass in weatherlist:
         #     weatherparams = weatherparams + weatherclass.params
 
-        self.classes['weather']        = Weather(self.params['mission']['altitude'],weatherlist)
-        print("Preparing to update weather:")
+        self.classes['weather']        = Weather(self.params['altitude'],weatherlist,debug=self.debug['weather'])
+        if self.debug['model']:
+            print("Preparing to update weather:")
         self.classes['weather'].update(self.classes['drone'])
-        print("Weather updated.")
+        if self.debug['model']:
+            print("Weather updated.")
         self.classes['drone'].update(self.classes['weather'])
-        print("MODEL: ----- Preparing power class:")
-        print("MODEL: ----- drone is",self.classes['drone'])
-        print("MODEL: ----- weather is",self.classes['weather'])
-        print("MODEL: ----- mission is",self.classes['mission'])
+        if self.debug['model']:
+            print("MODEL: ----- Preparing power class:")
+            print("MODEL: ----- drone is",self.classes['drone'])
+            print("MODEL: ----- weather is",self.classes['weather'])
+            print("MODEL: ----- mission is",self.classes['mission'])
         self.classes['power']          = Power(self.classes['drone'],self.classes['weather'],self.classes['mission'])
-        print("MODEL: ----- power class instantiated.")
+        if self.debug['model']:
+            print("MODEL: ----- power class instantiated.")
         self.classes['simulation']     = Simulation(self.params['timestep'],self.params['simulationtype'])
         
+        if 'zlabel' not in self.params:
+                    self.params['zlabel']   = None
+                    self.params['zvals']    = [0]
+
     def simulate(self):
         # self.__clearLogs()
         self.__prepareSimulation()
         x               = self.params['xvals']
         y               = []
         yplot = []
-
-        if self.params['zlabel'] is None:
-            self.params['zvals']      = [0]
 
         for zvalue in self.params['zvals']:
             if self.params['zlabel']:
@@ -1603,8 +1723,9 @@ class model:
                 if foundz == False:
                     raise(Exception("MODEL: ~~~~~ ERROR: manipulated z variable not set"))
                 else:
-                    print("MODEL: ===== SUCCESS: manipulated z variable set")
-                    print("MODEL: ----- missionspeed = ",self.classes['mission'].params['missionspeed'])
+                    if self.debug['model']:
+                        print("MODEL: ===== SUCCESS: manipulated z variable set")
+                        print("MODEL: ----- missionspeed = ",self.classes['mission'].params['missionspeed'])
 
             # i = 0
             # for weatherclass in self.classes['weather'].weatherlist:
@@ -1662,8 +1783,9 @@ class model:
                 if foundx == False:
                     raise(Exception("MODEL: ~~~~~ ERROR: manipulated x variable not set"))
                 else:
-                    print("MODEL: ===== SUCCESS: manipulated x variable set")
-                    print("MODEL: ----- missionspeed = ",self.classes['mission'].params['missionspeed'])
+                    if self.debug['model']:
+                        print("MODEL: ===== SUCCESS: manipulated x variable set")
+                        print("MODEL: ----- missionspeed = ",self.classes['mission'].params['missionspeed'])
 
                 # update value
                 ## determine x location
@@ -1694,12 +1816,12 @@ class model:
                 self.classes['weather'].update(self.classes['drone'])
                 self.classes['mission'].update()
                 self.classes['power'].update(self.classes['drone'],self.classes['weather'],self.classes['mission'])
-
-                print("========================= ABOUT TO RUN ========================")
+                if self.debug['model']:
+                    print("========================= ABOUT TO RUN ========================")
                 # self.classes['simulation'].run(self.classes['drone'],self.classes['battery'],self.classes['power'],self.classes['weather'],self.classes['mission'])
                 self.__runSimpleModel()
-                print("=========================   FINISHED   ========================")
-                self.__updateOutput([self.classes['drone'],self.classes['battery'],self.classes['power'],self.classes['weather'],self.classes['mission'],self.classes['simulation']],self.params['zvals'].index(zvalue))
+                if self.debug['model']:
+                    print("=========================   FINISHED   ========================")
 
                 sety = False
                 for myclass in self.classes:
@@ -1708,9 +1830,14 @@ class model:
                         sety = True
                         break
                 if sety == False:
-                    raise(Exception("MODEL: ~~~~~ ERROR: control variable not set"))
+                    self.__updateLog('ERROR','Dependent variable not set.')
+                    raise(Exception("MODEL: ~~~~~ ERROR: dependent variable not set"))
                 else:
-                    print("MODEL: ===== SUCCESS: dependent variable set")
+                    if self.debug['model']:
+                        print("MODEL: ===== SUCCESS: dependent variable set")
+                
+                self.__updateOutput([self.classes['drone'],self.classes['battery'],self.classes['power'],self.classes['weather'],self.classes['mission'],self.classes['simulation']],self.params['zvals'].index(zvalue))
+                self.__updateOutputLog([self.classes['drone'],self.classes['battery'],self.classes['power'],self.classes['weather'],self.classes['mission'],self.classes['simulation']],xvalue,zvalue)
 
             yplot.append(y)
             y = []
@@ -1724,7 +1851,8 @@ class model:
         # print("EXE.py:      Desired Result is       ",self.params['ylabel'])
 
         if self.params['zlabel']:   
-            print("EXE.py:      Z iterator is           ",self.params['zlabel'])
+            if self.debug['model']:
+                print("EXE.py:      Z iterator is           ",self.params['zlabel'])
             self.output['zvals'] = self.params['zvals']
         else:
             self.output['zvals'] = "undefined"
@@ -1794,3 +1922,18 @@ class model:
                         self.output[param].append([])
                 if param != "model" and param != "powerModel":
                     self.output[param][zindex].append(myclass.params[param])
+    
+    def __updateLog(self,entrytype,message):
+        self.log[entrytype].append(message)
+        # entrytype can be `SUCCESS`, `WARNING`, or `ERROR`
+
+    def __updateOutputLog(self,classes,xvalue,zvalue):
+        self.outputlog['log'].append({})
+        self.outputlog['log'][-1]['xvalue'] = xvalue
+        self.outputlog['log'][-1]['zvalue'] = zvalue
+
+        for myclass in classes+[self]:
+            for entrytype in myclass.log:
+                if entrytype not in self.outputlog['log'][-1]:
+                    self.outputlog['log'][-1][entrytype] = []
+                self.outputlog['log'][-1][entrytype].append(myclass.log[entrytype])

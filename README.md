@@ -277,7 +277,7 @@ Units of temperature are given in degrees Celcius.
 
 `'xvals'` is a list containing all the values of x the simulation will loop through and produce a single data point for. 
 
-`'zlabel'` can be specified to any of the variables used for the `'xlabel'` parameter (see list above) to loop through. This will produce a curve for each of the values in `'zvals'` and plot them on the same plot. This is useful for looping through a weather effect, such as temperature or relative humidity, to see their effects on a plot of range vs payload.
+`'zlabel'` can be specified to any of the variables used for the `'xlabel'` parameter (see list above) to loop through. This will produce a curve for each of the values in `'zvals'` and plot them on the same figure. This is useful for looping through a weather effect, such as temperature or relative humidity, to see their effects on a plot of range vs payload.
 
 `'title'` is the title displayed on the top of the plot, followed by the current date. Currently, the title needs to be one word. A title of multiple words can have each word separated by an underscore en lieu of a space.
 
