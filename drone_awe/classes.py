@@ -1510,7 +1510,8 @@ class model:
         'weather': False,
         'battery': False,
         'mission': False,
-        'model': False
+        'model': False,
+        'power': False
     }  # toggles debugging logs
 
     log         = {
