@@ -344,6 +344,8 @@ class Power:
         self.params['power']                = (self.params['thrust']*self.params['velocityinduced'] + \
                                                 self.params['drag']*mission.params['missionspeed'] + \
                                                 self.params['bladeprofilepower'])/self.params['efficiencypropulsive']
+        # self.params['power']                = self.params['thrust'] * (mission.params['missionspeed']*np.sin(self.params['alpha'] + self.params['velocityinduced']))
+
         if self.debug:
             self.__printParameters(drone,weather,mission)
 
@@ -1582,6 +1584,13 @@ class model:
 
         for key in self.input:
             self.params[key] = self.input[key]
+
+        self.output     = {}
+        self.outputlog  = {
+            'log': [],
+            'xlabel': None,
+            'zlabel': None
+        }
 
     def __setupValidation(self):
         validationdata = getParams(validationdatabase,self.params['validationcase'])
