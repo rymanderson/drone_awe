@@ -1,3 +1,3 @@
 import drone_awe
-a = drone_awe.model({'debug':True,'validation':True,'rain':True,'dropsize':0.004,'zlabel':'payload','zvals':[0,.1,.2],'liquidwatercontent':0.2},plot=True,debug={'drone':False,'battery':False,'power':False,'weather':False,'mission':False,'model':True})
+a = drone_awe.model({'validation':True,'dropsize':0.000,'zlabel':'payload','zvals':[0,.1,.2],'liquidwatercontent':0.0},plot=True,debug={'drone':False,'battery':False,'power':True,'weather':False,'mission':False,'model':False})
 a.simulate()

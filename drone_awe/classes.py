@@ -521,7 +521,7 @@ class Power:
         self.params['velocityinduced']  = m.velocityinduced.value[0]
         self.params['thrust']           = m.thrust.value[0]
         self.params['drag']             = m.drag.value[0]
-        self.params['dragarea']             = m.dragarea.value[0]
+        self.params['dragarea']         = m.dragarea.value[0]
 
         if self.debug:
             self.__print5('__solveModel AFTER')
@@ -531,6 +531,7 @@ class Power:
             print('POWER: ----- airdensity    ',airdensity)
             print('POWER: ----- rotorarea     ',rotorarea)
             print('POWER: ----- rotorquantity ',rotorquantity)
+            print('POWER: ----- power         ',self.params['power'])
             print('')
             print('')
 
@@ -565,7 +566,7 @@ class Power:
         self.params['dragcoefficient'] = 2.0
     
     def __setBladeProfilePower(self):
-        self.params['bladeprofilepower'] = 0.0
+        self.params['bladeprofilepower'] = 50.0
 
     def __updateLog(self,entrytype,message):
         self.log[entrytype].append(message)
@@ -1698,7 +1699,7 @@ class model:
             print("MODEL: ----- drone is",self.classes['drone'])
             print("MODEL: ----- weather is",self.classes['weather'])
             print("MODEL: ----- mission is",self.classes['mission'])
-        self.classes['power']          = Power(self.classes['drone'],self.classes['weather'],self.classes['mission'])
+        self.classes['power']          = Power(self.classes['drone'],self.classes['weather'],self.classes['mission'], debug=self.debug['power'])
         if self.debug['model']:
             print("MODEL: ----- power class instantiated.")
         self.classes['simulation']     = Simulation(self.params['timestep'],self.params['simulationtype'])
@@ -1941,4 +1942,4 @@ class model:
             for entrytype in myclass.log:
                 if entrytype not in self.outputlog['log'][-1]:
                     self.outputlog['log'][-1][entrytype] = []
-                self.outputlog['log'][-1][entrytype].append(myclass.log[entrytype])
+                self.outputlog['log'][-1][entrytype] += myclass.log[entrytype]
