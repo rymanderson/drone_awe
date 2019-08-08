@@ -1724,7 +1724,8 @@ class model:
         x               = self.params['xvals']
         y               = []
         yplot = []
-
+        index = 0
+        
         for zvalue in self.params['zvals']:
             if self.params['zlabel']:
                 for myclass in self.classes:
@@ -1852,8 +1853,9 @@ class model:
                 
                 self.__updateOutput([self.classes['drone'],self.classes['battery'],self.classes['power'],self.classes['weather'],self.classes['mission'],self.classes['simulation']],self.params['zvals'].index(zvalue))
                 # print('MODEL: ----- xlabel is ',self.params['xlabel'])
-                self.__updateOutputLog([self.classes['drone'],self.classes['battery'],self.classes['power'],self.classes['weather'],self.classes['mission'],self.classes['simulation']],xvalue,zvalue)
-
+                self.__updateOutputLog([self.classes['drone'],self.classes['battery'],self.classes['power'],self.classes['weather'],self.classes['mission'],self.classes['simulation']],xvalue,zvalue,index)
+                index += 1
+                
             yplot.append(y)
             y = []
 
@@ -1942,11 +1944,12 @@ class model:
         self.log[entrytype].append(message)
         # entrytype can be `SUCCESS`, `WARNING`, or `ERROR`
 
-    def __updateOutputLog(self,classes,xvalue,zvalue):
+    def __updateOutputLog(self,classes,xvalue,zvalue,index):
         #TODO: add function to set self.outputlog['xlabel'] and self.outputlog['zlabel']
         self.outputlog['log'].append({})
         self.outputlog['log'][-1]['xvalue'] = xvalue
         self.outputlog['log'][-1]['zvalue'] = zvalue
+        self.outputlog['log'][-1]['index']  = index
 
         for myclass in classes+[self]:
             for entrytype in myclass.log:
