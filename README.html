@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>README.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: "Segoe WPC", "Segoe UI", "SFUIText-Light", "HelveticaNeue-Light", sans-serif, "Droid Sans Fallback";
+	font-size: 14px;
+	padding: 0 12px;
+	line-height: 22px;
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	color: #4080D0;
+	text-decoration: none;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+h1 code,
+h2 code,
+h3 code,
+h4 code,
+h5 code,
+h6 code {
+	font-size: inherit;
+	line-height: auto;
+}
+
+a:hover {
+	color: #4080D0;
+	text-decoration: underline;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left: 5px solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 14px;
+	line-height: 19px;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+.mac code {
+	font-size: 12px;
+	line-height: 18px;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+/** Theming */
+
+.vscode-light,
+.vscode-light pre code {
+	color: rgb(30, 30, 30);
+}
+
+.vscode-dark,
+.vscode-dark pre code {
+	color: #DDD;
+}
+
+.vscode-high-contrast,
+.vscode-high-contrast pre code {
+	color: white;
+}
+
+.vscode-light code {
+	color: #A31515;
+}
+
+.vscode-dark code {
+	color: #D7BA7D;
+}
+
+.vscode-light pre:not(.hljs),
+.vscode-light code > div {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre:not(.hljs),
+.vscode-dark code > div {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre:not(.hljs),
+.vscode-high-contrast code > div {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+.vscode-light blockquote,
+.vscode-dark blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.vscode-high-contrast blockquote {
+	background: transparent;
+	border-color: #fff;
+}
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family:  "Meiryo", "Segoe WPC", "Segoe UI", "SFUIText-Light", "HelveticaNeue-Light", sans-serif, "Droid Sans Fallback";
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+
+</head>
+<body>
+<h1 id="drone-awe-drone-applications-in-weather-environments">Drone-AWE: Drone Applications in Weather Environments</h1>
+<p>This repository is being developed to advance the state of the art of drone performance predictions under a wide range of weather and battery conditions with mission planning in mind. An interactive GUI is available at http://droneecon.com. This README will explain general usage as well as the underlying theory for the models used, as currently implemented. Note that <em>Drone-AWE</em> is a work in progress (see <strong>Future Work</strong>). This document will explain general usage for the latter, as well as the engineering theory at work behind the scenes.</p>
+<h2 id="installation">Installation</h2>
+<p>Drone-AWE may be used in two ways: using the GUI available at http://droneecon.com, or by using the source code directly. To use the source code directly, install using</p>
+<pre class="hljs"><code><div>pip install drone_awe
+</div></code></pre>
+<h2 id="usage">Usage</h2>
+<h3 id="basic-usage">Basic Usage</h3>
+<p>Base functionality is achieved by running the following:</p>
+<pre class="hljs"><code><div>import drone_awe
+m = drone_awe.model(args)
+m.simulate()
+</div></code></pre>
+<p>where <code>args</code> is a dictionary containing simulation parameters. Note that for every parameter not specified in <code>args</code>, a default value is used. It is possible to run the default simulation by passing an empty dictionary into the <code>drone_awe.model()</code> method:</p>
+<pre class="hljs"><code><div>import drone_awe
+m = drone_awe.model({})
+m.simulate()
+</div></code></pre>
+<p>Settable dictionary keys with example values for <code>args</code> include the following:</p>
+<pre class="hljs"><code><div>{
+    &quot;validation&quot;:False,
+    &quot;validationcase&quot;:&quot;DiFranco2016&quot;,
+    &quot;dronename&quot;:&quot;dji-Mavic2&quot;,
+    &quot;batterytechnology&quot;:&quot;near-future&quot;,
+    &quot;stateofhealth&quot;:90.0,
+    &quot;startstateofcharge&quot;:100.0,
+    &quot;rain&quot;:False,
+    &quot;dropsize&quot;:1.0,
+    &quot;liquidwatercontent&quot;:1.0,
+    &quot;temperature&quot;:15.0,
+    &quot;wind&quot;:False,
+    &quot;windspeed&quot;:10.0,
+    &quot;winddirection&quot;:0.0,
+    &quot;relativehumidity&quot;:0.0,
+    &quot;mission&quot;: {
+            &quot;missionspeed&quot;: 10.0,
+            &quot;altitude&quot;:100.0,
+            &quot;heading&quot;:0.0,
+            &quot;payload:0.0
+        },
+    &quot;timestep&quot;:1,
+    &quot;plot&quot;:True,
+    &quot;xlabel&quot;:&quot;missionspeed&quot;,
+    &quot;ylabel&quot;:&quot;power&quot;,
+    &quot;title&quot;:&quot;First_test&quot;,
+    &quot;simulationtype&quot;:&quot;simple&quot;,
+    &quot;model&quot;:&quot;abdilla&quot;,
+    &quot;xvals&quot;:[0,1,2,3,4,5],
+    &quot;weathereffect&quot;:&quot;temperature&quot;,
+    &quot;weathervals&quot;:[10,20,30,40]
+}
+</div></code></pre>
+<p>These are explained further in <strong>Settings</strong>. After a <code>drone_awe.model</code> object is instantiated, settings can be changed by modifying the <code>input</code> class variable as:</p>
+<pre class="hljs"><code><div>m.input['xlabel'] = 'payload'
+m.input['validationcase'] = 'Stolaroff2018'
+</div></code></pre>
+<p>The simulation must then be re-run using:</p>
+<pre class="hljs"><code><div>m.simulate()
+</div></code></pre>
+<h3 id="plotting">Plotting</h3>
+<p>An optional boolean may be set to produce a plot on runtime by running:</p>
+<pre class="hljs"><code><div>m = drone_awe.model({},plot=True)
+</div></code></pre>
+<p>when a <code>drone_awe.model</code> is instantiated. Alternatively, the <code>drone_awe.model</code>'s <code>plot</code> variable may be set at any time:</p>
+<pre class="hljs"><code><div>m.plot = True
+</div></code></pre>
+<h3 id="settings">Settings</h3>
+<p>The following subsections explain the use of various settings of a <code>drone_awe.model</code> object.</p>
+<h4 id="dronename"><code>'dronename'</code></h4>
+<p><code>'dronename'</code> must be set to a string that is defined in the drone database. To access a dictionary containing all supported drones, use the following methods:</p>
+<pre class="hljs"><code><div>droneDictionary = drone_awe.drones
+</div></code></pre>
+<p>If a drone or validation case does not exist in the drone database, it may still be used by setting a custom dictionary:</p>
+<pre class="hljs"><code><div>m.drone = droneDictionary
+</div></code></pre>
+<p>where <code>droneDictionary</code> is a dictionary with the same keys as the following:</p>
+<pre class="hljs"><code><div>{
+    'id': 'dji-Mavic2',
+    'wingtype': 'rotary',
+    'diagonal': 0.354,
+    'takeoffweight': 0.907,
+    'speedmax': 20,
+    'altitudemax': 6000,
+    'endurancemax': 31,
+    'endurancemaxspeed': 6.944,
+    'endurancemaxhover': 29,
+    'rangemax': 18000,
+    'rangemaxspeed': 13.889,
+    'temperaturemin': -10,
+    'chargerpowerrating': 60,
+    'batterytype': 'LiPo',
+    'batterycapacity': 3850,
+    'batteryvoltage': 15.4,
+    'batterycells': 4,
+    'batteryenergy': 59.29,
+    'batterymass': 0.297,
+    'waterproof': 'no',
+    'windspeedmax': 10.8,
+    'batteryrechargetime': 90,
+    'rotorquantity': 4,
+    'rotordiameter': 0.2,
+    'cruisespeed': 6.94,
+    'payload': 0.0,
+    'length': 0.322,
+    'width': 0.242,
+    'height': 0.084
+}
+</div></code></pre>
+<p>Note that not all parameters need be specified, but if a simulation is run that requires unspecified parameters, the model will not run.</p>
+<h4 id="validation-and-validationcase"><code>'validation'</code> and <code>'validationcase'</code></h4>
+<p>To view validation cases for <code>drone_awe</code> models, set <code>'validation'=True</code> and <code>'validationcase'</code> to a string contained in the validation case database. To access a dictionary containing all supported validation cases, run the following:</p>
+<pre class="hljs"><code><div>validationDictionary = drone_awe.validationdata()
+</div></code></pre>
+<p>Additionally, <code>validationCaseDictionary</code> is a dictionary with the following format:</p>
+<pre class="hljs"><code><div>{
+    'id': 'Stolaroff2018',
+    'xvalid': [1.358974359,1.7179487179,1.6923076923,1.7692307692,1.7692307692,1.8205128205,1.8717948718,1.8974358974,1.9230769231,1.9743589744,2.0512820513,2.1025641026,2.1025641026,2.1794871795,2.2820512821,2.3076923077,2.3333333333,2.4358974359,2.5384615385,2.5384615385,2.6666666667,2.7948717949,2.9487179487,3.1025641026,3.2564102564,3.358974359,3.4615384615,3.641025641,3.7435897436,3.8717948718,4.0512820513,4.2564102564,4.358974359,4.641025641,4.8974358974,5.8461538462,6,6.2820512821,6.5384615385,7.1538461538,7.4871794872,7.8205128205,8.4871794872,9.1794871795,9.7692307692,10.2564102564,10.6923076923,11.1282051282,11.5897435897],
+    'yvalid': [133.7510729614,149.2375075128,142.6477385276,144.5897859156,140.9450186657,141.7583868756,142.3874173587,140.4340604922,139.3656195241,139.5335348046,140.2321151941,139.9589946754,136.1689649626,138.3618186589,141.3711557508,139.4001574523,136.7492021569,136.5131929807,137.712167001,133.136399421,135.7755034665,136.58240428,141.8694500174,143.7278953027,145.8751386173,144.4503136349,143.5492800366,144.4966689523,140.8944307591,139.7885398414,140.0842115956,140.6905892611,140.7593265104,140.4412051028,148.3297356325,161.0751453894,160.7738527567,158.8079335653,157.0439596719,161.2248774665,165.1381601781,164.7032531681,177.1408013138,175.6982333173,190.095233258,197.4485952036,209.0736216573,203.7684942987,215.7551870381],
+    'drone': {
+        'validationcase':'Stolaroff2018',
+        'wingtype': 'rotary',
+        'rotorquantity': 4,
+        'takeoffweight': 1.3,
+        'batterytype': 'LiPo',
+        'batteryvoltage': 11.1,
+        'batterymass': 0.262,
+        'props': '10x4.7',
+        'endurancemaxhover': 16,
+        'payloadmax': 0.4,
+        'batterycapacity': 5500,
+        'payload': 0.0,
+        'rotordiameter': 0.254,
+        'batterycells': 3,
+        'length': 0.280,
+        'width': 0.140,
+        'height': 0.100,
+        'waterproof': 'no'
+        },
+    'settings': {
+        'dronename': 'drone',
+        'stateofhealth': 100.0,
+        'startstateofcharge': 100.0,
+        'altitude': 100.0,
+        'temperaturesealevel': 15.0,
+        'rain': False,
+        'dropsize': 0.0,
+        'liquidwatercontent': 1.0,
+        'temperature': 15.0,
+        'wind': False,
+        'windspeed': 0.0,
+        'winddirection': 0.0,
+        'relativehumidity': 85.0,
+        'icing': False,
+        &quot;mission&quot;: {
+            &quot;missionspeed&quot;: 10.0
+        },
+        'timestep': 1,
+        'xlabel': 'missionspeed',
+        'ylabel': 'alpha',
+        'title': 'Stolaroff',
+        'simulationtype': 'simple',
+        'model': 'abdilla',
+        'xvals': [0.0,1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0,9.0,10.0,11.0,12.0,13.0,14.0,15.0],
+        'validation': False,
+        'validationcase': 'Stolaroff2018',
+        'batterytechnology': 'current'
+        }
+}
+</div></code></pre>
+<h4 id="ld-and-propulsiveefficiency"><code>'L/D'</code> and <code>'propulsiveefficiency'</code></h4>
+<p>When simulating a fixed-wing drone, the current model requires input parameters for the lift-to-drag ratio (<code>'L/D'</code>) and the efficiency of the propulsive system (<code>'propulsiveefficiency'</code>). Ballpark estimates for small UAVs are on the order of 10 and 30%, respectively, although these values heavily depend on the specific geometries and propulsive systems of the drones.</p>
+<h4 id="battery-parameters">Battery parameters</h4>
+<h4 id="batterytechnology"><code>'batterytechnology'</code></h4>
+<p><code>'batterytechnology'</code> must be set to one of the following options: <code>'current'</code>, <code>'near-future'</code>, or <code>'far-future'</code>. <code>'current'</code> will use the current battery capacity as specified in <code>drone.params</code>. <code>'near-future'</code> projects a future capacity in five years based on an increase of 3.5% of battery capacity each year. <code>'far-future'</code> projects battery capacity for lithium-air batteries, about ten times the capacity of current LiPo batteries.</p>
+<h4 id="stateofhealth-and-stateofcharge"><code>'stateofhealth'</code> and <code>'stateofcharge'</code></h4>
+<p><code>'stateofhealth'</code> refers to the amount of capacity contained within the battery relative to its initial capacity at first use. 100% would be a new battery. LiPo batteries (most commonly used battery for drones) are typically retired when their state of health falls to 80-85%. At lower states of health, the battery capacity is decreased and cycles through a full charge more quickly.</p>
+<p><code>'stateofcharge'</code> refers to the current capacity level of the battery, where 100% is fully charged (regardless of how much the battery has been used before), and 0% is a dead battery.</p>
+<h4 id="weather-parameters">Weather parameters</h4>
+<h4 id="dropsize-liquidwatercontent-and-rainfallrate"><code>'dropsize'</code>, <code>'liquidwatercontent'</code> and <code>'rainfallrate'</code></h4>
+<p>These parameters specifiy rain characteristics. If there is no rain in the simulation, set these to 0.0.</p>
+<p><code>'dropsize'</code> refers to the diameter of a raindrop (assuming a spherical shape), with units of meters. <code>'liquidwatercontent'</code> refers to the amount of water in a given volume of air, with units of kg/m^3. <code>'rainfallrate'</code> is the rate of rainfall in units of mm/hr, which translates to litres per cubic meter per hour.</p>
+<p>Only one of <code>'liquidatercontent'</code> and <code>'rainfallrate'</code> needs to be specified.</p>
+<h4 id="temperature"><code>'temperature'</code></h4>
+<p>Units of temperature are given in degrees Celcius.</p>
+<h4 id="relativehumidity"><code>'relativehumidity'</code></h4>
+<p><code>'relativehumidity'</code> refers to water content in the air, ranging from 0% to 100%.</p>
+<h4 id="mission-parameters">Mission parameters</h4>
+<p><code>'mission'</code> is a dictionary with the following keys:</p>
+<ul>
+<li>
+<p><code>'missionspeed'</code>— the cruise velocity of the drone, with units of m/s.</p>
+</li>
+<li>
+<p><code>'altitude'</code>— in units of meters.</p>
+</li>
+<li>
+<p><code>'heading'</code>— the heading angle of the drone, in units of ___________.</p>
+</li>
+<li>
+<p><code>'payload'</code>— the mass of any exra payload attached to the drone (e.g., camera), in units of kg.</p>
+</li>
+</ul>
+<h4 id="plotting-parameters">Plotting parameters</h4>
+<p><code>'xlabel'</code> and <code>'ylabel'</code> not only specify axis labels of the plot, but also tell the simulation what to solve for (<code>'ylabel'</code>) and what parameter to loop through (<code>'xlabel'</code>). <code>'ylabel'</code> can be <code>range</code>, <code>endurance</code>, or <code>power</code>. <code>'xlabel'</code> can be any variable from the following list:</p>
+<pre class="hljs"><code><div>&quot;startstateofcharge&quot;,
+&quot;altitude&quot;,
+&quot;temperature&quot;,
+&quot;dropsize&quot;,
+&quot;liquidwatercontent&quot;,
+&quot;newtemperature&quot;,
+&quot;windspeed&quot;,
+&quot;winddirection&quot;,
+&quot;relativehumidity&quot;,
+&quot;payload&quot;,
+&quot;missionspeed&quot;
+</div></code></pre>
+<p><code>'xvals'</code> is a list containing all the values of x the simulation will loop through and produce a single data point for.</p>
+<p><code>'zlabel'</code> can be specified to any of the variables used for the <code>'xlabel'</code> parameter (see list above) to loop through. This will produce a curve for each of the values in <code>'zvals'</code> and plot them on the same figure. This is useful for looping through a weather effect, such as temperature or relative humidity, to see their effects on a plot of range vs payload.</p>
+<p><code>'title'</code> is the title displayed on the top of the plot, followed by the current date. Currently, the title needs to be one word. A title of multiple words can have each word separated by an underscore en lieu of a space.</p>
+<h2 id="theory">Theory</h2>
+<p><code>Drone AWE</code> is intended to predict performance parameters of rotary and fixed-wing drones based on readily-available specifications. To accomplish this, the power requirements for a given flight maneuver is calculated and used to predict battery drain behavior. Then, parameters such as range and endurance can be calculated. Comprehensive state data is collected at each step of a simulation, providing a versatile data set as output for study.</p>
+<h3 id="power">Power</h3>
+<h4 id="rotary-drones">Rotary Drones</h4>
+<p>For rotary drones, power consumption is predicted in two steps. First, model parameters are calibrated based on known specifications, like maximum hover time and rotor diameter. Then, momentum theory is used to predict the power consumption.</p>
+<h4 id="calibration">Calibration</h4>
+<h4 id="momentum-theory">Momentum Theory</h4>
+<p>According to rotor momentum theory, five equations govern the flight of a rotorcraft:</p>
+<ol>
+<li>$T = \sqrt{W^2 + D^2}$</li>
+<li>$tan(\alpha) = \frac{D}{W}$</li>
+<li>$D = \frac{1}{2} \rho V_\infty^2 C_D A_{\bot}$</li>
+<li>$v_i = \frac{T}{2 A_{rotor} N_{rotor} \rho \sqrt{V_\infty^2 cos^2(\alpha) + (V_\infty sin(\alpha) + v_i^2)}}$</li>
+<li>$A_{\bot} = A_{front} cos(\alpha) + A_{top} sin(\alpha)$</li>
+</ol>
+<h4 id="fixed-wing-drones">Fixed-Wing Drones</h4>
+<h2 id="classes">Classes</h2>
+<p>This section contains a detailed description of each class, all contained in Classes.py.</p>
+<ul>
+<li>
+<p>the <code>Drone</code> class</p>
+<ul>
+<li>
+<p>class variables contain:</p>
+<ul>
+<li>
+<p>data sheet specifications of specific drone models (e.g., the Mavic 2 Pro), including</p>
+<ul>
+<li>battery size</li>
+<li>battery type</li>
+<li>range under specified conditions</li>
+<li>fixed wing or rotary wing</li>
+<li>etc.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>methods calculate certain characteristics based on available information</p>
+</li>
+</ul>
+</li>
+<li>
+<p>the <code>Battery</code> class</p>
+<ul>
+<li>
+<p>class variables describe:</p>
+<ul>
+<li>
+<p>properties of specific batteries used to model their discharge characteristics, including</p>
+<ul>
+<li>battery type</li>
+<li>number of cells</li>
+<li>low, nominal, and charged cell voltages</li>
+</ul>
+</li>
+<li>
+<p>Real-time discharge characteristics for simulation, including</p>
+<ul>
+<li>instantaneous voltage</li>
+<li>instantaneous current</li>
+<li>instantaneous state of charge</li>
+<li>current state of health</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>methods are used to update class variables using information from the <code>params/</code> directory</p>
+</li>
+</ul>
+</li>
+<li>
+<p>the <code>Power</code> class</p>
+<ul>
+<li>
+<p>class variables describe</p>
+<ul>
+<li>baseline power consumption</li>
+<li>an array of 'correction' objects used to modify the power consumption class variable due to weather or other effects (these could be the weather effect classes, actually)</li>
+<li>total power consumption</li>
+</ul>
+</li>
+<li>
+<p>methods are used to</p>
+<ul>
+<li>update the total power consumption class variable</li>
+<li>append <code>PowerCorrection</code> objects to <code>Power</code> objects using the <code>addCorrection</code> method</li>
+<li>throw an error if <code>addCorrection</code> attempts to append a time-variant <code>PowerCorrection</code> object to a time-invariant <code>Power</code> object</li>
+<li>the <code>PowerCorrection</code> method
+<ul>
+<li>adjustments to the baseline power requirements of the drone</li>
+<li>whether the simulation is time-variant or time-invariant</li>
+<li>methods perform miscellaneous book-keeping functions</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>the <code>Weather</code> class</p>
+<ul>
+<li>
+<p>class variables describe</p>
+<ul>
+<li>an instance of each weather effect to be modeled</li>
+<li>droplet size (rain)</li>
+<li>Liquid Water Content (LWC) (rain)</li>
+<li>rainfall rate (rain)</li>
+</ul>
+</li>
+<li>
+<p>the <code>__updateRain</code> method</p>
+<ul>
+<li>For all drone types, this calculates the momentum imparted to the drone from falling rain droplets based on their size and liquid water content.</li>
+</ul>
+</li>
+<li>
+<p>the <code>__getWebernumber</code> method</p>
+<ul>
+<li>Calculates weber number based on rain density, velocity, diameter, and frequency. This is used to obtain momentum in the __updateRain method.</li>
+</ul>
+</li>
+<li>
+<p>the <code>__getSurfaceTension</code> method</p>
+<ul>
+<li>
+<p>empirically interpolates surfaces tension based on current temperature</p>
+</li>
+<li>
+<p>the <code>Temperature</code> class</p>
+<ul>
+<li>
+<p>class variables describe</p>
+<ul>
+<li>new temperature?</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>the <code>Humidity</code> class</p>
+<ul>
+<li>
+<p>class variables describe</p>
+<ul>
+<li>relative humidity</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>the <code>Wind</code> class</p>
+<ul>
+<li>
+<p>class variables describe</p>
+<ul>
+<li>wind speed</li>
+<li>wind direction</li>
+<li>amount of turbulence?</li>
+<li>variation in speed and/or direction?</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>the <code>Gust</code> class</p>
+<ul>
+<li>
+<p>class variables describe</p>
+<ul>
+<li>frequency</li>
+<li>amplitude</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>the <code>Ice</code> class</p>
+<ul>
+<li>Because of modeling difficulty, this class does not attempt yet to model icing effects. It may in the future be used to identify if icing conditions are present.</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>the <code>Mission</code> class</p>
+<ul>
+<li>
+<p>class variables describe</p>
+<ul>
+<li>mission speed</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>the <code>Simulation</code> class</p>
+<ul>
+<li>class variables describe
+<ul>
+<li>start time</li>
+<li>end time</li>
+<li>timestep</li>
+<li>current timestep index</li>
+<li>current time</li>
+<li>methods are used to run and store simulation information, including procedures to get range and endurance</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p>NOTE: the model is based on power consumption to accomodate future development. The <code>Power</code> class is designed to receive an indefinite number of modifications based on weather effects</p>
+<ul>
+<li>
+<p>the <code>Plotter</code> class</p>
+<ul>
+<li>plots results according to labels and titles specified by the user in the <code>settings.txt</code> file. Methods can plot a line or scatter plots. The validation method plots results on top of specified validation data.</li>
+</ul>
+</li>
+</ul>
+<h2 id="units">Units</h2>
+<p>Properties and their respective units are converted within the simulation to SI units, and then converted back. Those units are:</p>
+<!-- These could probably be better organized -->
+<h3 id="electricity">Electricity</h3>
+<ul>
+<li>Capacity: <em>milliamp-hours [mAh]</em></li>
+<li>Voltage: <em>volts [V]</em></li>
+<li>Current: <em>amperes [A]</em></li>
+<li>Resistance: <em>ohms [Ω]</em></li>
+</ul>
+<h3 id="mechanics">Mechanics</h3>
+<ul>
+<li>
+<p>Velocity/Speed: <em>meters per second [m/s]</em></p>
+</li>
+<li>
+<p>Power: <em>watts [W]</em></p>
+</li>
+<li>
+<p>Endurance or Flight time: <em>minutes [min]</em></p>
+</li>
+<li>
+<p>Altitude: <em>meters [m]</em></p>
+</li>
+<li>
+<p>mass: <em>kilograms [kg]</em></p>
+<ul>
+<li>note that &quot;takeoff weight&quot; is measured in mass units <!-- I feel weird quoting a weight in mass units, but I put this here because the .param files seem to use kg. Which may be fine. Let me know if you have any thoughts. :)  Yeah, that is kind of strange. --></li>
+</ul>
+</li>
+</ul>
+<h3 id="miscellaneous">Miscellaneous</h3>
+<ul>
+<li>
+<p>Temperature: <em>degrees Celcius [°C]</em></p>
+</li>
+<li>
+<p>Wind Resistance: <em>meters per second [m/s]</em></p>
+<p>*refers to the maximum wind speed the drone can resist</p>
+</li>
+<li>
+<p>Battery re-charge time: <em>minutes [min]</em></p>
+</li>
+</ul>
+<h2 id="parameter-files">Parameter Files</h2>
+<h3 id="simulation">Simulation</h3>
+<ul>
+<li>
+<p>The settings list file contains all the necessary simulation parameters the code will look through before running simulations. These include:</p>
+<ul>
+<li>
+<p>validation (True/False)</p>
+<ul>
+<li>If validation is True, the program reads in the next value, validationcase, and looks for the settings file under that directory in params/Validation/, and ignores the rest of the current settings file.</li>
+</ul>
+</li>
+<li>
+<p>validationcase</p>
+<ul>
+<li>Specifies which validation case is being tested. Irrelevant if validation is False.</li>
+</ul>
+</li>
+<li>
+<p>drone (True/False)</p>
+</li>
+<li>
+<p>dronename</p>
+</li>
+<li>
+<p>battery state of health</p>
+</li>
+<li>
+<p>battery beginning state of charge</p>
+</li>
+<li>
+<p>altitude</p>
+</li>
+<li>
+<p>sea level temperature</p>
+</li>
+<li>
+<p>rain (True/False)</p>
+<ul>
+<li>droplet size</li>
+<li>LWC</li>
+</ul>
+</li>
+<li>
+<p>Temperature</p>
+<ul>
+<li>New temperature</li>
+</ul>
+</li>
+<li>
+<p>Humidity</p>
+<ul>
+<li>Relative humidity</li>
+</ul>
+</li>
+<li>
+<p>Wind</p>
+<ul>
+<li>Wind speed</li>
+<li>Wind direction</li>
+</ul>
+</li>
+<li>
+<p>Icing</p>
+</li>
+<li>
+<p>Timestep</p>
+</li>
+<li>
+<p>plot (True/False)</p>
+<ul>
+<li>xlabel</li>
+<li>ylabel</li>
+<li>axis title</li>
+</ul>
+</li>
+<li>
+<p>simulation type</p>
+<ul>
+<li>simple is the only option for now</li>
+</ul>
+</li>
+<li>
+<p>range of vx-values</p>
+<ul>
+<li>
+<p>xbegin</p>
+</li>
+<li>
+<p>xend</p>
+</li>
+<li>
+<p>xnumber</p>
+<ul>
+<li>the simulation will loop through xnumber of the model from xbeginning to xend, according to what is put as the xlabel (also the x-variable)</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p>NOTE: For the plotting x- and y-labels, choose from the following parameters to plot:</p>
+<ul>
+<li>range</li>
+<li>endurance</li>
+<li>payload</li>
+</ul>
+<h3 id="drone">Drone</h3>
+<p>There are <code>.param</code> files in the Drone directory each contain parameters specific to each drone. They are labled with the company's name or abbreviation in lowercase letters followed by a dash (-) and then the name of the drone (e.g., dji-Mavic2). New drones needing to be tested can follow similar formats, with a space (<code>&quot; &quot;</code>) delimiter.</p>
+<h3 id="batteries">Batteries</h3>
+<p>Similar to the Drone <code>.param</code> files, battery <code>.param</code> files exist for each type of battery tested. These parameters assist in determining the discharge rate over time and amount of specific energy and power available for different types of batteries.</p>
+<h2 id="functionspy-%E2%80%94-commonly-used-functions">functions.py — Commonly used functions</h2>
+<ul>
+<li><code>getparams</code> reads in a .txt or .csv file and outputs a dictionary with keys from a specified list and values from the specified parameter file.</li>
+<li><code>getXandY()</code> reads in data from a validation case and saves the contents to lists for x and y. This function assumes the first row contains labels and ignores them.</li>
+<li><code>interpolate()</code> does a simple linear interpolation with inputs of 2 x-values, 2 y-values, and the x-value of the parameter you are seeking.</li>
+</ul>
+<h2 id="testing">Testing</h2>
+<ul>
+<li>test_power.py</li>
+<li>test_drone.py</li>
+<li>test_plotter.py</li>
+</ul>
+<h2 id="future-work">Future Work</h2>
+<p>This section is to be used to record ideas for future development that cannot be immediately implemented due to time constraints.</p>
+<ul>
+<li>calculate propulsive efficiency at max range and max endurance and interpolate between the two</li>
+<li>go weather by weather and determine the appropriate model to be used</li>
+</ul>
+
+</body>
+</html>
