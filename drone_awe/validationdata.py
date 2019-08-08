@@ -45,7 +45,8 @@ validationdatabase = [
             "mission": {
                 "missionspeed": 10.0,
                 "heading": 0.0,
-                "payload": 0.0
+                "payload": 0.0,
+                "altitude": 0.0
             },
             'timestep': 1,
             'plot': True,
@@ -106,7 +107,8 @@ validationdatabase = [
             "mission": {
                 "missionspeed": 10.0,
                 "heading": 0.0,
-                "payload": 0.0
+                "payload": 0.0,
+                "altitude": 0.0
             },
             'timestep': 1,
             'plot': True,
@@ -176,7 +178,8 @@ validationdatabase = [
             "mission": {
                 "missionspeed": 10.0,
                 "heading": 0.0,
-                "payload": 0.0
+                "payload": 0.0,
+                "altitude": 0.0
             },
             'timestep': 1,
             'plot': True,
@@ -228,7 +231,8 @@ validationdatabase = [
             "mission": {
                 "missionspeed": 10.0,
                 "heading": 0.0,
-                "payload": 0.0
+                "payload": 0.0,
+                "altitude": 0.0
             },
             'timestep': 1,
             'plot': True,
@@ -279,7 +283,8 @@ validationdatabase = [
             "mission": {
                 "missionspeed": 10.0,
                 "heading": 0.0,
-                "payload": 0.0
+                "payload": 0.0,
+                "altitude": 0.0
             },
             'timestep': 1,
             'plot': True,
@@ -332,7 +337,8 @@ validationdatabase = [
             "mission": {
                 "missionspeed": 10.0,
                 "heading": 0.0,
-                "payload": 0.0
+                "payload": 0.0,
+                "altitude": 0.0
             },
             'timestep': 1,
             'plot': True,
@@ -393,7 +399,8 @@ validationdatabase = [
             "mission": {
                 "missionspeed": 10.0,
                 "heading": 0.0,
-                "payload": 0.0
+                "payload": 0.0,
+                "altitude": 0.0
             },
             'timestep': 1,
             'plot': True,
@@ -449,7 +456,8 @@ validationdatabase = [
             "mission": {
                 "missionspeed": 10.0,
                 "heading": 0.0,
-                'payload': 0.095
+                'payload': 0.095,
+                "altitude": 0.0
             },
             'timestep': 1,
             'plot': True,
@@ -504,7 +512,8 @@ validationdatabase = [
             "mission": {
                 "missionspeed": 10.0,
                 "heading": 0.0,
-                "payload": 0.0
+                "payload": 0.0,
+                "altitude": 0.0
             },
             'timestep': 1,
             'plot': True,
