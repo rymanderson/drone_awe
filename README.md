@@ -305,6 +305,12 @@ According to rotor momentum theory, five equations govern the flight of a rotorc
 
 #### Fixed-Wing Drones
 
+### Weather
+
+#### Temperature
+From the ideal gas law, $PV=nRT$ (which applies to standard air conditions), temperature is inversely proportional to air density:
+$$T \propto \frac{1}{\rho}$$
+
 ## Classes
 
 This section contains a detailed description of each class, all contained in Classes.py.
