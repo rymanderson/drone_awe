@@ -40,7 +40,6 @@ Settable dictionary keys with example values for `args` include the following:
     "batterytechnology":"near-future",
     "stateofhealth":90.0,
     "startstateofcharge":100.0,
-    "altitude":100.0,
     "rain":False,
     "dropsize":1.0,
     "liquidwatercontent":1.0,
@@ -50,7 +49,10 @@ Settable dictionary keys with example values for `args` include the following:
     "winddirection":0.0,
     "relativehumidity":0.0,
     "mission": {
-            "missionspeed": 10.0
+            "missionspeed": 10.0,
+            "altitude":100.0,
+            "heading":0.0,
+            "payload:0.0
         },
     "timestep":1,
     "plot":True,
@@ -215,6 +217,70 @@ Additionally, `validationCaseDictionary` is a dictionary with the following form
 }
 ```
 
+#### `'L/D'` and `'propulsiveefficiency'`
+
+When simulating a fixed-wing drone, the current model requires input parameters for the lift-to-drag ratio (`'L/D'`) and the efficiency of the propulsive system (`'propulsiveefficiency'`). Ballpark estimates for small UAVs are on the order of 10 and 30%, respectively, although these values heavily depend on the specific geometries and propulsive systems of the drones.
+
+#### Battery parameters
+
+#### `'batterytechnology'`
+`'batterytechnology'` must be set to one of the following options: `'current'`, `'near-future'`, or `'far-future'`. `'current'` will use the current battery capacity as specified in `drone.params`. The other two options project a future battery capacity based on current advances, which average an increase in battery capacity of about 3-4% per year. `'near-future'` assumes a capacity that has increased by 3.5% per year for five years, and `'far-future'` assumes a capacity that has increased by 3.5% per year for ten years.
+
+#### `'stateofhealth'` and `'stateofcharge'`
+`'stateofhealth'` refers to the amount of capacity contained within the battery relative to its initial capacity at first use. 100% would be a new battery. LiPo batteries (most commonly used battery for drones) are typically retired when their state of health falls to 80-85%. At lower states of health, the battery capacity is decreased and cycles through a full charge more quickly.
+
+`'stateofcharge'` refers to the current capacity level of the battery, where 100% is fully charged (regardless of how much the battery has been used before), and 0% is a dead battery.
+
+#### Weather parameters
+
+#### `'dropsize'`, `'liquidwatercontent'` and `'rainfallrate'`
+These parameters specifiy rain characteristics. If there is no rain in the simulation, set these to 0.0. 
+
+`'dropsize'` refers to the diameter of a raindrop (assuming a spherical shape), with units of meters. `'liquidwatercontent'` refers to the amount of water in a given volume of air, with units of kg/m^3. `'rainfallrate'` is the rate of rainfall in units of mm/hr, which translates to litres per cubic meter per hour.
+
+Only one of `'liquidatercontent'` and `'rainfallrate'` needs to be specified. 
+
+#### `'temperature'`
+Units of temperature are given in degrees Celcius.
+
+#### `'relativehumidity'`
+
+`'relativehumidity'` refers to water content in the air, ranging from 0% to 100%.
+
+#### Mission parameters
+`'mission'` is a dictionary with the following keys: 
+
+* `'missionspeed'`&mdash; the cruise velocity of the drone, with units of m/s.
+
+* `'altitude'`&mdash; in units of meters.
+
+* `'heading'`&mdash; the heading angle of the drone, in units of ___________.
+
+* `'payload'`&mdash; the mass of any exra payload attached to the drone (e.g., camera), in units of kg.
+
+#### Plotting parameters
+`'xlabel'` and `'ylabel'` not only specify axis labels of the plot, but also tell the simulation what to solve for (`'ylabel'`) and what parameter to loop through (`'xlabel'`). `'ylabel'` can be `range`, `endurance`, or `power`. `'xlabel'` can be any variable from the following list:
+
+```
+"startstateofcharge",
+"altitude",
+"temperature",
+"dropsize",
+"liquidwatercontent",
+"newtemperature",
+"windspeed",
+"winddirection",
+"relativehumidity",
+"payload",
+"missionspeed"
+```
+
+`'xvals'` is a list containing all the values of x the simulation will loop through and produce a single data point for. 
+
+`'zlabel'` can be specified to any of the variables used for the `'xlabel'` parameter (see list above) to loop through. This will produce a curve for each of the values in `'zvals'` and plot them on the same plot. This is useful for looping through a weather effect, such as temperature or relative humidity, to see their effects on a plot of range vs payload.
+
+`'title'` is the title displayed on the top of the plot, followed by the current date. Currently, the title needs to be one word. A title of multiple words can have each word separated by an underscore en lieu of a space.
+
 ## Theory
 
 `Drone AWE` is intended to predict performance parameters of rotary and fixed-wing drones based on readily-available specifications. To accomplish this, the power requirements for a given flight maneuver is calculated and used to predict battery drain behavior. Then, parameters such as range and endurance can be calculated. Comprehensive state data is collected at each step of a simulation, providing a versatile data set as output for study.
@@ -299,20 +365,19 @@ This section contains a detailed description of each class, all contained in Cla
 	* class variables describe
 
 		* an instance of each weather effect to be modeled
+        * droplet size (rain)
+        * Liquid Water Content (LWC) (rain)
+        * rainfall rate (rain)
 
-	* methods may be used to check for icing, or other miscellaneous needs
+    * the `__updateRain` method
 
-* the `WeatherType` class
+		* For all drone types, this calculates the momentum imparted to the drone from falling rain droplets based on their size and liquid water content. 
 
-	* class consists of the following sub-classes:
+    * the `__getWebernumber` method
+        * Calculates weber number based on rain density, velocity, diameter, and frequency. This is used to obtain momentum in the __updateRain method.
 
-		* the `Rain` class
-
-			* class variables describe 
-
-				* droplet size
-				* Liquid Water Content (LWC)
-				* other parameters needed to model rain
+    * the `__getSurfaceTension` method
+        * empirically interpolates surfaces tension based on current temperature
 
 		* the `Temperature` class
 
@@ -472,7 +537,7 @@ There are `.param` files in the Drone directory each contain parameters specific
 
 Similar to the Drone `.param` files, battery `.param` files exist for each type of battery tested. These parameters assist in determining the discharge rate over time and amount of specific energy and power available for different types of batteries.
 
-## functions.py - Commonly used functions
+## functions.py &mdash; Commonly used functions
 
 * `getparams` reads in a .txt or .csv file and outputs a dictionary with keys from a specified list and values from the specified parameter file.
 * `getXandY()` reads in data from a validation case and saves the contents to lists for x and y. This function assumes the first row contains labels and ignores them.

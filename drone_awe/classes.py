@@ -577,7 +577,7 @@ class Weather:
         self.params['extrathrust'] = self.__updateRain(drone.params['toparea'])
         if drone.params['wingtype'] == 'fixed':
             self.params['LDadjustment'] = weatherclass.updateLD() #list with [CLfactor, CD factor]
-        self.params['airdensity'] *= densityfactor 
+        self.params['airdensity'] = self.params['airdensitysealevel'] * densityfactor #for the case that we update weather multiple times, we need to not compound weather effects
         self.__warning()
 
     def getStandardAtmosphere(self, altitude):
@@ -1424,10 +1424,11 @@ class model:
             "validationcase":"DiFranco2016",
             "drone":None,
             "dronename":"dji-Mavic2",
+            "L/D":10.0, #we can change these default values vvv
+            "propulsiveefficiency":0.35,
             "batterytechnology":"near-future",
             "stateofhealth":90.0,
             "startstateofcharge":100.0,
-            "altitude":100.0,
             "dropsize":0.0,
             "liquidwatercontent":0.0, #one of this and rainfallrate needs to be specified for rain, but not both
             "rainfallrate":None,
@@ -1439,9 +1440,10 @@ class model:
             "relativehumidity":0.0,
             "icing":False,
             "mission": {
-                    "missionspeed": 10.0,
-                    "heading": 0.0,
-                    "payload": 0.0
+                    "missionspeed":10.0,
+                    "altitude":100.0,
+                    "heading":0.0,
+                    "payload":0.0
                 },
             "timestep":1,
             # "plot":True,
@@ -1454,11 +1456,11 @@ class model:
             # "xend":1,
             # "xnumber":5,
             "xvals":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15],
-            "zlabel":"dropsize",
+            "zlabel":"temperature",
             # "weatherbegin":10,
             # "weatherend":40,
             # "weathernumber":3
-            "zvals":[0,.002,0.004,0.01] # must contain only unique elements
+            "zvals":[0,10,20,30,40] # must contain only unique elements
         }
 
         for key in self.input:
@@ -1568,7 +1570,7 @@ class model:
         # for weatherclass in weatherlist:
         #     weatherparams = weatherparams + weatherclass.params
 
-        self.classes['weather']        = Weather(self.params['altitude'],weatherlist)
+        self.classes['weather']        = Weather(self.params['mission']['altitude'],weatherlist)
         print("Preparing to update weather:")
         self.classes['weather'].update(self.classes['drone'])
         print("Weather updated.")
