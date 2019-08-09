@@ -217,6 +217,8 @@ Additionally, `validationCaseDictionary` is a dictionary with the following form
 }
 ```
 
+Note that the `'altitude'` setting of validation cases is not always known and is set by default to `'0'`.
+
 #### `'L/D'` and `'propulsiveefficiency'`
 
 When simulating a fixed-wing drone, the current model requires input parameters for the lift-to-drag ratio (`'L/D'`) and the efficiency of the propulsive system (`'propulsiveefficiency'`). Ballpark estimates for small UAVs are on the order of 10 and 30%, respectively, although these values heavily depend on the specific geometries and propulsive systems of the drones.
@@ -303,7 +305,42 @@ According to rotor momentum theory, five equations govern the flight of a rotorc
 4. $v_i = \frac{T}{2 A_{rotor} N_{rotor} \rho \sqrt{V_\infty^2 cos^2(\alpha) + (V_\infty sin(\alpha) + v_i^2)}}$
 5. $A_{\bot} = A_{front} cos(\alpha) + A_{top} sin(\alpha)$
 
-These equations were applied to rotary drones by Stolaroff, Samaras, O'Neill et. al. in [1]. `Drone AWE` predicts the power consumption of a rotary drone by solving this system. GEKKO, a software package introduced in [2], is used to solve the system.
+A modified set of these equations were applied to rotary drones by Stolaroff, Samaras, O'Neill et. al. in [1]. `Drone AWE` predicts the power consumption of a rotary drone by solving this system. GEKKO, a software package introduced in [2], is used to solve for:
+
+* $T$ - thrust per rotor
+* $\alpha$ - angle of attack
+* $D$ - drag
+* $v_i$ - rotor induced velocity
+* $A_{\bot}$ - planform area of the drone perpendicular to its velocity
+
+given the following:
+
+* $W$ - effective weight
+* $V_\infty$ - drone speed
+* $C_D$ - drag coefficient
+* $A_{rotor}$ - rotor area
+* $N_{rotor}$ - number of rotors
+* $\rho$ - air density
+* $A_{front}$ - frontal drone area
+* $A_{top}$ - drone top area
+
+Note that the model currently assumes that the drag coefficient does not change with velocity and/or angle of attack.
+
+The power requirement for the hover case is calculated according to another equation from [1]:
+
+* $P_{hover} = \frac{W^{3/2}}{\eta \sqrt{2N_{rotor} A_{rotor} \rho}}$
+
+where $\eta$ is the propulsive efficiency calculated as:
+
+* $\eta = \frac{P_{hover}}{P_{hover, actual}}
+
+where $P_{hover, actual}$ is predicted using:
+
+* $P_{hover, actual} = $
+
+This $\eta$ is used to predict power consumption for the non-hover case as:
+
+* $P = \eta T(V_\infty sin(\alpha) + v_i)$
 
 #### Fixed-Wing Drones
 
