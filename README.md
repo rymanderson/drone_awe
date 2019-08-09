@@ -217,7 +217,9 @@ Additionally, `validationCaseDictionary` is a dictionary with the following form
 }
 ```
 
-Note that the `'altitude'` setting of validation cases is not always known and is set by default to `'0'`.
+##### Assumed Specs
+
+Some specifications are not explicitly available, or require some adaptation at runtime. Note that the `'altitude'` setting of validation cases is not always known and is set by default to `'0'`. `'length'`, `'width'`, and `'height'` parameters are not necessarily set to geometrically accurate values; rather, they are set so that `'length'` times `'width'` results in the top area and that `'width'` times `'height'` results in the drone's frontal area.
 
 #### `'L/D'` and `'propulsiveefficiency'`
 
@@ -338,9 +340,9 @@ where $\eta$ is the propulsive efficiency calculated as:
 
 where $P_{hover, actual}$ is predicted using:
 
-* $P_{hover, actual} = $
+* $P_{hover, actual} = \frac{CV_{battery}}{E_{hover}}$
 
-This $\eta$ is used to predict power consumption for the non-hover case as:
+where $C$ is the battery capacity, $V_{battery}$ is the battery voltage, and $t_{hover}$ is the hover endurance of the drone. Ideally, each parameter is available as published specifications for the drone to be modeled. Next, $\eta$ is used to predict power consumption for the non-hover case as:
 
 * $P = \eta T(V_\infty sin(\alpha) + v_i)$
 

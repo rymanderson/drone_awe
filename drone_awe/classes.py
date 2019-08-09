@@ -42,8 +42,6 @@ class Drone:
         if self.params['wingtype'] == 'rotary':
             self.params['frontalarea']  = self.params['width'] * self.params['height']
             self.params['toparea']      = self.params['width'] * self.params['length']
-        else:
-            self.params['toparea'] = self.params['span'] * self.params['chord']
         if 'rangemax' in self.params and 'rangemaxspeed' in self.params:
             self.params['endurancemaxrange'] = self.params['rangemax'] / self.params['rangemaxspeed']
         if 'endurancemaxhover' not in self.params and 'endurancemax' in self.params:
@@ -58,12 +56,13 @@ class Drone:
             self.params['rotorarea'] = np.pi*self.params['rotordiameter']**2/4
         if self.params['wingtype'] == 'fixed':
             self.params['spanefficiency'] = 0.8 #estimate from Dr. Ning's book (he lists 0.7-0.9). If we want to we could decrease this further based on fuselage diameter, but maybe that's requiring too much detail
-            # print("DRONE: ????? Should we be pre-defining a spanwise efficiency?")
+            if 'wingarea' not in self.params:
+                self.params['wingarea'] = self.params['span'] * self.params['chord']
         if 'energyfull' not in self.params['battery']:
             self.params['battery']['energyfull'] = self.params['battery']['batteryvoltage']*self.params['battery']['batterycapacity']
         if 'numbatteries' in self.params['battery']:
             if self.params['battery']['numbatteriesconnection'] == 'parallel':
-                self.params['battery']['batterycapacity'] *= self.params['numbatteries'] #increase capacity in parallel
+                self.params['battery']['batterycapacity'] *= self.params['battery']['numbatteries'] #increase capacity in parallel
             elif self.params['battery']['numbatteriesconnection'] == 'series':
                 self.params['battery']['batteryvoltage'] *= self.params['nummbatteries'] #increase voltage in series
             else:
@@ -225,7 +224,8 @@ class Power:
             # self.__getPowerAbdilla(drone, weather, mission)
             self.params['powerModel'] = self.__setPowerMomentum
         elif drone.params['wingtype'] == 'fixed':
-            self.params['powerModel'] = self.__setPowerTraub
+            # self.params['powerModel'] = self.__setPowerTraub
+            self.params['powerModel'] = self.__setPowerFixedWing
         else:
             self.__updateLog('ERROR','No power model defined for ' + drone.params['wingtype'])
             if self.debug:
@@ -235,13 +235,14 @@ class Power:
         if self.debug:
             print("POWER: ===== mission.params = ",mission.params)
         self.__updateWeight(drone.params['takeoffweight'],weather.params['gravitationconstant'],weather.params['weightadjustment'],mission.params['payload'])
-        self.__updateVelocityInducedHover(self.params['effectiveweight'],drone.params['rotorquantity'],drone.params['rotorarea'],weather.params['airdensity'])
-        self.params['velocityinduced']          = self.params['velocityinducedhover']
-        self.params['thrust']                   = self.params['effectiveweight']
-        self.params['alpha']                    = 0.0
-        self.params['alpha_gekko']              = 0.0
-        self.params['drag']                     = 0.0
-        self.params['dragarea']                 = drone.params['frontalarea']
+        if drone.params['wingtype'] == 'rotary':
+            self.__updateVelocityInducedHover(self.params['effectiveweight'],drone.params['rotorquantity'],drone.params['rotorarea'],weather.params['airdensity'])
+            self.params['velocityinduced']          = self.params['velocityinducedhover']
+            self.params['thrust']                   = self.params['effectiveweight']
+            self.params['alpha']                    = 0.0
+            self.params['alpha_gekko']              = 0.0
+            self.params['drag']                     = 0.0
+            self.params['dragarea']                 = drone.params['frontalarea']
         self.__setDragCoefficient()
 
 
@@ -293,7 +294,8 @@ class Power:
 
     def update(self, drone, weather, mission):
         self.__updateWeight(drone.params['takeoffweight'],weather.params['gravitationconstant'],weather.params['weightadjustment'],mission.params['payload'])
-        self.__updateVelocityInducedHover(self.params['effectiveweight'],drone.params['rotorquantity'],drone.params['rotorarea'],weather.params['airdensity'])
+        if drone.params['wingtype'] == 'rotary':
+            self.__updateVelocityInducedHover(self.params['effectiveweight'],drone.params['rotorquantity'],drone.params['rotorarea'],weather.params['airdensity'])
         self.params['powerModel'](drone, weather, mission)
 
     # def update(self, drone, weather, mission):
@@ -343,10 +345,11 @@ class Power:
         # self.__getDrag(drone,weather,mission)
         # self.__getThrust(drone,weather,mission)
         self.__setBladeProfilePower()
-        self.params['efficiencypropulsive'] = self.__getEfficiencyPropulsive(drone.params['endurancemaxhover'],drone.params['takeoffweight'],9.81,drone.params['rotorquantity'],drone.params['rotorarea'],drone.params['battery']['energyfull'],1.225)
+        self.params['efficiencypropulsive'] = self.__getEfficiencyPropulsive(drone.params['takeoffweight'],9.81,drone.params['rotorquantity'],drone.params['rotorarea'],drone.params['battery']['energyfull'],1.225,drone.params['endurancemaxhover'])
+        print("efficiencypropulsive is ",self.params['efficiencypropulsive'])
         self.params['power']                = (self.params['thrust']*self.params['velocityinduced'] + \
                                                 self.params['drag']*mission.params['missionspeed'] + \
-                                                self.params['bladeprofilepower'])/self.params['efficiencypropulsive']
+                                                self.params['bladeprofilepower'])*self.params['efficiencypropulsive']
         # self.params['power']                = self.params['thrust'] * (mission.params['missionspeed']*np.sin(self.params['alpha'] + self.params['velocityinduced']))
 
         if self.debug:
@@ -369,7 +372,7 @@ class Power:
             span = drone.params['span']
         self.__setDragCoefficient()
         dragcoefficient  = self.params['dragcoefficient']
-        weight           = drone.params['takeoffweight'] * weather.params['gravitationconstant']
+        weight           = self.params['effectiveweight']
         spanefficiency   = drone.params['spanefficiency']
         k                = 1 / (np.pi*span**2 / wingarea * spanefficiency)
 
@@ -377,13 +380,13 @@ class Power:
                                 + 2*weight**2*k \
                                 / (density*cruisespeed*wingarea)
 
-    def getPowerFixedWing(self, drone, weather, mission): #from Dr. Nin's textbook
+    def __setPowerFixedWing(self, drone, weather, mission): #from Dr. Nin's textbook
         
         L_D = drone.params['L/D'] 
         propulsiveefficiency = drone.params['propulsiveefficiency'] 
 
         if 'LDadjustment' in weather.params: #this probably can be its own method
-            L = drone.params['effectivetakeoffweight'] * weather.params['gravitationconstant']
+            L = self.params['effectiveweight'] * weather.params['gravitationconstant']
             D = L / L_D
             CLfactor = weather.params['LDadjustment'][0]
             CDfactor = weather.params['LDadjustment'][1]
@@ -392,10 +395,15 @@ class Power:
             L_D = L/D
 
         gravity = weather.params['gravitationconstant']
-        weight = drone.params['effectivetakeoffweight']
+        weight = self.params['effectiveweight']
         speed = mission.params['missionspeed']
 
+        print('gravity:',gravity)
+        print('weight:', weight)
+        print('speed:', speed)
+
         self.params['power'] = gravity * weight * speed / (propulsiveefficiency * L_D)
+        print("POWER GENERATED IS:", self.params['power'])
 
 
     # def __updateEfficiencyPropulsive(self, drone, weather, mission):
@@ -415,16 +423,20 @@ class Power:
     #         self.params['efficiencypropulsive'] = etamaxendurance - (vmaxendurance - mission.params['missionspeed']) / \
     #             (vmaxendurance - vmaxrange) * (etamaxendurance - etamaxrange)
 
-    def __getEfficiencyPropulsive(self, testmass, g, rotorquantity, rotorarea, airdensity, batteryenergy, endurance):
+    def __getEfficiencyPropulsive(self, testmass, g, rotorquantity, rotorarea, batteryenergy, airdensity, endurance):
         # Analyzing a single propeller
-        thrust          = testmass * g / rotorquantity
-        batteryenergy   = batteryenergy / \
-                          rotorquantity
+        thrust          = testmass * g
+        # batteryenergy   = batteryenergy / \
+        #                   rotorquantity
         poweractual     = batteryenergy/endurance
-        powerideal      = thrust**1.5 / np.sqrt(2*rotorarea*airdensity)
+        powerideal      = (thrust)**1.5 / np.sqrt(2*rotorarea*rotorquantity*airdensity)
 
-        # print('gEP: poweractual is      ',poweractual)
-        # print('gEP: powerideal is      ',powerideal)
+        print('gEP: poweractual is      ',poweractual)
+        print('gEP: powerideal is       ',powerideal)
+        print('gEP: testmass is         ',testmass)
+        print('gEP: rotorarea is        ',rotorarea)
+        print('gEP: batteryenergy is    ',batteryenergy)
+        print('gEP: endurance is        ',endurance)
 
         efficiencypropulsive = powerideal/poweractual
 
@@ -513,7 +525,11 @@ class Power:
 
     # def __solveModel(self):
         m.options.SOLVER=3
-        m.solve(disp=False)     # solve
+        try:
+            m.solve(disp=False)     # solve
+        except:
+            self.__updateLog('ERROR','Solver did not converge on momentum theory solution.')
+            raise(Exception('POWER ~~~~~ ERROR: Solver did not converge on momentum theory solution.'))
 
         self.params['alpha_gekko']      = m.alpha.value[0]
         alpha                           = m.alpha.value[0]
@@ -574,7 +590,7 @@ class Power:
         self.params['dragcoefficient'] = 2.0
     
     def __setBladeProfilePower(self):
-        self.params['bladeprofilepower'] = 50.0
+        self.params['bladeprofilepower'] = 0.0
 
     def __updateLog(self,entrytype,message):
         self.log[entrytype].append(message)
@@ -652,8 +668,10 @@ class Weather:
         densityfactor = 1.0
         densityfactor *= self.__updateDensityTemperature()
         densityfactor *= self.__updateDensityHumidity()
-        self.params['weightadjustment'] = self.__updateRain(drone.params['toparea'])
-        if drone.params['wingtype'] == 'fixed':
+        if drone.params['wingtype'] == 'rotary':
+            self.params['weightadjustment'] = self.__updateRain(drone.params['toparea'])
+        elif drone.params['wingtype'] == 'fixed':
+            self.params['weightadjustment'] = self.__updateRain(drone.params['wingarea'])
             self.params['LDadjustment'] = self.updateLD() #list with [CLfactor, CD factor]
         self.params['airdensity'] = self.params['airdensitysealevel'] * densityfactor #for the case that we update weather multiple times, we need to not compound weather effects
         self.__warning()
@@ -996,7 +1014,9 @@ class Rain(WeatherType):
                 params['liquidwatercontent'] = 1400*np.pi * 10**-3 / (3**4) * R**0.84
         elif 'rainfallrate' not in params:
             liquidwatercontent = params['liquidwatercontent']
-            if liquidwatercontent < 0.05: #drizzle
+            if liquidwatercontent == 0.0:
+                params['rainfallrate'] = 0.0
+            elif liquidwatercontent < 0.05: #drizzle
                 params['rainfallrate'] = 1/((30000*np.pi*10**-3 / 5.7**4*liquidwatercontent)**(1/0.84))
             elif liquidwatercontent < 0.25: #moderate
                 params['rainfallrate'] = 1/((7000*np.pi*10**-3 / 4.1**4*liquidwatercontent)**(1/0.84))
@@ -1005,129 +1025,6 @@ class Rain(WeatherType):
         paramnames = ['dropsize', 'rainfallrate', 'liquidwatercontent']
 
         WeatherType.__init__(self, params, paramnames)
-
-    # def update(self, weather, drone):
-        
-    #     diameter = weather.weatherlist[2].params['dropsize']
-    #     liquidwatercontent = weather.weatherlist[2].params['dropsize'] / 1000 #convert to kg/m3
-    #     # print("Rain.update is in process.")
-    #     print("diameter =",diameter)
-    #     print("liquidwatercontent =",liquidwatercontent)
-
-    #     if diameter == 0 or liquidwatercontent == 0:
-    #         dropletforce = 0.0
-    #     else:
-            
-    #         # single droplet
-    #         diameter = weather.weatherlist[2].params['dropsize']
-    #         radius = diameter/2.0
-    #         dropletvolume = 4.0/3.0 * np.pi * radius**3 #sphere estimate
-    #         airdensity = weather.params['airdensity'] #kg/m^3
-    #         waterdensity = 1000 #kg/m^3
-    #         dropletmass = dropletvolume * waterdensity #kg
-    #         g = weather.params['gravitationconstant']
-    #         Cd = 0.5 #sphere estimate
-    #         area = np.pi * radius**2
-    #         terminalvelocity = np.sqrt(2*dropletmass*g / (Cd*airdensity*area)) 
-    #         # terminalvelocity2 = 9.58*(1-np.exp(-(diameter/1.77)**1.147)) #(from Cao et al.)
-    #         # print("terminalvelocity1",terminalvelocity)
-    #         # print("terminalvelocity2 =",terminalvelocity2)
-            
-    #         #determine raindrop incidence using rate - Method 1
-    #         # rate = self.params['rainfallrate']
-    #         # rate *= 0.001 #convert from L/m3/h to m3/m2/h
-    #         # rate /= 3600 #convert from m3/m3/h to m3/m2/s
-    #         # dronearea = drone.params['area']
-    #         # rate *= dronearea #m3 per drone area per second
-    #         # numdrops = rate / dropletvolume #number of drops per drone area per second
-
-    #         #Method 2 - using LWC
-    #         dronearea = drone.params['toparea']
-    #         numdrops = liquidwatercontent / dropletmass * dronearea * terminalvelocity #numsrops hitting drone per second
-
-    #         surfacetension = self.getSurfaceTension(weather)
-    #         webernumber = self.getWeberNumber(weather, terminalvelocity, diameter, surfacetension)
-
-    #         upperthreshold = 18.0**2 * diameter * (waterdensity/surfacetension)**0.5 * terminalvelocity**0.25 * numdrops**0.75
-    #         # print("rain upper threshold weber number is:",upperthreshold)
-
-    #         if webernumber < 5:
-    #             #raindrop sticks
-    #             C = 0.0
-    #         elif webernumber < 10:
-    #             #raindrop bounces back
-    #             C = 1.0
-    #         elif webernumber < upperthreshold:
-    #             #raindrop spreads
-    #             C = 0.0
-    #         else:
-    #             #raindrop splashes
-    #             C = 2/np.pi #estimate, (integral of sin(x) from 0 to pi) / pi
-    #         #calculate change in velocity
-    #         delta_velocity = terminalvelocity * (C+1)
-            
-    #         dropletforce = numdrops * (dropletmass*delta_velocity)
-
-    #         print("")
-    #         print("Rain Parameters:")
-    #         print("dropletmass is:", dropletmass)
-    #         print("dropletvolume is:", dropletvolume)
-    #         print("velocity is:", terminalvelocity)
-    #         print("webernumber is:", webernumber)
-    #         print("numdrops is:", numdrops)
-    #         print("dropletforce is:", dropletforce)
-    #         print("")
-
-    #     return dropletforce
-
-    #     # if drone.params['wingtype'] == 'fixed':
-    #     #     #TODO loss of lift, increase in drag
-
-    # def getWeberNumber(self, weather, velocity, diameter, surfacetension):
-    #     density = 1000 #kg/m^3
-    #     webernumber = density * velocity**2 * diameter / surfacetension
-
-    #     return webernumber
-
-    # def getSurfaceTension(self, weather):
-    #     Tlist = [0, 5, 10, 20, 30, 40, 50] #deg C
-    #     sigmalist = [7.56, 7.49, 7.42, 7.28, 7.12, 6.96, 6.79] #N/m
-    #     temperature = weather.weatherlist[0].params['temperature']
-
-    #     if temperature < Tlist[0]:
-    #         surfacetension = sigmalist[0]
-    #         print("temperature is too low to predict surface tension of raindrops. Assuming a surface tension at 0 degrees C.")
-    #     elif temperature > Tlist[-1]:
-    #         surfacetension = sigmalist[-1]
-    #         print("temperature is too high to predict surface tension of raindrops. Assuming a surface tension at 50 degrees C.")
-    #     else:
-    #         counter = 0
-    #         for temp in Tlist:
-    #             if temperature == temp:
-    #                 id1 = counter
-    #                 id2 = counter
-    #                 break
-    #             elif temperature < temp:
-    #                 id1 = counter - 1
-    #                 id2 = counter
-    #                 break
-    #             else:
-    #                 counter += 1
-    #         #interpolate
-    #         x1 = Tlist[id1]
-    #         x2 = Tlist[id2]
-    #         y1 = sigmalist[id1]
-    #         y2 = sigmalist[id2]
-    #         x = temperature
-    #         surfacetension = interpolate(x1,x2,y1,y2,x)
-
-    #     return surfacetension
-
-    # def updateLD(self):
-    #     CLfactor = 0.94 #94% of original value
-    #     CDfactor = 0.01 #added on to original value 
-    #     #if CD needs to be percentage, increasing by 20% is about average, although less acurate than an addition. 
-    #     return [CLfactor, CDfactor]
 
 
 class Temperature(WeatherType):
@@ -1144,18 +1041,6 @@ class Temperature(WeatherType):
     def __init__(self, params):
         paramnames = ['temperature']
         WeatherType.__init__(self, params, paramnames)
-    
-    # def updateDensity(self,weather):
-    #     newtemperature = weather.weatherlist[0].params['temperature'] +273.15 #convert to kelvin
-    #     oldtemperature = weather.params['temperaturesealevel'] #convert to kelvin
-    #     # print("old temperature is",oldtemperature)
-    #     # print("new temperature is",newtemperature)
-    #     # print("Self.params['temperature'] is",self.params['temperature'])
-    #     olddensity = weather.params['airdensity']
-    #     # print("old density is",olddensity)
-    #     newdensity = olddensity * ((oldtemperature-newtemperature)/oldtemperature + 1) #inverse relationship
-    #     temperatureeffect = newdensity / olddensity
-    #     return temperatureeffect
 
 
 class Humidity(WeatherType):
@@ -1173,94 +1058,6 @@ class Humidity(WeatherType):
     def __init__(self, params):
         paramnames = ['relativehumidity']    #, 'absolutehumidity'] - most of the time it is only given in relative terms
         WeatherType.__init__(self, params, paramnames)
-
-    # def updateDensity(self,weather): # 2D linear interpolation based on Yue (2017)
-    #     relativehumiditylist = [0.0,25.0,50.0,70.0,90.0] #percentage
-    #     temperaturelist = [15.0,20.0,25.0,30.0,35.0] #may need to convert this to kelvin
-
-    #     #humidity effects only
-    #     humidityarray = np.array([[1.0, 1.0, 1.0, 1.0, 1.0],\
-    #                                 [0.99837, 0.99751, 0.99662, 0.99656, 0.99389],\
-    #                                 [0.99673, 0.99585, 0.99409, 0.99055, 0.98866],\
-    #                                 [0.99592, 0.99419, 0.99155, 0.98883, 0.98517],\
-    #                                 [0.99429, 0.99252, 0.98902, 0.98625, 0.98080]]) # increasing humditiy in rows, temp in columns
-
-
-    #     # temperature and humidity effects included
-    #     # humidityarray = np.array([[1.0, 0.98286, 0.96653, 0.95020, 0.93551],\
-    #     #                             [0.99837, 0.98041, 0.96327, 0.94694, 0.92980],\
-    #     #                             [0.99673, 0.97878, 0.96082, 0.94122, 0.92490],\
-    #     #                             [0.99592, 0.97714, 0.95837, 0.93959, 0.92163],\
-    #     #                             [0.99429, 0.97551, 0.95592, 0.93714, 0.91755]]) # increasing humditiy in rows, temp in columns
-
-    #     relativehumidity = weather.weatherlist[1].params['relativehumidity']
-    #     # temperature = weather.params['temperaturesealevel']
-    #     # temperature = 288.15 - 273.15 #convert to celcius - need to update this if temperature is altered
-    #     temperature = weather.weatherlist[0].params['temperature'] #already to celcius
-    #     # print("Temperature is",temperature)
-    #     # determine 4 closest points before doing a 2D interpolation
-
-    #     if temperature < temperaturelist[0]:
-    #         temperature = temperaturelist[0]
-    #         print("WARNING: Temperature is below interpolation bounds. Humidity effects are assumed to be as if the temperature is",temperaturelist[0],"degrees C")
-    #     elif temperature > temperaturelist[-1]:
-    #         temperature = temperaturelist[-1]
-    #         print("WARNING: Temperature is below interpolation bounds. Humidity effects are assumed to be as if the temperature is",temperaturelist[0],"degrees C")
-        
-    #     if relativehumidity < 0.0 or relativehumidity > 100.0:
-    #         raise(Exception("~~~~~ ERROR: relative humidity is outside of available bounds ~~~~~"))
-    #     elif relativehumidity > relativehumiditylist[-1]:
-    #         relativehumidity = relativehumiditylist[-1]
-    #         print("WARNING: Humidity is above interpolation bounds. Humidity effects are assumed to be as if the temperature is",relativehumiditylist[-1],"%")
-
-    #     counter = 0
-    #     for temp in temperaturelist:
-    #         if temperature == temp:
-    #             idT1 = counter
-    #             idT2 = counter
-    #             break
-    #         elif temperature < temp:
-    #             idT1 = counter - 1
-    #             idT2 = counter
-    #             break
-    #         else:
-    #             counter += 1
-    #     counter = 0
-    #     for hum in relativehumiditylist:
-    #         if relativehumidity == hum:
-    #             idH1 = counter
-    #             idH2 = counter
-    #             break
-    #         elif relativehumidity < hum:
-    #             idH1 = counter - 1
-    #             idH2 = counter
-    #             break
-    #         else:
-    #             counter += 1
-
-    #     #interpolate temperature at each humidity index
-    #     x1 = temperaturelist[idT1]
-    #     x2 = temperaturelist[idT2]
-    #     y1 = humidityarray[idH1,idT1]
-    #     y2 = humidityarray[idH1,idT2]
-    #     x = temperature
-    #     tempid1 = interpolate(x1,x2,y1,y2,x)
-        
-    #     x1 = temperaturelist[idT1]
-    #     x2 = temperaturelist[idT2]
-    #     y1 = humidityarray[idH2,idT1]
-    #     y2 = humidityarray[idH2,idT2]
-    #     x = temperature
-    #     tempid2 = interpolate(x1,x2,y1,y2,x)
-
-    #     #now interpolate based on humidity
-    #     x1 = relativehumiditylist[idH1]
-    #     x2 = relativehumiditylist[idH2]
-    #     y1 = tempid1
-    #     y2 = tempid2
-    #     x = relativehumidity
-    #     humidityeffect = interpolate(x1,x2,y1,y2,x)
-    #     return humidityeffect
 
 
 class Wind(WeatherType):
@@ -1343,21 +1140,6 @@ class Ice(WeatherType):
     def __init__(self):
         pass
     
-    # def warning(self,weather):
-    #     for weatherclass in weather.weatherlist:
-    #         if 'temperature' in weatherclass.params:
-    #             temperature = weatherclass.params['temperature']
-    #         elif 'relativehumidty' in weatherclass.params:
-    #             relativehumidity = weatherclass.params['relativehumidity']
-        
-    #     if temperature < 5:
-    #         if relativehumidity <= 0:
-    #             print("WARNING: Cold temperatures may result in dangerous icing conditions. Avoid routes near clouds and/or rain.")
-    #         elif relativehumidity < 30:
-    #             print("WARNING: Cold temperatures and moderate humidity could result in dangerous icing conditions. Be cautious when flying.")
-    #         else:
-    #             print("WARNING: Cold temperatures and high humidity will likely result in dangerous icing conditions. Take extreme caution if flying.")
-
 
 class Mission:
     'Class used to define the mission, including flight trajectory, maneuvers, etc.'
@@ -1399,9 +1181,6 @@ class Simulation:
         'timestep': None,        # in seconds
         'clock': 0.0,            # tracks the current time
         'counter': 0,            # tracks the iteration number (0-indexed)
-        # results
-        'range':None,
-        'endurance':None
     }
 
     log         = {
@@ -1418,18 +1197,6 @@ class Simulation:
         # get parameters from `settings.txt`
         self.params['simulationtype'] = simulationtype
         self.debug = debug
-
-    def run(self, drone, battery, power, weather, mission):
-        if self.params['simulationtype'] == 'simple':
-            # insert simple model here
-            self.__runSimpleModel(drone, battery, power, weather, mission)
-        # we'll need to define a list of these terms in the README
-        elif self.params['simulationtype'] == 'complicated':
-            # insert another model here
-            pass
-        else:
-            self.__updateLog('ERROR','Simulation model not available.')
-            raise(Exception("~~~~~ ERROR: simulation model not available ~~~~~"))
 
     def __updateLog(self,entrytype,message):
         self.log[entrytype].append(message)
@@ -1586,12 +1353,23 @@ class model:
             # "xbegin":0,
             # "xend":1,
             # "xnumber":5,
-            "xvals":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15],
-            "zlabel":"temperature",
+            "xvals":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15],
+            # "zlabel":"temperature",
             # "weatherbegin":10,
             # "weatherend":40,
             # "weathernumber":3
             "zvals":[0,10,20,30,40] # must contain only unique elements
+
+            # "voltage"
+            # "voltagecharged"
+            # "voltagedead"
+            # "current"
+            # "humidity"
+            # "altitude"
+            # "timestep"
+            # "range"
+            # "endurance"
+
         }
 
         for key in self.input:
@@ -1847,6 +1625,7 @@ class model:
                     print("========================= ABOUT TO RUN ========================")
                 # self.classes['simulation'].run(self.classes['drone'],self.classes['battery'],self.classes['power'],self.classes['weather'],self.classes['mission'])
                 self.__runSimpleModel()
+                print("MODEL: ----- endurance is: ",self.params['endurance'])
                 if self.debug['model']:
                     print("=========================   FINISHED   ========================")
 
@@ -1863,7 +1642,7 @@ class model:
                     if self.debug['model']:
                         print("MODEL: ===== SUCCESS: dependent variable set")
                 
-                self.__updateOutput([self.classes['drone'],self.classes['battery'],self.classes['power'],self.classes['weather'],self.classes['mission'],self.classes['simulation']],self.params['zvals'].index(zvalue))
+                self.__updateOutput([self.classes['drone'],self.classes['battery'],self.classes['power'],self.classes['weather'],self.classes['mission'],self.classes['simulation']]+[self],self.params['zvals'].index(zvalue))
                 # print('MODEL: ----- xlabel is ',self.params['xlabel'])
                 self.__updateOutputLog([self.classes['drone'],self.classes['battery'],self.classes['power'],self.classes['weather'],self.classes['mission'],self.classes['simulation']],xvalue,zvalue,index)
                 index += 1
@@ -1903,6 +1682,7 @@ class model:
         self.params['endurance']    = self.classes['battery'].params['batterycapacity'] * self.classes['battery'].params['voltagemean'] / \
                                       self.classes['power'].params['power']  # simple endurance model
         self.params['range']        = self.params['endurance'] * self.classes['mission'].params["missionspeed"]
+        print('__runSimpleModel: ----- endurance is ',self.params['endurance'])
 
     def printWeatherClasses(self,name): # method for debugging
         print("")

@@ -177,7 +177,9 @@ drones = [
         'chord': 0.2778,
         'altitudemax': 152,
         'battery': {
-            'batterytype': 'LE'            
+            'batterytype': 'LE',
+            'batteryvoltage' : 28.8,
+            'batterycapacity' : 5000  #assumption      
         }
     },
     {
@@ -186,6 +188,7 @@ drones = [
         'L/D' : 10,
         'propulsiveefficiency' : 0.4,
         'span': 1.524,
+        'chord' : 0.20742,
         'takeoffweight': 4.5,
         'endurancemax': 59,
         'speedmax' : 31,
@@ -194,7 +197,11 @@ drones = [
         'VTOL': 'yes',
         'waterproof' : 'yes',
         'battery': {
-        'batterytype': 'LiHV'            
+            'batterytype' : 'LiHV',
+            'batterycapacity' : 5500,
+            'batteryvoltage' : 22.8,
+            'num_batteries': 2,
+            'numbatteriesconnection': 'parallel'            
         }
     },
     {
@@ -203,6 +210,7 @@ drones = [
         'L/D' : 10,
         'propulsiveefficiency' : 0.4,
         'span': 1.16,
+        'chord': 0.303,
         'takeoffweight': 1.4,
         'speedmax': 30,
         'endurancemax': 90,
