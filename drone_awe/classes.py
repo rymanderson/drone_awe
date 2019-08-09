@@ -661,7 +661,7 @@ class Weather:
             self.params['weightadjustment'] = self.__updateRain(drone.params['toparea'])
         elif drone.params['wingtype'] == 'fixed':
             self.params['weightadjustment'] = self.__updateRain(drone.params['wingarea'])
-            self.params['LDadjustment'] = weatherclass.updateLD() #list with [CLfactor, CD factor]
+            self.params['LDadjustment'] = self.updateLD() #list with [CLfactor, CD factor]
         self.params['airdensity'] = self.params['airdensitysealevel'] * densityfactor #for the case that we update weather multiple times, we need to not compound weather effects
         self.__warning()
 
@@ -815,6 +815,12 @@ class Weather:
             surfacetension = interpolate(x1,x2,y1,y2,x)
 
         return surfacetension
+
+    def updateLD(self):
+            CLfactor = 0.94 #94% of original value
+            CDfactor = 0.01 #added on to original value 
+            #if CD needs to be percentage, increasing by 20% is about average, although less acurate than an addition. 
+            return [CLfactor, CDfactor]
 
     # Icing Methods:
 

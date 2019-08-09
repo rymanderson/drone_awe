@@ -217,7 +217,9 @@ Additionally, `validationCaseDictionary` is a dictionary with the following form
 }
 ```
 
-Note that the `'altitude'` setting of validation cases is not always known and is set by default to `'0'`.
+##### Assumed Specs
+
+Some specifications are not explicitly available, or require some adaptation at runtime. Note that the `'altitude'` setting of validation cases is not always known and is set by default to `'0'`. `'length'`, `'width'`, and `'height'` parameters are not necessarily set to geometrically accurate values; rather, they are set so that `'length'` times `'width'` results in the top area and that `'width'` times `'height'` results in the drone's frontal area.
 
 #### `'L/D'` and `'propulsiveefficiency'`
 
@@ -336,13 +338,88 @@ where $\eta$ is the propulsive efficiency calculated as:
 
 where $P_{hover, actual}$ is predicted using:
 
-* $P_{hover, actual} = $
+* $P_{hover, actual} = \frac{CV_{battery}}{E_{hover}}$
 
-This $\eta$ is used to predict power consumption for the non-hover case as:
+where $C$ is the battery capacity, $V_{battery}$ is the battery voltage, and $t_{hover}$ is the hover endurance of the drone. Ideally, each parameter is available as published specifications for the drone to be modeled. Next, $\eta$ is used to predict power consumption for the non-hover case as:
 
 * $P = \eta T(V_\infty sin(\alpha) + v_i)$
 
 #### Fixed-Wing Drones
+
+### Range and Endurance
+Endurance is defined as the length of time a drone can remain airborne. Range is the physical distance traveled by the drone. Endurance is calculated by dividing the battery energy (capacity multiplied by voltage) by the power required:
+
+$t = \frac{C\times V}{P}$
+
+where $t$ is the endurance, $C$ is the battery capacity, and $V$ is the average battery voltage. Range is then simply calculated by multiplying the endurance by the average velocity of the drone:
+
+$R = t\times U$
+
+where $R$ is the range in meters and $U$ is the average drone velocity.
+
+### Weather
+
+#### Temperature
+From the ideal gas law, $PV=nRT$ (which applies to standard air conditions), temperature is inversely proportional to air density:
+
+$T \propto \frac{1}{\rho}$
+
+In this model the increase or decrease in temperature is taken from 15 &deg;C, and is used to calculate an associated change in air density. In turn, density directly influences power required for drones.
+
+#### Humidity
+Humidity also has a direct impact on air density, which directly affects power requirements for drones. This model uses empirical data obtained from [3], where the effects of varying levels of humidity and temperature on air density were recorded. 
+
+#### Rain 
+Rain has many effects on the flight performance of drones; however, there is little to no information or validation experiments that test the effects of rain on rotary-wing drones. Thus, for rotary drones in this model, only the effects of downward momentum imparted by the rain to the drone is considered. It is not meant to be comprehensive and, with the aid of more empirical data, could be refined and/or altered significantly to better represent the effects of rain. 
+
+For fixed-wing drones, in addition to the momentum exchange, rain has been shown to both decrease lift and increase drag at all practical angles of attack. In this model, a slight reduction in the lift-to-drag ratio is performed, based on averages taken from plots from [4] and [5] (the lift coefficient is reduced by 6% and the drag coefficient increases by 0.01).
+
+Force from downward momentum was calculated from the droplet size and liquid water content, as specified by the user. If a rainfall rate was instead given, the following conversion is performed taken from [4]:
+
+$Drizzle:\ LWC = \frac{30000\pi10^{-3}}{5.7^4R^{-0.84}}$
+
+$Widespread:\ LWC = \frac{7000\pi10^{-3}}{4.1^4R^{-0.84}}$
+
+$Thunderstorm:\ LWC = \frac{1400\pi10^{-3}}{5.7^4R^{-0.84}}$
+
+where $LWC$ is the liquid water content in $g/m^3$ and $R$ is the rainfall rate in mm/hr. Drizzle, widespread, and thunderstorm rain conditions were determined based on the value of $R$.
+
+The force from a single droplet is found by multiplying the droplet mass by the change in velocity of the droplet upon impact ($\Delta V$). Assuming each drop is a sphere of diameter `'dropsize'`, the terminal velocity can be calculated as:
+
+$Terminal\ velocity\ V_t = \sqrt{\frac{2mg}{C_d\rho A}}$
+
+where $m$ is the droplet mass, $g$ is accelleration due to gravity, $C_d$ is the coefficient of drag (in this case assumed to be 0.5), $\rho$ is the density of air, and $A$ is the cross-sectional area of the droplet. This equation can be derived from setting equal the forces of gravity and drag on the raindrop. Upon impact with a drone's surface, some or all of the drop can stick to the surface or splash back. Criteron given in [4] determines this outcome based on the droplet's weber number:
+
+$We = \frac{\rho_{air} V_t^2 d}{\sigma}$
+
+where $d$ is the droplet diameter, $V_t$ is the drop's velocity, and $\sigma$ is the water surface tension (this is taken from empirical values based on the current temperature).
+
+The result of the drop's impact is assumed to be:
+
+$We < 5$: drop sticks; $\Delta V = V_t$ 
+
+$5 < We < 10$: drop rebounds; $\Delta V = 2V_t$
+
+$10 < We < 18.0^2 D_p(\rho_{drop}/\sigma)^{1/2}V_t^{1/4}f^{3/4}$: drop spreads; $\Delta V = V_t$
+
+$18.0^2 D_p(\rho_{drop}/\sigma)^{1/2}V_t^{1/4}f^{3/4} < We$: drop splashes; $\Delta V = V_t(1+2/\pi)$
+
+The number of raindrops incident on the drone per second ($f$) can be determined by dividing the liquid water content (with units of kg/m^3) by the droplet mass, and then multiplying by the drone area and the velocity of the drops:
+
+$\#\ of\ drops\ incident\ per\ second\ f = \frac{LWC A_{drone} U_{drop}}{m_{drop}}$
+
+Putting all of this together, the force imparted by all incident raindrops per second on a drone is the number of incident drops multiplied by the change in momentum, the average droplet mass multiplied by the average change in velocity:
+
+$F = f * (m_{drop} \times \Delta V)$
+
+This force acts in the opposite direction of lift, which requires more power to overcome. It effectively increases the "weight" of the drone as far as power generation is concerned. 
+
+#### Wind
+
+#### Icing
+Ice accretion has many adverse effects on a drone's flight performance, including significant losses in lift and increases in drag. In addition, ice adds more weight to the system, which is especially significant for drones, whose weights are small to begin with. Icing effects can even lead to premature stall conditions. Despite these dangerous risks, icing is also very difficult to predict without using computational fluid dynamics (CFD), which is outside the current scope of this project. 
+
+In this model, we do not attempt to predict the effects of icing; however, at certain conditions we do issue a warning to the user that icing could occur at those operating conditions, specifically when temperature is low and humidity is high. We encourage users to refer to the icing sections in our literature reviews of weather effects on drone flight performance for more information.
 
 ## Units
 
@@ -526,4 +603,6 @@ NOTE: the model is based on power consumption to accomodate future development. 
 
 1. Beal, L.D.R., Hill, D., Martin, R.A., and Hedengren, J. D., GEKKO Optimization Suite, Processes, Volume 6, Number 8, 2018, doi: 10.3390/pr6080106.
 2. Stolaroff, J. K., Samaras, C., O’Neill, E. R., Lubers, A., Mitchell, A. S., & Ceperley, D. (2018). Energy use and life cycle greenhouse gas emissions of drones for commercial package delivery. Nature Communications, 9(1), 1–13. https://doi.org/10.1038/s41467-017-02411-5
-3. 
+3. Yue, W., Xue, Y., & Liu, Y. (2017). High Humidity Aerodynamic Effects Study on Offshore Wind Turbine Airfoil/Blade Performance through CFD Analysis. International Journal of Rotating Machinery, 2017, 1–15. https://doi.org/10.1155/2017/7570519
+4. Cao, Y., Wu, Z., & Xu, Z. (2014). Effects of rainfall on aircraft aerodynamics. Progress in Aerospace Sciences, 71, 85–127. https://doi.org/10.1016/j.paerosci.2014.07.003
+5. Ismail, M., Yihua, C., Wu, Z., & Sohail, M. A. (2014). Numerical Study of Aerodynamic Efficiency of a Wing in Simulated Rain Environment. Journal of Aircraft, 51(6), 2015–2023. https://doi.org/10.2514/1.c032594
