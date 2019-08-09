@@ -303,13 +303,134 @@ According to rotor momentum theory, five equations govern the flight of a rotorc
 4. $v_i = \frac{T}{2 A_{rotor} N_{rotor} \rho \sqrt{V_\infty^2 cos^2(\alpha) + (V_\infty sin(\alpha) + v_i^2)}}$
 5. $A_{\bot} = A_{front} cos(\alpha) + A_{top} sin(\alpha)$
 
+These equations were applied to rotary drones by Stolaroff, Samaras, O'Neill et. al. in [1]. `Drone AWE` predicts the power consumption of a rotary drone by solving this system. GEKKO, a software package introduced in [2], is used to solve the system.
+
 #### Fixed-Wing Drones
+
+### Range and Endurance
+Endurance is defined as the length of time a drone can remain airborne. Range is the physical distance traveled by the drone. Endurance is calculated by dividing the battery energy (capacity multiplied by voltage) by the power required:
+
+$t = \frac{C\times V}{P}$
+
+where $t$ is the endurance, $C$ is the battery capacity, and $V$ is the average battery voltage. Range is then simply calculated by multiplying the endurance by the average velocity of the drone:
+
+$R = t\times U$
+
+where $R$ is the range in meters and $U$ is the average drone velocity.
 
 ### Weather
 
 #### Temperature
 From the ideal gas law, $PV=nRT$ (which applies to standard air conditions), temperature is inversely proportional to air density:
-$$T \propto \frac{1}{\rho}$$
+
+$T \propto \frac{1}{\rho}$
+
+In this model the increase or decrease in temperature is taken from 15 &deg;C, and is used to calculate an associated change in air density. In turn, density directly influences power required for drones.
+
+#### Humidity
+Humidity also has a direct impact on air density, which directly affects power requirements for drones. This model uses empirical data obtained from [3], where the effects of varying levels of humidity and temperature on air density were recorded. 
+
+#### Rain 
+Rain has many effects on the flight performance of drones; however, there is little to no information or validation experiments that test the effects of rain on rotary-wing drones. Thus, for rotary drones in this model, only the effects of downward momentum imparted by the rain to the drone is considered. It is not meant to be comprehensive and, with the aid of more empirical data, could be refined and/or altered significantly to better represent the effects of rain. 
+
+For fixed-wing drones, in addition to the momentum exchange, rain has been shown to both decrease lift and increase drag at all practical angles of attack. In this model, a slight reduction in the lift-to-drag ratio is performed, based on averages taken from plots from [4] and [5] (the lift coefficient is reduced by 6% and the drag coefficient increases by 0.01).
+
+Force from downward momentum was calculated from the droplet size and liquid water content, as specified by the user. If a rainfall rate was instead given, the following conversion is performed taken from [4]:
+
+$Drizzle:\ LWC = \frac{30000\pi10^{-3}}{5.7^4R^{-0.84}}$
+
+$Widespread:\ LWC = \frac{7000\pi10^{-3}}{4.1^4R^{-0.84}}$
+
+$Thunderstorm:\ LWC = \frac{1400\pi10^{-3}}{5.7^4R^{-0.84}}$
+
+where $LWC$ is the liquid water content in $g/m^3$ and $R$ is the rainfall rate in mm/hr. Drizzle, widespread, and thunderstorm rain conditions were determined based on the value of $R$.
+
+The force from a single droplet is found by multiplying the droplet mass by the change in velocity of the droplet upon impact ($\Delta V$). Assuming each drop is a sphere of diameter `'dropsize'`, the terminal velocity can be calculated as:
+
+$Terminal\ velocity\ V_t = \sqrt{\frac{2mg}{C_d\rho A}}$
+
+where $m$ is the droplet mass, $g$ is accelleration due to gravity, $C_d$ is the coefficient of drag (in this case assumed to be 0.5), $\rho$ is the density of air, and $A$ is the cross-sectional area of the droplet. This equation can be derived from setting equal the forces of gravity and drag on the raindrop. Upon impact with a drone's surface, some or all of the drop can stick to the surface or splash back. Criteron given in [4] determines this outcome based on the droplet's weber number:
+
+$We = \frac{\rho_{air} V_t^2 d}{\sigma}$
+
+where $d$ is the droplet diameter, $V_t$ is the drop's velocity, and $\sigma$ is the water surface tension (this is taken from empirical values based on the current temperature).
+
+The result of the drop's impact is assumed to be:
+
+$We < 5$: drop sticks; $\Delta V = V_t$ 
+
+$5 < We < 10$: drop rebounds; $\Delta V = 2V_t$
+
+$10 < We < 18.0^2 D_p(\rho_{drop}/\sigma)^{1/2}V_t^{1/4}f^{3/4}$: drop spreads; $\Delta V = V_t$
+
+$18.0^2 D_p(\rho_{drop}/\sigma)^{1/2}V_t^{1/4}f^{3/4} < We$: drop splashes; $\Delta V = V_t(1+2/\pi)$
+
+The number of raindrops incident on the drone per second ($f$) can be determined by dividing the liquid water content (with units of kg/m^3) by the droplet mass, and then multiplying by the drone area and the velocity of the drops:
+
+$\#\ of\ drops\ incident\ per\ second\ f = \frac{LWC A_{drone} U_{drop}}{m_{drop}}$
+
+Putting all of this together, the force imparted by all incident raindrops per second on a drone is the number of incident drops multiplied by the change in momentum, the average droplet mass multiplied by the average change in velocity:
+
+$F = f * (m_{drop} \times \Delta V)$
+
+This force acts in the opposite direction of lift, which requires more power to overcome. It effectively increases the "weight" of the drone as far as power generation is concerned. 
+
+#### Wind
+
+#### Icing
+Ice accretion has many adverse effects on a drone's flight performance, including significant losses in lift and increases in drag. In addition, ice adds more weight to the system, which is especially significant for drones, whose weights are small to begin with. Icing effects can even lead to premature stall conditions. Despite these dangerous risks, icing is also very difficult to predict without using computational fluid dynamics (CFD), which is outside the current scope of this project. 
+
+In this model, we do not attempt to predict the effects of icing; however, at certain conditions we do issue a warning to the user that icing could occur at those operating conditions, specifically when temperature is low and humidity is high. We encourage users to refer to the icing sections in our literature reviews of weather effects on drone flight performance for more information.
+
+## Units
+
+Properties and their respective units are converted within the simulation to SI units, and then converted back. Those units are:
+
+<!-- These could probably be better organized -->
+
+### Electricity
+
+* Capacity: _milliamp-hours [mAh]_
+* Voltage: _volts [V]_
+* Current: _amperes [A]_
+* Resistance: _ohms [&Omega;]_
+
+### Mechanics
+
+* Velocity/Speed: _meters per second [m/s]_
+* Power: _watts [W]_
+* Endurance or Flight time: _minutes [min]_
+* Altitude: _meters [m]_
+* mass: _kilograms [kg]_
+
+	* note that "takeoff weight" is measured in mass units <!-- I feel weird quoting a weight in mass units, but I put this here because the .param files seem to use kg. Which may be fine. Let me know if you have any thoughts. :)  Yeah, that is kind of strange. -->
+
+### Miscellaneous
+
+* Temperature: _degrees Celcius [&deg;C]_
+* Wind Resistance: _meters per second [m/s]_
+
+	*refers to the maximum wind speed rating for the drone
+
+* Battery re-charge time: _minutes [min]_
+
+## functions.py &mdash; Commonly used functions
+
+* `getparams` reads in a .txt or .csv file and outputs a dictionary with keys from a specified list and values from the specified parameter file.
+* `getXandY()` reads in data from a validation case and saves the contents to lists for x and y. This function assumes the first row contains labels and ignores them.
+* `interpolate()` does a simple linear interpolation with inputs of 2 x-values, 2 y-values, and the x-value of the interpolated value.
+
+## Testing
+* test_power.py
+* test_drone.py
+* test_plotter.py
+
+## Future Work
+
+This section is to be used to record ideas for future development that cannot be immediately implemented due to time constraints.
+
+* calculate propulsive efficiency at max range and max endurance and interpolate between the two
+* go weather by weather and determine the appropriate model to be used
 
 ## Classes
 
@@ -439,124 +560,10 @@ NOTE: the model is based on power consumption to accomodate future development. 
 
 	* plots results according to labels and titles specified by the user in the `settings.txt` file. Methods can plot a line or scatter plots. The validation method plots results on top of specified validation data.
 
-## Units
+## References
 
-Properties and their respective units are converted within the simulation to SI units, and then converted back. Those units are:
-
-<!-- These could probably be better organized -->
-
-### Electricity
-
-* Capacity: _milliamp-hours [mAh]_
-* Voltage: _volts [V]_
-* Current: _amperes [A]_
-* Resistance: _ohms [&Omega;]_
-
-### Mechanics
-
-* Velocity/Speed: _meters per second [m/s]_
-* Power: _watts [W]_
-* Endurance or Flight time: _minutes [min]_
-* Altitude: _meters [m]_
-* mass: _kilograms [kg]_
-
-	* note that "takeoff weight" is measured in mass units <!-- I feel weird quoting a weight in mass units, but I put this here because the .param files seem to use kg. Which may be fine. Let me know if you have any thoughts. :)  Yeah, that is kind of strange. -->
-
-### Miscellaneous
-
-* Temperature: _degrees Celcius [&deg;C]_
-* Wind Resistance: _meters per second [m/s]_
-
-	*refers to the maximum wind speed the drone can resist
-
-* Battery re-charge time: _minutes [min]_
-
-## Parameter Files
-
-### Simulation
-
-* The settings list file contains all the necessary simulation parameters the code will look through before running simulations. These include:
-
-	* validation (True/False)
-
-		* If validation is True, the program reads in the next value, validationcase, and looks for the settings file under that directory in params/Validation/, and ignores the rest of the current settings file.
-
-	* validationcase
-		
-		* Specifies which validation case is being tested. Irrelevant if validation is False.
-	
-	* drone (True/False)
-	* dronename
-	* battery state of health
-	* battery beginning state of charge
-	* altitude
-	* sea level temperature
-	* rain (True/False)
-
-		* droplet size
-		* LWC
-
-	* Temperature
-
-		* New temperature
-
-	* Humidity
-
-		* Relative humidity
-
-	* Wind
-
-		* Wind speed
-		* Wind direction
-
-	* Icing
-	* Timestep
-	* plot (True/False)
-
-		* xlabel
-		* ylabel
-		* axis title
-
-	* simulation type
-
-		* simple is the only option for now
-
-	* range of vx-values
-
-		* xbegin
-		* xend
-		* xnumber
-
-			* the simulation will loop through xnumber of the model from xbeginning to xend, according to what is put as the xlabel (also the x-variable)
-
-NOTE: For the plotting x- and y-labels, choose from the following parameters to plot:
-
-* range
-* endurance
-* payload
-
-### Drone
-
-There are `.param` files in the Drone directory each contain parameters specific to each drone. They are labled with the company's name or abbreviation in lowercase letters followed by a dash (-) and then the name of the drone (e.g., dji-Mavic2). New drones needing to be tested can follow similar formats, with a space (`" "`) delimiter.
-
-### Batteries
-
-Similar to the Drone `.param` files, battery `.param` files exist for each type of battery tested. These parameters assist in determining the discharge rate over time and amount of specific energy and power available for different types of batteries.
-
-## functions.py &mdash; Commonly used functions
-
-* `getparams` reads in a .txt or .csv file and outputs a dictionary with keys from a specified list and values from the specified parameter file.
-* `getXandY()` reads in data from a validation case and saves the contents to lists for x and y. This function assumes the first row contains labels and ignores them.
-* `interpolate()` does a simple linear interpolation with inputs of 2 x-values, 2 y-values, and the x-value of the parameter you are seeking.
-
-## Testing
-* test_power.py
-* test_drone.py
-* test_plotter.py
-
-## Future Work
-
-This section is to be used to record ideas for future development that cannot be immediately implemented due to time constraints.
-
-* calculate propulsive efficiency at max range and max endurance and interpolate between the two
-* go weather by weather and determine the appropriate model to be used
+1. Beal, L.D.R., Hill, D., Martin, R.A., and Hedengren, J. D., GEKKO Optimization Suite, Processes, Volume 6, Number 8, 2018, doi: 10.3390/pr6080106.
+2. Stolaroff, J. K., Samaras, C., O’Neill, E. R., Lubers, A., Mitchell, A. S., & Ceperley, D. (2018). Energy use and life cycle greenhouse gas emissions of drones for commercial package delivery. Nature Communications, 9(1), 1–13. https://doi.org/10.1038/s41467-017-02411-5
+3. Yue, W., Xue, Y., & Liu, Y. (2017). High Humidity Aerodynamic Effects Study on Offshore Wind Turbine Airfoil/Blade Performance through CFD Analysis. International Journal of Rotating Machinery, 2017, 1–15. https://doi.org/10.1155/2017/7570519
+4. Cao, Y., Wu, Z., & Xu, Z. (2014). Effects of rainfall on aircraft aerodynamics. Progress in Aerospace Sciences, 71, 85–127. https://doi.org/10.1016/j.paerosci.2014.07.003
+5. Ismail, M., Yihua, C., Wu, Z., & Sohail, M. A. (2014). Numerical Study of Aerodynamic Efficiency of a Wing in Simulated Rain Environment. Journal of Aircraft, 51(6), 2015–2023. https://doi.org/10.2514/1.c032594

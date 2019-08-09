@@ -147,7 +147,6 @@ class Battery:
         # estimate list lengths for prior memory allocation
 
     def __defineCapacity(self):
-        self.__updateLog('NOTE','Assuming a LiPo battery capacity increase of 3.5% per year for 5 years.')
         if self.debug:
             print("defineCapacity:  batterytechnology is: ",self.params['batterytechnology'])
         if self.params['batterytechnology'] == 'current':
@@ -522,7 +521,7 @@ class Power:
         self.params['velocityinduced']  = m.velocityinduced.value[0]
         self.params['thrust']           = m.thrust.value[0]
         self.params['drag']             = m.drag.value[0]
-        self.params['dragarea']             = m.dragarea.value[0]
+        self.params['dragarea']         = m.dragarea.value[0]
 
         if self.debug:
             self.__print5('__solveModel AFTER')
@@ -532,6 +531,7 @@ class Power:
             print('POWER: ----- airdensity    ',airdensity)
             print('POWER: ----- rotorarea     ',rotorarea)
             print('POWER: ----- rotorquantity ',rotorquantity)
+            print('POWER: ----- power         ',self.params['power'])
             print('')
             print('')
 
@@ -566,7 +566,7 @@ class Power:
         self.params['dragcoefficient'] = 2.0
     
     def __setBladeProfilePower(self):
-        self.params['bladeprofilepower'] = 0.0
+        self.params['bladeprofilepower'] = 50.0
 
     def __updateLog(self,entrytype,message):
         self.log[entrytype].append(message)
@@ -644,9 +644,9 @@ class Weather:
         densityfactor = 1.0
         densityfactor *= self.__updateDensityTemperature()
         densityfactor *= self.__updateDensityHumidity()
-        self.params['extrathrust'] = self.__updateRain(drone.params['toparea'])
+        self.params['weightadjustment'] = self.__updateRain(drone.params['toparea'])
         if drone.params['wingtype'] == 'fixed':
-            self.params['LDadjustment'] = weatherclass.updateLD() #list with [CLfactor, CD factor]
+            self.params['LDadjustment'] = self.updateLD() #list with [CLfactor, CD factor]
         self.params['airdensity'] = self.params['airdensitysealevel'] * densityfactor #for the case that we update weather multiple times, we need to not compound weather effects
         self.__warning()
 
@@ -800,6 +800,12 @@ class Weather:
             surfacetension = interpolate(x1,x2,y1,y2,x)
 
         return surfacetension
+
+    def updateLD(self):
+            CLfactor = 0.94 #94% of original value
+            CDfactor = 0.01 #added on to original value 
+            #if CD needs to be percentage, increasing by 20% is about average, although less acurate than an addition. 
+            return [CLfactor, CDfactor]
 
     # Icing Methods:
 
@@ -1350,7 +1356,8 @@ class Mission:
 
     params = {
         'payload': 0.0,
-        'missionspeed': 10.0
+        'missionspeed': 10.0,
+        'altitude': 5000
     }
 
     log     = {
@@ -1509,7 +1516,8 @@ class model:
         'weather': False,
         'battery': False,
         'mission': False,
-        'model': False
+        'model': False,
+        'power': False
     }  # toggles debugging logs
 
     log         = {
@@ -1543,6 +1551,7 @@ class model:
             "batterytechnology":"near-future",
             "stateofhealth":90.0,
             "startstateofcharge":100.0,
+            "altitude": 5000,
             "dropsize":0.0,
             "liquidwatercontent":1.0, #one of this and rainfallrate needs to be specified for rain, but not both
             "rainfallrate":None,
@@ -1685,7 +1694,7 @@ class model:
         # for weatherclass in weatherlist:
         #     weatherparams = weatherparams + weatherclass.params
 
-        self.classes['weather']        = Weather(self.params['altitude'],weatherlist,debug=self.debug['weather'])
+        self.classes['weather']        = Weather(self.classes['mission'].params['altitude'],weatherlist,debug=self.debug['weather'])
         if self.debug['model']:
             print("Preparing to update weather:")
         self.classes['weather'].update(self.classes['drone'])
@@ -1697,7 +1706,7 @@ class model:
             print("MODEL: ----- drone is",self.classes['drone'])
             print("MODEL: ----- weather is",self.classes['weather'])
             print("MODEL: ----- mission is",self.classes['mission'])
-        self.classes['power']          = Power(self.classes['drone'],self.classes['weather'],self.classes['mission'])
+        self.classes['power']          = Power(self.classes['drone'],self.classes['weather'],self.classes['mission'], debug=self.debug['power'])
         if self.debug['model']:
             print("MODEL: ----- power class instantiated.")
         self.classes['simulation']     = Simulation(self.params['timestep'],self.params['simulationtype'])
@@ -1721,8 +1730,10 @@ class model:
                         foundz = True
                         break
                 if foundz == False:
+                    self.__updateLog('ERROR','Manipulated z variable not set.')
                     raise(Exception("MODEL: ~~~~~ ERROR: manipulated z variable not set"))
                 else:
+                    self.__updateLog('SUCCESS','Manipulated z variable set.')
                     if self.debug['model']:
                         print("MODEL: ===== SUCCESS: manipulated z variable set")
                         print("MODEL: ----- missionspeed = ",self.classes['mission'].params['missionspeed'])
@@ -1837,6 +1848,7 @@ class model:
                         print("MODEL: ===== SUCCESS: dependent variable set")
                 
                 self.__updateOutput([self.classes['drone'],self.classes['battery'],self.classes['power'],self.classes['weather'],self.classes['mission'],self.classes['simulation']],self.params['zvals'].index(zvalue))
+                # print('MODEL: ----- xlabel is ',self.params['xlabel'])
                 self.__updateOutputLog([self.classes['drone'],self.classes['battery'],self.classes['power'],self.classes['weather'],self.classes['mission'],self.classes['simulation']],xvalue,zvalue)
 
             yplot.append(y)
@@ -1928,6 +1940,7 @@ class model:
         # entrytype can be `SUCCESS`, `WARNING`, or `ERROR`
 
     def __updateOutputLog(self,classes,xvalue,zvalue):
+        #TODO: add function to set self.outputlog['xlabel'] and self.outputlog['zlabel']
         self.outputlog['log'].append({})
         self.outputlog['log'][-1]['xvalue'] = xvalue
         self.outputlog['log'][-1]['zvalue'] = zvalue
@@ -1936,4 +1949,4 @@ class model:
             for entrytype in myclass.log:
                 if entrytype not in self.outputlog['log'][-1]:
                     self.outputlog['log'][-1][entrytype] = []
-                self.outputlog['log'][-1][entrytype].append(myclass.log[entrytype])
+                self.outputlog['log'][-1][entrytype] += myclass.log[entrytype]
