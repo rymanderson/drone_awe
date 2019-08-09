@@ -223,6 +223,8 @@ Note that the `'altitude'` setting of validation cases is not always known and i
 
 When simulating a fixed-wing drone, the current model requires input parameters for the lift-to-drag ratio (`'L/D'`) and the efficiency of the propulsive system (`'propulsiveefficiency'`). Ballpark estimates for small UAVs are on the order of 10 and 30%, respectively, although these values heavily depend on the specific geometries and propulsive systems of the drones.
 
+These parameters need to be edited for each specific fixed-wing drone in drones.py. 
+
 #### Battery parameters
 
 #### `'batterytechnology'`

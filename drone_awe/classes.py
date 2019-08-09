@@ -39,8 +39,11 @@ class Drone:
         self.conversions            = conversions
         self.__convertUnits()
         # extrapolate useful parameters
-        self.params['frontalarea']  = self.params['width'] * self.params['height']
-        self.params['toparea']      = self.params['width'] * self.params['length']
+        if self.params['wingtype'] == 'rotary':
+            self.params['frontalarea']  = self.params['width'] * self.params['height']
+            self.params['toparea']      = self.params['width'] * self.params['length']
+        else:
+            self.params['toparea'] = self.params['span'] * self.params['chord']
         if 'rangemax' in self.params and 'rangemaxspeed' in self.params:
             self.params['endurancemaxrange'] = self.params['rangemax'] / self.params['rangemaxspeed']
         if 'endurancemaxhover' not in self.params and 'endurancemax' in self.params:
@@ -48,14 +51,14 @@ class Drone:
             self.__updateLog('WARNING','`endurancemaxhover` not found; assuming 90%% of `endurancemax`.')
             if self.debug:
                 print("Drone.__init__:  'endurancemaxhover' not found; assuming 90%% of 'endurancemax'")
-        if 'rotordiameter' not in self.params:
+        if 'rotordiameter' not in self.params and self.params['wingtype'] == 'rotary':
             self.__updateLog('ERROR','Rotor diameter not found.')
             raise(Exception("DRONE: ~~~~~ ERROR: rotor diameter not found"))
-        if 'rotorarea' not in self.params:
+        if 'rotorarea' not in self.params and self.params['wingtype'] == 'rotary':
             self.params['rotorarea'] = np.pi*self.params['rotordiameter']**2/4
         if self.params['wingtype'] == 'fixed':
             self.params['spanefficiency'] = 0.8 #estimate from Dr. Ning's book (he lists 0.7-0.9). If we want to we could decrease this further based on fuselage diameter, but maybe that's requiring too much detail
-            print("DRONE: ????? Should we be pre-defining a spanwise efficiency?")
+            # print("DRONE: ????? Should we be pre-defining a spanwise efficiency?")
         if 'energyfull' not in self.params['battery']:
             self.params['battery']['energyfull'] = self.params['battery']['batteryvoltage']*self.params['battery']['batterycapacity']
         if 'numbatteries' in self.params['battery']:
@@ -354,16 +357,16 @@ class Power:
         cruisespeed = mission.params['missionspeed']
         if 'wingarea' in drone.params:
             wingarea = drone.params['wingarea']
-        elif 'wingspan' in drone.params and 'chord' in drone.params:
-            wingarea = drone.params['wingspan'] * drone.params['chord']
+        elif 'span' in drone.params and 'chord' in drone.params:
+            wingarea = drone.params['span'] * drone.params['chord']
         else:
             self.__updateLog('ERROR','Wing area needed to calculate power')
             raise(Exception("~~~~~ ERROR: wing area needed to calculate power ~~~~~"))
-        if 'wingspan' not in drone.params:
-            self.__updateLog('ERROR','Wingspan needed to calculate power')
-            raise(Exception("~~~~~ ERROR: wingspan needed to calculate power ~~~~~"))
+        if 'span' not in drone.params:
+            self.__updateLog('ERROR','span needed to calculate power')
+            raise(Exception("~~~~~ ERROR: span needed to calculate power ~~~~~"))
         else:
-            span = drone.params['wingspan']
+            span = drone.params['span']
         self.__setDragCoefficient()
         dragcoefficient  = self.params['dragcoefficient']
         weight           = drone.params['takeoffweight'] * weather.params['gravitationconstant']
@@ -376,20 +379,23 @@ class Power:
 
     def getPowerFixedWing(self, drone, weather, mission): #from Dr. Nin's textbook
         
-        LD = 10 #placeholder, this could be a user input
+        L_D = drone.params['L/D'] 
+        propulsiveefficiency = drone.params['propulsiveefficiency'] 
 
         if 'LDadjustment' in weather.params: #this probably can be its own method
             L = drone.params['effectivetakeoffweight'] * weather.params['gravitationconstant']
-            D = L / LD
+            D = L / L_D
             CLfactor = weather.params['LDadjustment'][0]
             CDfactor = weather.params['LDadjustment'][1]
             L *= CLfactor
             D += CDfactor
-            LD = L/D
+            L_D = L/D
 
-        propulsiveefficiency = .4 #placeholder
+        gravity = weather.params['gravitationconstant']
+        weight = drone.params['effectivetakeoffweight']
+        speed = mission.params['missionspeed']
 
-        self.params['power'] = weather.params['gravitationconstant'] * drone.params['effectivetakeoffweight'] * mission.params['missionspeed'] / (propulsiveefficiency * LD)
+        self.params['power'] = gravity * weight * speed / (propulsiveefficiency * L_D)
 
 
     # def __updateEfficiencyPropulsive(self, drone, weather, mission):
@@ -1555,7 +1561,7 @@ class model:
             "startstateofcharge":100.0,
             "altitude": 5000,
             "dropsize":0.0,
-            "liquidwatercontent":1.0, #one of this and rainfallrate needs to be specified for rain, but not both
+            "liquidwatercontent":0.0, #one of this and rainfallrate needs to be specified for rain, but not both
             "rainfallrate":None,
             "temperature":15.0,
             "wind":False,

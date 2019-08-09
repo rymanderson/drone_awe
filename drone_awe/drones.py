@@ -50,17 +50,6 @@ drones = [
         }
     },
     {
-        'id': 'aerovironment-Puma3AE',
-        'wingtype': 'fixed',
-        'endurancemax': 150,
-        'takeoffweight': 6.8,
-        'span': 2.8,
-        'altitudemax': 152,
-        'battery': {
-            'batterytype': 'LE'            
-        }
-    },
-    {
         'id': 'aeryon-skyrangerR70',
         'wingtype': 'rotary',
         'rotorquantity': 4,
@@ -178,8 +167,24 @@ drones = [
         }
     },
     {
+        'id': 'aerovironment-Puma3AE',
+        'wingtype': 'fixed',
+        'L/D' : 10,
+        'propulsiveefficiency' : 0.4,
+        'endurancemax': 150,
+        'takeoffweight': 6.8,
+        'span': 2.8,
+        'chord': 0.2778,
+        'altitudemax': 152,
+        'battery': {
+            'batterytype': 'LE'            
+        }
+    },
+    {
         'id': 'precisionhawk-FireFLY6Pro',
         'wingtype': 'fixed',
+        'L/D' : 10,
+        'propulsiveefficiency' : 0.4,
         'span': 1.524,
         'takeoffweight': 4.5,
         'endurancemax': 59,
@@ -195,6 +200,8 @@ drones = [
     {
         'id': 'senseFly-ebeeX',
         'wingtype': 'fixed',
+        'L/D' : 10,
+        'propulsiveefficiency' : 0.4,
         'span': 1.16,
         'takeoffweight': 1.4,
         'speedmax': 30,
