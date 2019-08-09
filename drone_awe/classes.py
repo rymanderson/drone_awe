@@ -376,6 +376,12 @@ class Power:
         spanefficiency   = drone.params['spanefficiency']
         k                = 1 / (np.pi*span**2 / wingarea * spanefficiency)
 
+        if 'LDadjustment' in weather.params: #this probably can be its own method
+            CLfactor = weather.params['LDadjustment'][0]
+            CDfactor = weather.params['LDadjustment'][1]
+            weight *= CLfactor
+            dragcoefficient += CDfactor
+
         self.params['power'] = 0.5 * density * cruisespeed**3 * wingarea * dragcoefficient \
                                 + 2*weight**2*k \
                                 / (density*cruisespeed*wingarea)
@@ -1354,11 +1360,11 @@ class model:
             # "xend":1,
             # "xnumber":5,
             "xvals":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15],
-            # "zlabel":"temperature",
+            "zlabel":"dropsize",
             # "weatherbegin":10,
             # "weatherend":40,
             # "weathernumber":3
-            "zvals":[0,10,20,30,40] # must contain only unique elements
+            "zvals":[0.0, 0.002, 0.004, 0.006, 0.008, 0.01] # must contain only unique elements
 
             # "voltage"
             # "voltagecharged"
