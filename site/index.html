@@ -1,0 +1,1533 @@
+
+
+
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      <meta http-equiv="x-ua-compatible" content="ie=edge">
+      
+      
+      
+      
+        <meta name="lang:clipboard.copy" content="Copy to clipboard">
+      
+        <meta name="lang:clipboard.copied" content="Copied to clipboard">
+      
+        <meta name="lang:search.language" content="en">
+      
+        <meta name="lang:search.pipeline.stopwords" content="True">
+      
+        <meta name="lang:search.pipeline.trimmer" content="True">
+      
+        <meta name="lang:search.result.none" content="No matching documents">
+      
+        <meta name="lang:search.result.one" content="1 matching document">
+      
+        <meta name="lang:search.result.other" content="# matching documents">
+      
+        <meta name="lang:search.tokenizer" content="[\s\-]+">
+      
+      <link rel="shortcut icon" href="assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.0.4, mkdocs-material-4.4.0">
+    
+    
+      
+        <title>drone_awe</title>
+      
+    
+    
+      <link rel="stylesheet" href="assets/stylesheets/application.0284f74d.css">
+      
+        <link rel="stylesheet" href="assets/stylesheets/application-palette.01803549.css">
+      
+      
+        
+        
+        <meta name="theme-color" content="#546e7a">
+      
+    
+    
+      <script src="assets/javascripts/modernizr.74668098.js"></script>
+    
+    
+      
+        <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Slab:300,400,400i,700|Source+Code+Pro&display=fallback">
+        <style>body,input{font-family:"Roboto Slab","Helvetica Neue",Helvetica,Arial,sans-serif}code,kbd,pre{font-family:"Source Code Pro","Courier New",Courier,monospace}</style>
+      
+    
+    <link rel="stylesheet" href="assets/fonts/material-icons.css">
+    
+    
+    
+      
+    
+    
+  </head>
+  
+    
+    
+    <body dir="ltr" data-md-color-primary="blue-grey" data-md-color-accent="grey">
+  
+    <svg class="md-svg">
+      <defs>
+        
+        
+      </defs>
+    </svg>
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" data-md-component="overlay" for="__drawer"></label>
+    
+      <a href="#drone-awe-drone-applications-in-weather-environments" tabindex="1" class="md-skip">
+        Skip to content
+      </a>
+    
+    
+      <header class="md-header" data-md-component="header">
+  <nav class="md-header-nav md-grid">
+    <div class="md-flex">
+      <div class="md-flex__cell md-flex__cell--shrink">
+        <a href="." title="drone_awe" class="md-header-nav__button md-logo">
+          
+            <i class="md-icon">home</i>
+          
+        </a>
+      </div>
+      <div class="md-flex__cell md-flex__cell--shrink">
+        <label class="md-icon md-icon--menu md-header-nav__button" for="__drawer"></label>
+      </div>
+      <div class="md-flex__cell md-flex__cell--stretch">
+        <div class="md-flex__ellipsis md-header-nav__title" data-md-component="title">
+          
+            <span class="md-header-nav__topic">
+              drone_awe
+            </span>
+            <span class="md-header-nav__topic">
+              
+                Drone-AWE: Drone Applications in Weather Environments
+              
+            </span>
+          
+        </div>
+      </div>
+      <div class="md-flex__cell md-flex__cell--shrink">
+        
+          <label class="md-icon md-icon--search md-header-nav__button" for="__search"></label>
+          
+<div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="query" data-md-state="active">
+      <label class="md-icon md-search__icon" for="__search"></label>
+      <button type="reset" class="md-icon md-search__icon" data-md-component="reset" tabindex="-1">
+        &#xE5CD;
+      </button>
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="result">
+          <div class="md-search-result__meta">
+            Type to start searching
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+        
+      </div>
+      
+    </div>
+  </nav>
+</header>
+    
+    <div class="md-container">
+      
+        
+      
+      
+      <main class="md-main">
+        <div class="md-main__inner md-grid" data-md-component="container">
+          
+            
+              <div class="md-sidebar md-sidebar--primary" data-md-component="navigation">
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    <nav class="md-nav md-nav--primary" data-md-level="0">
+  <label class="md-nav__title md-nav__title--site" for="__drawer">
+    <a href="." title="drone_awe" class="md-nav__button md-logo">
+      
+        <i class="md-icon">home</i>
+      
+    </a>
+    drone_awe
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+
+
+  <li class="md-nav__item md-nav__item--active">
+    
+    <input class="md-toggle md-nav__toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+    
+      
+    
+    
+      <label class="md-nav__link md-nav__link--active" for="__toc">
+        Drone-AWE: Drone Applications in Weather Environments
+      </label>
+    
+    <a href="." title="Drone-AWE: Drone Applications in Weather Environments" class="md-nav__link md-nav__link--active">
+      Drone-AWE: Drone Applications in Weather Environments
+    </a>
+    
+      
+<nav class="md-nav md-nav--secondary">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">Table of contents</label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#installation" title="Installation" class="md-nav__link">
+    Installation
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#usage" title="Usage" class="md-nav__link">
+    Usage
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#basic-usage" title="Basic Usage" class="md-nav__link">
+    Basic Usage
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#plotting" title="Plotting" class="md-nav__link">
+    Plotting
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#settings" title="Settings" class="md-nav__link">
+    Settings
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#dronename" title="'dronename'" class="md-nav__link">
+    'dronename'
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#validation-and-validationcase" title="'validation' and 'validationcase'" class="md-nav__link">
+    'validation' and 'validationcase'
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#assumed-specs" title="Assumed Specs" class="md-nav__link">
+    Assumed Specs
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ld-and-propulsiveefficiency" title="'L/D' and 'propulsiveefficiency'" class="md-nav__link">
+    'L/D' and 'propulsiveefficiency'
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#battery-parameters" title="Battery parameters" class="md-nav__link">
+    Battery parameters
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#batterytechnology" title="'batterytechnology'" class="md-nav__link">
+    'batterytechnology'
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#stateofhealth-and-stateofcharge" title="'stateofhealth' and 'stateofcharge'" class="md-nav__link">
+    'stateofhealth' and 'stateofcharge'
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#weather-parameters" title="Weather parameters" class="md-nav__link">
+    Weather parameters
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dropsize-liquidwatercontent-and-rainfallrate" title="'dropsize', 'liquidwatercontent' and 'rainfallrate'" class="md-nav__link">
+    'dropsize', 'liquidwatercontent' and 'rainfallrate'
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#temperature" title="'temperature'" class="md-nav__link">
+    'temperature'
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#relativehumidity" title="'relativehumidity'" class="md-nav__link">
+    'relativehumidity'
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mission-parameters" title="Mission parameters" class="md-nav__link">
+    Mission parameters
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#plotting-parameters" title="Plotting parameters" class="md-nav__link">
+    Plotting parameters
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#theory" title="Theory" class="md-nav__link">
+    Theory
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#power" title="Power" class="md-nav__link">
+    Power
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#rotary-drones" title="Rotary Drones" class="md-nav__link">
+    Rotary Drones
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#calibration" title="Calibration" class="md-nav__link">
+    Calibration
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#momentum-theory" title="Momentum Theory" class="md-nav__link">
+    Momentum Theory
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fixed-wing-drones" title="Fixed-Wing Drones" class="md-nav__link">
+    Fixed-Wing Drones
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#range-and-endurance" title="Range and Endurance" class="md-nav__link">
+    Range and Endurance
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#weather" title="Weather" class="md-nav__link">
+    Weather
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#temperature_1" title="Temperature" class="md-nav__link">
+    Temperature
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#humidity" title="Humidity" class="md-nav__link">
+    Humidity
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rain" title="Rain" class="md-nav__link">
+    Rain
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#wind" title="Wind" class="md-nav__link">
+    Wind
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#icing" title="Icing" class="md-nav__link">
+    Icing
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#units" title="Units" class="md-nav__link">
+    Units
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#electricity" title="Electricity" class="md-nav__link">
+    Electricity
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mechanics" title="Mechanics" class="md-nav__link">
+    Mechanics
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#miscellaneous" title="Miscellaneous" class="md-nav__link">
+    Miscellaneous
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#functionspy-commonly-used-functions" title="functions.py &mdash; Commonly used functions" class="md-nav__link">
+    functions.py &mdash; Commonly used functions
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#testing" title="Testing" class="md-nav__link">
+    Testing
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#future-work" title="Future Work" class="md-nav__link">
+    Future Work
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#classes" title="Classes" class="md-nav__link">
+    Classes
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#references" title="References" class="md-nav__link">
+    References
+  </a>
+  
+</li>
+      
+      
+      
+      
+      
+    </ul>
+  
+</nav>
+    
+  </li>
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="toc">
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+<nav class="md-nav md-nav--secondary">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">Table of contents</label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#installation" title="Installation" class="md-nav__link">
+    Installation
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#usage" title="Usage" class="md-nav__link">
+    Usage
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#basic-usage" title="Basic Usage" class="md-nav__link">
+    Basic Usage
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#plotting" title="Plotting" class="md-nav__link">
+    Plotting
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#settings" title="Settings" class="md-nav__link">
+    Settings
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#dronename" title="'dronename'" class="md-nav__link">
+    'dronename'
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#validation-and-validationcase" title="'validation' and 'validationcase'" class="md-nav__link">
+    'validation' and 'validationcase'
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#assumed-specs" title="Assumed Specs" class="md-nav__link">
+    Assumed Specs
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ld-and-propulsiveefficiency" title="'L/D' and 'propulsiveefficiency'" class="md-nav__link">
+    'L/D' and 'propulsiveefficiency'
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#battery-parameters" title="Battery parameters" class="md-nav__link">
+    Battery parameters
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#batterytechnology" title="'batterytechnology'" class="md-nav__link">
+    'batterytechnology'
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#stateofhealth-and-stateofcharge" title="'stateofhealth' and 'stateofcharge'" class="md-nav__link">
+    'stateofhealth' and 'stateofcharge'
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#weather-parameters" title="Weather parameters" class="md-nav__link">
+    Weather parameters
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dropsize-liquidwatercontent-and-rainfallrate" title="'dropsize', 'liquidwatercontent' and 'rainfallrate'" class="md-nav__link">
+    'dropsize', 'liquidwatercontent' and 'rainfallrate'
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#temperature" title="'temperature'" class="md-nav__link">
+    'temperature'
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#relativehumidity" title="'relativehumidity'" class="md-nav__link">
+    'relativehumidity'
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mission-parameters" title="Mission parameters" class="md-nav__link">
+    Mission parameters
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#plotting-parameters" title="Plotting parameters" class="md-nav__link">
+    Plotting parameters
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#theory" title="Theory" class="md-nav__link">
+    Theory
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#power" title="Power" class="md-nav__link">
+    Power
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#rotary-drones" title="Rotary Drones" class="md-nav__link">
+    Rotary Drones
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#calibration" title="Calibration" class="md-nav__link">
+    Calibration
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#momentum-theory" title="Momentum Theory" class="md-nav__link">
+    Momentum Theory
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fixed-wing-drones" title="Fixed-Wing Drones" class="md-nav__link">
+    Fixed-Wing Drones
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#range-and-endurance" title="Range and Endurance" class="md-nav__link">
+    Range and Endurance
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#weather" title="Weather" class="md-nav__link">
+    Weather
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#temperature_1" title="Temperature" class="md-nav__link">
+    Temperature
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#humidity" title="Humidity" class="md-nav__link">
+    Humidity
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rain" title="Rain" class="md-nav__link">
+    Rain
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#wind" title="Wind" class="md-nav__link">
+    Wind
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#icing" title="Icing" class="md-nav__link">
+    Icing
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#units" title="Units" class="md-nav__link">
+    Units
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#electricity" title="Electricity" class="md-nav__link">
+    Electricity
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mechanics" title="Mechanics" class="md-nav__link">
+    Mechanics
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#miscellaneous" title="Miscellaneous" class="md-nav__link">
+    Miscellaneous
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#functionspy-commonly-used-functions" title="functions.py &mdash; Commonly used functions" class="md-nav__link">
+    functions.py &mdash; Commonly used functions
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#testing" title="Testing" class="md-nav__link">
+    Testing
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#future-work" title="Future Work" class="md-nav__link">
+    Future Work
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#classes" title="Classes" class="md-nav__link">
+    Classes
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#references" title="References" class="md-nav__link">
+    References
+  </a>
+  
+</li>
+      
+      
+      
+      
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content">
+            <article class="md-content__inner md-typeset">
+              
+                
+                
+                <h1 id="drone-awe-drone-applications-in-weather-environments">Drone-AWE: Drone Applications in Weather Environments</h1>
+<p>This repository is being developed to advance the state of the art of drone performance predictions under a wide range of weather and battery conditions with mission planning in mind. An interactive GUI is available at http://droneecon.com. This README will explain general usage as well as the underlying theory for the models used, as currently implemented. Note that <em>Drone-AWE</em> is a work in progress (see <strong>Future Work</strong>). This document will explain general usage for the latter, as well as the engineering theory at work behind the scenes.</p>
+<h2 id="installation">Installation</h2>
+<p>Drone-AWE may be used in two ways: using the GUI available at http://droneecon.com, or by using the source code directly. To use the source code directly, install using</p>
+<pre><code class="python3">pip install drone_awe
+</code></pre>
+
+<h2 id="usage">Usage</h2>
+<h3 id="basic-usage">Basic Usage</h3>
+<p>Base functionality is achieved by running the following:</p>
+<pre><code class="python3">import drone_awe
+m = drone_awe.model(args)
+m.simulate()
+</code></pre>
+
+<p>where <code>args</code> is a dictionary containing simulation parameters. Note that for every parameter not specified in <code>args</code>, a default value is used. It is possible to run the default simulation by passing an empty dictionary into the <code>drone_awe.model()</code> method:</p>
+<pre><code class="python3">import drone_awe
+m = drone_awe.model({})
+m.simulate()
+</code></pre>
+
+<p>Settable dictionary keys with example values for <code>args</code> include the following:</p>
+<pre><code class="python3">{
+    &quot;validation&quot;:False,
+    &quot;validationcase&quot;:&quot;DiFranco2016&quot;,
+    &quot;dronename&quot;:&quot;dji-Mavic2&quot;,
+    &quot;batterytechnology&quot;:&quot;near-future&quot;,
+    &quot;stateofhealth&quot;:90.0,
+    &quot;startstateofcharge&quot;:100.0,
+    &quot;rain&quot;:False,
+    &quot;dropsize&quot;:1.0,
+    &quot;liquidwatercontent&quot;:1.0,
+    &quot;temperature&quot;:15.0,
+    &quot;wind&quot;:False,
+    &quot;windspeed&quot;:10.0,
+    &quot;winddirection&quot;:0.0,
+    &quot;relativehumidity&quot;:0.0,
+    &quot;mission&quot;: {
+            &quot;missionspeed&quot;: 10.0,
+            &quot;altitude&quot;:100.0,
+            &quot;heading&quot;:0.0,
+            &quot;payload:0.0
+        },
+    &quot;timestep&quot;:1,
+    &quot;plot&quot;:True,
+    &quot;xlabel&quot;:&quot;missionspeed&quot;,
+    &quot;ylabel&quot;:&quot;power&quot;,
+    &quot;title&quot;:&quot;First_test&quot;,
+    &quot;simulationtype&quot;:&quot;simple&quot;,
+    &quot;model&quot;:&quot;abdilla&quot;,
+    &quot;xvals&quot;:[0,1,2,3,4,5],
+    &quot;weathereffect&quot;:&quot;temperature&quot;,
+    &quot;weathervals&quot;:[10,20,30,40]
+}
+</code></pre>
+
+<p>These are explained further in <strong>Settings</strong>. After a <code>drone_awe.model</code> object is instantiated, settings can be changed by modifying the <code>input</code> class variable as:</p>
+<pre><code class="python3">m.input['xlabel'] = 'payload'
+m.input['validationcase'] = 'Stolaroff2018'
+</code></pre>
+
+<p>The simulation must then be re-run using:</p>
+<pre><code class="python3">m.simulate()
+</code></pre>
+
+<h3 id="plotting">Plotting</h3>
+<p>An optional boolean may be set to produce a plot on runtime by running:</p>
+<pre><code class="python3">m = drone_awe.model({},plot=True)
+</code></pre>
+
+<p>when a <code>drone_awe.model</code> is instantiated. Alternatively, the <code>drone_awe.model</code>'s <code>plot</code> variable may be set at any time:</p>
+<pre><code class="python3">m.plot = True
+</code></pre>
+
+<h3 id="settings">Settings</h3>
+<p>The following subsections explain the use of various settings of a <code>drone_awe.model</code> object.</p>
+<h4 id="dronename"><code>'dronename'</code></h4>
+<p><code>'dronename'</code> must be set to a string that is defined in the drone database. To access a dictionary containing all supported drones, use the following methods:</p>
+<pre><code class="python3">droneDictionary = drone_awe.drones
+</code></pre>
+
+<p>If a drone or validation case does not exist in the drone database, it may still be used by setting a custom dictionary:</p>
+<pre><code class="python3">m.drone = droneDictionary
+</code></pre>
+
+<p>where <code>droneDictionary</code> is a dictionary with the same keys as the following:</p>
+<pre><code class="python3">{
+    'id': 'dji-Mavic2',
+    'wingtype': 'rotary',
+    'diagonal': 0.354,
+    'takeoffweight': 0.907,
+    'speedmax': 20,
+    'altitudemax': 6000,
+    'endurancemax': 31,
+    'endurancemaxspeed': 6.944,
+    'endurancemaxhover': 29,
+    'rangemax': 18000,
+    'rangemaxspeed': 13.889,
+    'temperaturemin': -10,
+    'chargerpowerrating': 60,
+    'batterytype': 'LiPo',
+    'batterycapacity': 3850,
+    'batteryvoltage': 15.4,
+    'batterycells': 4,
+    'batteryenergy': 59.29,
+    'batterymass': 0.297,
+    'waterproof': 'no',
+    'windspeedmax': 10.8,
+    'batteryrechargetime': 90,
+    'rotorquantity': 4,
+    'rotordiameter': 0.2,
+    'cruisespeed': 6.94,
+    'payload': 0.0,
+    'length': 0.322,
+    'width': 0.242,
+    'height': 0.084
+}
+</code></pre>
+
+<p>Note that not all parameters need be specified, but if a simulation is run that requires unspecified parameters, the model will not run.</p>
+<h4 id="validation-and-validationcase"><code>'validation'</code> and <code>'validationcase'</code></h4>
+<p>To view validation cases for <code>drone_awe</code> models, set <code>'validation'=True</code> and <code>'validationcase'</code> to a string contained in the validation case database. To access a dictionary containing all supported validation cases, run the following:</p>
+<pre><code class="python3">validationDictionary = drone_awe.validationdata()
+</code></pre>
+
+<p>Additionally, <code>validationCaseDictionary</code> is a dictionary with the following format:</p>
+<pre><code class="python3">{
+    'id': 'Stolaroff2018',
+    'xvalid': [1.358974359,1.7179487179,1.6923076923,1.7692307692,1.7692307692,1.8205128205,1.8717948718,1.8974358974,1.9230769231,1.9743589744,2.0512820513,2.1025641026,2.1025641026,2.1794871795,2.2820512821,2.3076923077,2.3333333333,2.4358974359,2.5384615385,2.5384615385,2.6666666667,2.7948717949,2.9487179487,3.1025641026,3.2564102564,3.358974359,3.4615384615,3.641025641,3.7435897436,3.8717948718,4.0512820513,4.2564102564,4.358974359,4.641025641,4.8974358974,5.8461538462,6,6.2820512821,6.5384615385,7.1538461538,7.4871794872,7.8205128205,8.4871794872,9.1794871795,9.7692307692,10.2564102564,10.6923076923,11.1282051282,11.5897435897],
+    'yvalid': [133.7510729614,149.2375075128,142.6477385276,144.5897859156,140.9450186657,141.7583868756,142.3874173587,140.4340604922,139.3656195241,139.5335348046,140.2321151941,139.9589946754,136.1689649626,138.3618186589,141.3711557508,139.4001574523,136.7492021569,136.5131929807,137.712167001,133.136399421,135.7755034665,136.58240428,141.8694500174,143.7278953027,145.8751386173,144.4503136349,143.5492800366,144.4966689523,140.8944307591,139.7885398414,140.0842115956,140.6905892611,140.7593265104,140.4412051028,148.3297356325,161.0751453894,160.7738527567,158.8079335653,157.0439596719,161.2248774665,165.1381601781,164.7032531681,177.1408013138,175.6982333173,190.095233258,197.4485952036,209.0736216573,203.7684942987,215.7551870381],
+    'drone': {
+        'validationcase':'Stolaroff2018',
+        'wingtype': 'rotary',
+        'rotorquantity': 4,
+        'takeoffweight': 1.3,
+        'batterytype': 'LiPo',
+        'batteryvoltage': 11.1,
+        'batterymass': 0.262,
+        'props': '10x4.7',
+        'endurancemaxhover': 16,
+        'payloadmax': 0.4,
+        'batterycapacity': 5500,
+        'payload': 0.0,
+        'rotordiameter': 0.254,
+        'batterycells': 3,
+        'length': 0.280,
+        'width': 0.140,
+        'height': 0.100,
+        'waterproof': 'no'
+        },
+    'settings': {
+        'dronename': 'drone',
+        'stateofhealth': 100.0,
+        'startstateofcharge': 100.0,
+        'altitude': 100.0,
+        'temperaturesealevel': 15.0,
+        'rain': False,
+        'dropsize': 0.0,
+        'liquidwatercontent': 1.0,
+        'temperature': 15.0,
+        'wind': False,
+        'windspeed': 0.0,
+        'winddirection': 0.0,
+        'relativehumidity': 85.0,
+        'icing': False,
+        &quot;mission&quot;: {
+            &quot;missionspeed&quot;: 10.0
+        },
+        'timestep': 1,
+        'xlabel': 'missionspeed',
+        'ylabel': 'alpha',
+        'title': 'Stolaroff',
+        'simulationtype': 'simple',
+        'model': 'abdilla',
+        'xvals': [0.0,1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0,9.0,10.0,11.0,12.0,13.0,14.0,15.0],
+        'validation': False,
+        'validationcase': 'Stolaroff2018',
+        'batterytechnology': 'current'
+        }
+}
+</code></pre>
+
+<h5 id="assumed-specs">Assumed Specs</h5>
+<p>Some specifications are not explicitly available, or require some adaptation at runtime. Note that the <code>'altitude'</code> setting of validation cases is not always known and is set by default to <code>'0'</code>. <code>'length'</code>, <code>'width'</code>, and <code>'height'</code> parameters are not necessarily set to geometrically accurate values; rather, they are set so that <code>'length'</code> times <code>'width'</code> results in the top area and that <code>'width'</code> times <code>'height'</code> results in the drone's frontal area.</p>
+<h4 id="ld-and-propulsiveefficiency"><code>'L/D'</code> and <code>'propulsiveefficiency'</code></h4>
+<p>When simulating a fixed-wing drone, the current model requires input parameters for the lift-to-drag ratio (<code>'L/D'</code>) and the efficiency of the propulsive system (<code>'propulsiveefficiency'</code>). Ballpark estimates for small UAVs are on the order of 10 and 30%, respectively, although these values heavily depend on the specific geometries and propulsive systems of the drones.</p>
+<h4 id="battery-parameters">Battery parameters</h4>
+<h4 id="batterytechnology"><code>'batterytechnology'</code></h4>
+<p><code>'batterytechnology'</code> must be set to one of the following options: <code>'current'</code>, <code>'near-future'</code>, or <code>'far-future'</code>. <code>'current'</code> will use the current battery capacity as specified in <code>drone.params</code>. <code>'near-future'</code> projects a future capacity in five years based on an increase of 3.5% of battery capacity each year. <code>'far-future'</code> projects battery capacity for lithium-air batteries, about ten times the capacity of current LiPo batteries.</p>
+<h4 id="stateofhealth-and-stateofcharge"><code>'stateofhealth'</code> and <code>'stateofcharge'</code></h4>
+<p><code>'stateofhealth'</code> refers to the amount of capacity contained within the battery relative to its initial capacity at first use. 100% would be a new battery. LiPo batteries (most commonly used battery for drones) are typically retired when their state of health falls to 80-85%. At lower states of health, the battery capacity is decreased and cycles through a full charge more quickly.</p>
+<p><code>'stateofcharge'</code> refers to the current capacity level of the battery, where 100% is fully charged (regardless of how much the battery has been used before), and 0% is a dead battery.</p>
+<h4 id="weather-parameters">Weather parameters</h4>
+<h4 id="dropsize-liquidwatercontent-and-rainfallrate"><code>'dropsize'</code>, <code>'liquidwatercontent'</code> and <code>'rainfallrate'</code></h4>
+<p>These parameters specifiy rain characteristics. If there is no rain in the simulation, set these to 0.0. </p>
+<p><code>'dropsize'</code> refers to the diameter of a raindrop (assuming a spherical shape), with units of meters. <code>'liquidwatercontent'</code> refers to the amount of water in a given volume of air, with units of kg/m^3. <code>'rainfallrate'</code> is the rate of rainfall in units of mm/hr, which translates to litres per cubic meter per hour.</p>
+<p>Only one of <code>'liquidatercontent'</code> and <code>'rainfallrate'</code> needs to be specified. </p>
+<h4 id="temperature"><code>'temperature'</code></h4>
+<p>Units of temperature are given in degrees Celcius.</p>
+<h4 id="relativehumidity"><code>'relativehumidity'</code></h4>
+<p><code>'relativehumidity'</code> refers to water content in the air, ranging from 0% to 100%.</p>
+<h4 id="mission-parameters">Mission parameters</h4>
+<p><code>'mission'</code> is a dictionary with the following keys: </p>
+<ul>
+<li>
+<p><code>'missionspeed'</code>&mdash; the cruise velocity of the drone, with units of m/s.</p>
+</li>
+<li>
+<p><code>'altitude'</code>&mdash; in units of meters.</p>
+</li>
+<li>
+<p><code>'heading'</code>&mdash; the heading angle of the drone, in units of <strong><em>_</em></strong>____.</p>
+</li>
+<li>
+<p><code>'payload'</code>&mdash; the mass of any exra payload attached to the drone (e.g., camera), in units of kg.</p>
+</li>
+</ul>
+<h4 id="plotting-parameters">Plotting parameters</h4>
+<p><code>'xlabel'</code> and <code>'ylabel'</code> not only specify axis labels of the plot, but also tell the simulation what to solve for (<code>'ylabel'</code>) and what parameter to loop through (<code>'xlabel'</code>). <code>'ylabel'</code> can be <code>range</code>, <code>endurance</code>, or <code>power</code>. <code>'xlabel'</code> can be any variable from the following list:</p>
+<pre><code>&quot;startstateofcharge&quot;,
+&quot;altitude&quot;,
+&quot;temperature&quot;,
+&quot;dropsize&quot;,
+&quot;liquidwatercontent&quot;,
+&quot;newtemperature&quot;,
+&quot;windspeed&quot;,
+&quot;winddirection&quot;,
+&quot;relativehumidity&quot;,
+&quot;payload&quot;,
+&quot;missionspeed&quot;
+</code></pre>
+
+<p><code>'xvals'</code> is a list containing all the values of x the simulation will loop through and produce a single data point for. </p>
+<p><code>'zlabel'</code> can be specified to any of the variables used for the <code>'xlabel'</code> parameter (see list above) to loop through. This will produce a curve for each of the values in <code>'zvals'</code> and plot them on the same figure. This is useful for looping through a weather effect, such as temperature or relative humidity, to see their effects on a plot of range vs payload.</p>
+<p><code>'title'</code> is the title displayed on the top of the plot, followed by the current date. Currently, the title needs to be one word. A title of multiple words can have each word separated by an underscore en lieu of a space.</p>
+<h2 id="theory">Theory</h2>
+<p><code>Drone AWE</code> is intended to predict performance parameters of rotary and fixed-wing drones based on readily-available specifications. To accomplish this, the power requirements for a given flight maneuver is calculated and used to predict battery drain behavior. Then, parameters such as range and endurance can be calculated. Comprehensive state data is collected at each step of a simulation, providing a versatile data set as output for study.</p>
+<h3 id="power">Power</h3>
+<h4 id="rotary-drones">Rotary Drones</h4>
+<p>For rotary drones, power consumption is predicted in two steps. First, model parameters are calibrated based on known specifications, like maximum hover time and rotor diameter. Then, momentum theory is used to predict the power consumption.</p>
+<h4 id="calibration">Calibration</h4>
+<h4 id="momentum-theory">Momentum Theory</h4>
+<p>According to rotor momentum theory, five equations govern the flight of a rotorcraft:</p>
+<ol>
+<li>$T = \sqrt{W^2 + D^2}$</li>
+<li>$tan(\alpha) = \frac{D}{W}$</li>
+<li>$D = \frac{1}{2} \rho V_\infty^2 C_D A_{\bot}$</li>
+<li>$v_i = \frac{T}{2 A_{rotor} N_{rotor} \rho \sqrt{V_\infty^2 cos^2(\alpha) + (V_\infty sin(\alpha) + v_i^2)}}$</li>
+<li>$A_{\bot} = A_{front} cos(\alpha) + A_{top} sin(\alpha)$</li>
+</ol>
+<p>A modified set of these equations were applied to rotary drones by Stolaroff, Samaras, O'Neill et. al. in [1]. <code>Drone AWE</code> predicts the power consumption of a rotary drone by solving this system. GEKKO, a software package introduced in [2], is used to solve for:</p>
+<ul>
+<li>$T$ - thrust per rotor</li>
+<li>$\alpha$ - angle of attack</li>
+<li>$D$ - drag</li>
+<li>$v_i$ - rotor induced velocity</li>
+<li>$A_{\bot}$ - planform area of the drone perpendicular to its velocity</li>
+</ul>
+<p>given the following:</p>
+<ul>
+<li>$W$ - effective weight</li>
+<li>$V_\infty$ - drone speed</li>
+<li>$C_D$ - drag coefficient</li>
+<li>$A_{rotor}$ - rotor area</li>
+<li>$N_{rotor}$ - number of rotors</li>
+<li>$\rho$ - air density</li>
+<li>$A_{front}$ - frontal drone area</li>
+<li>$A_{top}$ - drone top area</li>
+</ul>
+<p>Note that the model currently assumes that the drag coefficient does not change with velocity and/or angle of attack.</p>
+<p>The power requirement for the hover case is calculated according to another equation from [1]:</p>
+<ul>
+<li>$P_{hover} = \frac{W^{3/2}}{\eta \sqrt{2N_{rotor} A_{rotor} \rho}}$</li>
+</ul>
+<p>where $\eta$ is the propulsive efficiency calculated as:</p>
+<ul>
+<li>$\eta = \frac{P_{hover}}{P_{hover, actual}}</li>
+</ul>
+<p>where $P_{hover, actual}$ is predicted using:</p>
+<ul>
+<li>$P_{hover, actual} = \frac{CV_{battery}}{E_{hover}}$</li>
+</ul>
+<p>where $C$ is the battery capacity, $V_{battery}$ is the battery voltage, and $t_{hover}$ is the hover endurance of the drone. Ideally, each parameter is available as published specifications for the drone to be modeled. Next, $\eta$ is used to predict power consumption for the non-hover case as:</p>
+<ul>
+<li>$P = \eta T(V_\infty sin(\alpha) + v_i)$</li>
+</ul>
+<h4 id="fixed-wing-drones">Fixed-Wing Drones</h4>
+<h3 id="range-and-endurance">Range and Endurance</h3>
+<p>Endurance is defined as the length of time a drone can remain airborne. Range is the physical distance traveled by the drone. Endurance is calculated by dividing the battery energy (capacity multiplied by voltage) by the power required:</p>
+<p>$t = \frac{C\times V}{P}$</p>
+<p>where $t$ is the endurance, $C$ is the battery capacity, and $V$ is the average battery voltage. Range is then simply calculated by multiplying the endurance by the average velocity of the drone:</p>
+<p>$R = t\times U$</p>
+<p>where $R$ is the range in meters and $U$ is the average drone velocity.</p>
+<h3 id="weather">Weather</h3>
+<h4 id="temperature_1">Temperature</h4>
+<p>From the ideal gas law, $PV=nRT$ (which applies to standard air conditions), temperature is inversely proportional to air density:</p>
+<p>$T \propto \frac{1}{\rho}$</p>
+<p>In this model the increase or decrease in temperature is taken from 15 &deg;C, and is used to calculate an associated change in air density. In turn, density directly influences power required for drones.</p>
+<h4 id="humidity">Humidity</h4>
+<p>Humidity also has a direct impact on air density, which directly affects power requirements for drones. This model uses empirical data obtained from [3], where the effects of varying levels of humidity and temperature on air density were recorded. </p>
+<h4 id="rain">Rain</h4>
+<p>Rain has many effects on the flight performance of drones; however, there is little to no information or validation experiments that test the effects of rain on rotary-wing drones. Thus, for rotary drones in this model, only the effects of downward momentum imparted by the rain to the drone is considered. It is not meant to be comprehensive and, with the aid of more empirical data, could be refined and/or altered significantly to better represent the effects of rain. </p>
+<p>For fixed-wing drones, in addition to the momentum exchange, rain has been shown to both decrease lift and increase drag at all practical angles of attack. In this model, a slight reduction in the lift-to-drag ratio is performed, based on averages taken from plots from [4] and [5] (the lift coefficient is reduced by 6% and the drag coefficient increases by 0.01).</p>
+<p>Force from downward momentum was calculated from the droplet size and liquid water content, as specified by the user. If a rainfall rate was instead given, the following conversion is performed taken from [4]:</p>
+<p>$Drizzle:\ LWC = \frac{30000\pi10^{-3}}{5.7^4R^{-0.84}}$</p>
+<p>$Widespread:\ LWC = \frac{7000\pi10^{-3}}{4.1^4R^{-0.84}}$</p>
+<p>$Thunderstorm:\ LWC = \frac{1400\pi10^{-3}}{5.7^4R^{-0.84}}$</p>
+<p>where $LWC$ is the liquid water content in $g/m^3$ and $R$ is the rainfall rate in mm/hr. Drizzle, widespread, and thunderstorm rain conditions were determined based on the value of $R$.</p>
+<p>The force from a single droplet is found by multiplying the droplet mass by the change in velocity of the droplet upon impact ($\Delta V$). Assuming each drop is a sphere of diameter <code>'dropsize'</code>, the terminal velocity can be calculated as:</p>
+<p>$Terminal\ velocity\ V_t = \sqrt{\frac{2mg}{C_d\rho A}}$</p>
+<p>where $m$ is the droplet mass, $g$ is accelleration due to gravity, $C_d$ is the coefficient of drag (in this case assumed to be 0.5), $\rho$ is the density of air, and $A$ is the cross-sectional area of the droplet. This equation can be derived from setting equal the forces of gravity and drag on the raindrop. Upon impact with a drone's surface, some or all of the drop can stick to the surface or splash back. Criteron given in [4] determines this outcome based on the droplet's weber number:</p>
+<p>$We = \frac{\rho_{air} V_t^2 d}{\sigma}$</p>
+<p>where $d$ is the droplet diameter, $V_t$ is the drop's velocity, and $\sigma$ is the water surface tension (this is taken from empirical values based on the current temperature).</p>
+<p>The result of the drop's impact is assumed to be:</p>
+<p>$We &lt; 5$: drop sticks; $\Delta V = V_t$ </p>
+<p>$5 &lt; We &lt; 10$: drop rebounds; $\Delta V = 2V_t$</p>
+<p>$10 &lt; We &lt; 18.0^2 D_p(\rho_{drop}/\sigma)^{1/2}V_t^{1/4}f^{3/4}$: drop spreads; $\Delta V = V_t$</p>
+<p>$18.0^2 D_p(\rho_{drop}/\sigma)^{1/2}V_t^{1/4}f^{3/4} &lt; We$: drop splashes; $\Delta V = V_t(1+2/\pi)$</p>
+<p>The number of raindrops incident on the drone per second ($f$) can be determined by dividing the liquid water content (with units of kg/m^3) by the droplet mass, and then multiplying by the drone area and the velocity of the drops:</p>
+<p>$#\ of\ drops\ incident\ per\ second\ f = \frac{LWC A_{drone} U_{drop}}{m_{drop}}$</p>
+<p>Putting all of this together, the force imparted by all incident raindrops per second on a drone is the number of incident drops multiplied by the change in momentum, the average droplet mass multiplied by the average change in velocity:</p>
+<p>$F = f * (m_{drop} \times \Delta V)$</p>
+<p>This force acts in the opposite direction of lift, which requires more power to overcome. It effectively increases the "weight" of the drone as far as power generation is concerned. </p>
+<h4 id="wind">Wind</h4>
+<h4 id="icing">Icing</h4>
+<p>Ice accretion has many adverse effects on a drone's flight performance, including significant losses in lift and increases in drag. In addition, ice adds more weight to the system, which is especially significant for drones, whose weights are small to begin with. Icing effects can even lead to premature stall conditions. Despite these dangerous risks, icing is also very difficult to predict without using computational fluid dynamics (CFD), which is outside the current scope of this project. </p>
+<p>In this model, we do not attempt to predict the effects of icing; however, at certain conditions we do issue a warning to the user that icing could occur at those operating conditions, specifically when temperature is low and humidity is high. We encourage users to refer to the icing sections in our literature reviews of weather effects on drone flight performance for more information.</p>
+<h2 id="units">Units</h2>
+<p>Properties and their respective units are converted within the simulation to SI units, and then converted back. Those units are:</p>
+<!-- These could probably be better organized -->
+
+<h3 id="electricity">Electricity</h3>
+<ul>
+<li>Capacity: <em>milliamp-hours [mAh]</em></li>
+<li>Voltage: <em>volts [V]</em></li>
+<li>Current: <em>amperes [A]</em></li>
+<li>Resistance: <em>ohms [&Omega;]</em></li>
+</ul>
+<h3 id="mechanics">Mechanics</h3>
+<ul>
+<li>Velocity/Speed: <em>meters per second [m/s]</em></li>
+<li>Power: <em>watts [W]</em></li>
+<li>Endurance or Flight time: <em>minutes [min]</em></li>
+<li>Altitude: <em>meters [m]</em></li>
+<li>
+<p>mass: <em>kilograms [kg]</em></p>
+<ul>
+<li>note that "takeoff weight" is measured in mass units <!-- I feel weird quoting a weight in mass units, but I put this here because the .param files seem to use kg. Which may be fine. Let me know if you have any thoughts. :)  Yeah, that is kind of strange. --></li>
+</ul>
+</li>
+</ul>
+<h3 id="miscellaneous">Miscellaneous</h3>
+<ul>
+<li>Temperature: <em>degrees Celcius [&deg;C]</em></li>
+<li>
+<p>Wind Resistance: <em>meters per second [m/s]</em></p>
+<p>*refers to the maximum wind speed rating for the drone</p>
+</li>
+<li>
+<p>Battery re-charge time: <em>minutes [min]</em></p>
+</li>
+</ul>
+<h2 id="functionspy-commonly-used-functions">functions.py &mdash; Commonly used functions</h2>
+<ul>
+<li><code>getparams</code> reads in a .txt or .csv file and outputs a dictionary with keys from a specified list and values from the specified parameter file.</li>
+<li><code>getXandY()</code> reads in data from a validation case and saves the contents to lists for x and y. This function assumes the first row contains labels and ignores them.</li>
+<li><code>interpolate()</code> does a simple linear interpolation with inputs of 2 x-values, 2 y-values, and the x-value of the interpolated value.</li>
+</ul>
+<h2 id="testing">Testing</h2>
+<ul>
+<li>test_power.py</li>
+<li>test_drone.py</li>
+<li>test_plotter.py</li>
+</ul>
+<h2 id="future-work">Future Work</h2>
+<p>This section is to be used to record ideas for future development that cannot be immediately implemented due to time constraints.</p>
+<ul>
+<li>calculate propulsive efficiency at max range and max endurance and interpolate between the two</li>
+<li>go weather by weather and determine the appropriate model to be used</li>
+</ul>
+<h2 id="classes">Classes</h2>
+<p>This section contains a detailed description of each class, all contained in Classes.py.</p>
+<ul>
+<li>
+<p>the <code>Drone</code> class</p>
+<ul>
+<li>
+<p>class variables contain:</p>
+<ul>
+<li>
+<p>data sheet specifications of specific drone models (e.g., the Mavic 2 Pro), including</p>
+<ul>
+<li>battery size</li>
+<li>battery type</li>
+<li>range under specified conditions</li>
+<li>fixed wing or rotary wing</li>
+<li>etc.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>methods calculate certain characteristics based on available information</p>
+</li>
+</ul>
+</li>
+<li>
+<p>the <code>Battery</code> class</p>
+<ul>
+<li>
+<p>class variables describe:</p>
+<ul>
+<li>
+<p>properties of specific batteries used to model their discharge characteristics, including</p>
+<ul>
+<li>battery type</li>
+<li>number of cells</li>
+<li>low, nominal, and charged cell voltages</li>
+</ul>
+</li>
+<li>
+<p>Real-time discharge characteristics for simulation, including</p>
+<ul>
+<li>instantaneous voltage</li>
+<li>instantaneous current</li>
+<li>instantaneous state of charge</li>
+<li>current state of health</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>methods are used to update class variables using information from the <code>params/</code> directory</p>
+</li>
+</ul>
+</li>
+<li>
+<p>the <code>Power</code> class</p>
+<ul>
+<li>
+<p>class variables describe</p>
+<ul>
+<li>baseline power consumption</li>
+<li>an array of 'correction' objects used to modify the power consumption class variable due to weather or other effects (these could be the weather effect classes, actually)</li>
+<li>total power consumption</li>
+</ul>
+</li>
+<li>
+<p>methods are used to</p>
+<ul>
+<li>update the total power consumption class variable</li>
+<li>append <code>PowerCorrection</code> objects to <code>Power</code> objects using the <code>addCorrection</code> method</li>
+<li>throw an error if <code>addCorrection</code> attempts to append a time-variant <code>PowerCorrection</code> object to a time-invariant <code>Power</code> object</li>
+<li>the <code>PowerCorrection</code> method<ul>
+<li>adjustments to the baseline power requirements of the drone</li>
+<li>whether the simulation is time-variant or time-invariant</li>
+<li>methods perform miscellaneous book-keeping functions</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>the <code>Weather</code> class</p>
+<ul>
+<li>
+<p>class variables describe</p>
+<ul>
+<li>an instance of each weather effect to be modeled</li>
+<li>droplet size (rain)</li>
+<li>Liquid Water Content (LWC) (rain)</li>
+<li>rainfall rate (rain)</li>
+</ul>
+</li>
+<li>
+<p>the <code>__updateRain</code> method</p>
+<ul>
+<li>For all drone types, this calculates the momentum imparted to the drone from falling rain droplets based on their size and liquid water content. </li>
+</ul>
+</li>
+<li>
+<p>the <code>__getWebernumber</code> method</p>
+<ul>
+<li>Calculates weber number based on rain density, velocity, diameter, and frequency. This is used to obtain momentum in the __updateRain method.</li>
+</ul>
+</li>
+<li>
+<p>the <code>__getSurfaceTension</code> method</p>
+<ul>
+<li>
+<p>empirically interpolates surfaces tension based on current temperature</p>
+</li>
+<li>
+<p>the <code>Temperature</code> class</p>
+<ul>
+<li>
+<p>class variables describe </p>
+<ul>
+<li>new temperature?</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>the <code>Humidity</code> class</p>
+<ul>
+<li>
+<p>class variables describe </p>
+<ul>
+<li>relative humidity</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>the <code>Wind</code> class</p>
+<ul>
+<li>
+<p>class variables describe </p>
+<ul>
+<li>wind speed</li>
+<li>wind direction</li>
+<li>amount of turbulence?</li>
+<li>variation in speed and/or direction?</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>the <code>Gust</code> class</p>
+<ul>
+<li>
+<p>class variables describe</p>
+<ul>
+<li>frequency</li>
+<li>amplitude</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>the <code>Ice</code> class</p>
+<ul>
+<li>Because of modeling difficulty, this class does not attempt yet to model icing effects. It may in the future be used to identify if icing conditions are present. </li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>the <code>Mission</code> class</p>
+<ul>
+<li>
+<p>class variables describe</p>
+<ul>
+<li>mission speed</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>the <code>Simulation</code> class</p>
+</li>
+<li>
+<p>class variables describe</p>
+<ul>
+<li>start time</li>
+<li>end time</li>
+<li>timestep</li>
+<li>current timestep index</li>
+<li>current time</li>
+<li>methods are used to run and store simulation information, including procedures to get range and endurance</li>
+</ul>
+</li>
+</ul>
+<p>NOTE: the model is based on power consumption to accomodate future development. The <code>Power</code> class is designed to receive an indefinite number of modifications based on weather effects</p>
+<ul>
+<li>
+<p>the <code>Plotter</code> class</p>
+<ul>
+<li>plots results according to labels and titles specified by the user in the <code>settings.txt</code> file. Methods can plot a line or scatter plots. The validation method plots results on top of specified validation data.</li>
+</ul>
+</li>
+</ul>
+<h2 id="references">References</h2>
+<ol>
+<li>Beal, L.D.R., Hill, D., Martin, R.A., and Hedengren, J. D., GEKKO Optimization Suite, Processes, Volume 6, Number 8, 2018, doi: 10.3390/pr6080106.</li>
+<li>Stolaroff, J. K., Samaras, C., O’Neill, E. R., Lubers, A., Mitchell, A. S., &amp; Ceperley, D. (2018). Energy use and life cycle greenhouse gas emissions of drones for commercial package delivery. Nature Communications, 9(1), 1–13. https://doi.org/10.1038/s41467-017-02411-5</li>
+<li>Yue, W., Xue, Y., &amp; Liu, Y. (2017). High Humidity Aerodynamic Effects Study on Offshore Wind Turbine Airfoil/Blade Performance through CFD Analysis. International Journal of Rotating Machinery, 2017, 1–15. https://doi.org/10.1155/2017/7570519</li>
+<li>Cao, Y., Wu, Z., &amp; Xu, Z. (2014). Effects of rainfall on aircraft aerodynamics. Progress in Aerospace Sciences, 71, 85–127. https://doi.org/10.1016/j.paerosci.2014.07.003</li>
+<li>Ismail, M., Yihua, C., Wu, Z., &amp; Sohail, M. A. (2014). Numerical Study of Aerodynamic Efficiency of a Wing in Simulated Rain Environment. Journal of Aircraft, 51(6), 2015–2023. https://doi.org/10.2514/1.c032594</li>
+</ol>
+                
+                  
+                
+              
+              
+                
+
+
+              
+            </article>
+          </div>
+        </div>
+      </main>
+      
+        
+<footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-footer-copyright">
+        
+        powered by
+        <a href="https://www.mkdocs.org">MkDocs</a>
+        and
+        <a href="https://squidfunk.github.io/mkdocs-material/">
+          Material for MkDocs</a>
+      </div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    
+      <script src="assets/javascripts/application.245445c6.js"></script>
+      
+      <script>app.initialize({version:"1.0.4",url:{base:"."}})</script>
+      
+    
+  </body>
+</html>
