@@ -224,8 +224,8 @@ class Power:
             # self.__getPowerAbdilla(drone, weather, mission)
             self.params['powerModel'] = self.__setPowerMomentum
         elif drone.params['wingtype'] == 'fixed':
-            # self.params['powerModel'] = self.__setPowerTraub
-            self.params['powerModel'] = self.__setPowerFixedWing
+            self.params['powerModel'] = self.__setPowerTraub
+            # self.params['powerModel'] = self.__setPowerFixedWing
         else:
             self.__updateLog('ERROR','No power model defined for ' + drone.params['wingtype'])
             if self.debug:
@@ -1360,11 +1360,11 @@ class model:
             # "xend":1,
             # "xnumber":5,
             "xvals":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15],
-            "zlabel":"dropsize",
+            "zlabel":"temperature",
             # "weatherbegin":10,
             # "weatherend":40,
             # "weathernumber":3
-            "zvals":[0.0, 0.002, 0.004, 0.006, 0.008, 0.01] # must contain only unique elements
+            "zvals":[0.0, 10.0, 20.0, 30.0, 40.0] # must contain only unique elements
 
             # "voltage"
             # "voltagecharged"
