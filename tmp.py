@@ -1,5 +1,5 @@
 import drone_awe
-a = drone_awe.model({'validation':False,'dronename':'aerovironment-Puma3AE'},plot=True,debug={'drone':False,'battery':False,'power':True,'weather':False,'mission':False,'model':False})
+a = drone_awe.model({'validation':False,'dronename':'dji-Mavic2','xlabel':'payload','missionspeed':15.0},plot=True,debug={'drone':False,'battery':False,'power':True,'weather':False,'mission':False,'model':False})
 a.simulate()
 
 #a = drone_awe.model({'validation':True,'validationcase':'Ostler2009','dropsize':0.000,'zlabel':'payload','zvals':[0,.1,.2],'liquidwatercontent':0.0},plot=False,debug={'drone':False,'battery':False,'power':True,'weather':False,'mission':False,'model':False})

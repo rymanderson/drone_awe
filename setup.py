@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="drone_awe",
-    version="1.0.0",
+    version="1.0.1",
     author="Tyler Critchfield and Ryan Anderson",
     author_email="rymanderson@gmail.com",
     description="A versatile modeling package for drone performance in various weather environments.",

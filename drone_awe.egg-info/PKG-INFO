@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: drone-awe
-Version: 1.0.0
+Version: 1.0.1
 Summary: A versatile modeling package for drone performance in various weather environments.
 Home-page: https://github.com/rymanderson/drone_awe
 Author: Tyler Critchfield and Ryan Anderson
@@ -226,6 +226,8 @@ Description: # Drone-AWE: Drone Applications in Weather Environments
         }
         ```
         
+        Data used for validation cases can be found in [2,6-10].
+        
         ##### Assumed Specs
         
         Some specifications are not explicitly available, or require some adaptation at runtime. Note that the `'altitude'` setting of validation cases is not always known and is set by default to `'0'`. `'length'`, `'width'`, and `'height'` parameters are not necessarily set to geometrically accurate values; rather, they are set so that `'length'` times `'width'` results in the top area and that `'width'` times `'height'` results in the drone's frontal area.
@@ -233,6 +235,8 @@ Description: # Drone-AWE: Drone Applications in Weather Environments
         #### `'L/D'` and `'propulsiveefficiency'`
         
         When simulating a fixed-wing drone, the current model requires input parameters for the lift-to-drag ratio (`'L/D'`) and the efficiency of the propulsive system (`'propulsiveefficiency'`). Ballpark estimates for small UAVs are on the order of 10 and 30%, respectively, although these values heavily depend on the specific geometries and propulsive systems of the drones.
+        
+        These parameters need to be edited for each specific fixed-wing drone in drones.py. 
         
         #### Battery parameters
         
@@ -354,6 +358,15 @@ Description: # Drone-AWE: Drone Applications in Weather Environments
         * $P = \eta T(V_\infty sin(\alpha) + v_i)$
         
         #### Fixed-Wing Drones
+        The power requirement for fixed-wing drones is found in [11] and is as follows:
+        
+        $P = \frac{1}{2} \rho U^3 S C_{D_0} + \frac{2W^2 k}{\rho U S}$
+        
+        $k = \frac{1}{\pi \times b^2/S \times e}$
+        
+        where $P$ is power required for steady-level flight, $\rho$ is air density, $U$ is the drone velocity, $S$ is the wing area, $C_{D_0}$ is the no-lift drag coefficient, $W$ is the weight of the drone, $k$ is a coefficient relating to pressure drag, $b$ is the wing span, and $e$ is the spanwise efficiency, estimated to be 0.8 in this model.
+        
+        Spanwise efficiency and the no-lift drag coefficient are assumed parameters, so this model has much room for improvement. It is also difficult to update from rain effects other than momentum, as the model is not easily manipulated by editing a lift-to-drag ratio.
         
         ### Range and Endurance
         Endurance is defined as the length of time a drone can remain airborne. Range is the physical distance traveled by the drone. Endurance is calculated by dividing the battery energy (capacity multiplied by voltage) by the power required:
@@ -479,6 +492,9 @@ Description: # Drone-AWE: Drone Applications in Weather Environments
         
         * calculate propulsive efficiency at max range and max endurance and interpolate between the two
         * go weather by weather and determine the appropriate model to be used
+        * validate the fixed-wing power model
+        * implement a more comprehensive model for power that could include lifting line theory
+        * Re-visit after having recorded wind tunnel data
         
         ## Classes
         
@@ -551,40 +567,35 @@ Description: # Drone-AWE: Drone Applications in Weather Environments
             * the `__getWebernumber` method
                 * Calculates weber number based on rain density, velocity, diameter, and frequency. This is used to obtain momentum in the __updateRain method.
         
+            * the `updateLD` method
+                * Refers to a pre-determined value for loss in lift and increase in drag based on validation data as noted in the theory section. Only for fixed-wing drones.
+        
             * the `__getSurfaceTension` method
                 * empirically interpolates surfaces tension based on current temperature
         
-        		* the `Temperature` class
+            * the `updateDensityTemperature` method
         
-        			* class variables describe 
+            * the `updateDensityHumidity` class
         
-        				* new temperature?
+            * the `Wind` class
         
-        		* the `Humidity` class
+            *   class variables describe 
         
-        			* class variables describe 
+                    * wind speed
+                    * wind direction
+                    * amount of turbulence?
+                    * variation in speed and/or direction?
+            
+            * the `Gust` class
         
-        				* relative humidity
+                * class variables describe
         
-        		* the `Wind` class
-        
-        			* class variables describe 
-        
-        				* wind speed
-        				* wind direction
-        				* amount of turbulence?
-        				* variation in speed and/or direction?
-        		
-        		* the `Gust` class
-        
-        			* class variables describe
-        
-        				* frequency
-        				* amplitude
-        		
-        		* the `Ice` class
-        			
-        			* Because of modeling difficulty, this class does not attempt yet to model icing effects. It may in the future be used to identify if icing conditions are present. 
+                    * frequency
+                    * amplitude
+            
+            * the `Ice` class
+                
+                * Because of modeling difficulty, this class does not attempt yet to model icing effects. It may in the future be used to identify if icing conditions are present. 
         
         * the `Mission` class
         
@@ -615,6 +626,12 @@ Description: # Drone-AWE: Drone Applications in Weather Environments
         3. Yue, W., Xue, Y., & Liu, Y. (2017). High Humidity Aerodynamic Effects Study on Offshore Wind Turbine Airfoil/Blade Performance through CFD Analysis. International Journal of Rotating Machinery, 2017, 1–15. https://doi.org/10.1155/2017/7570519
         4. Cao, Y., Wu, Z., & Xu, Z. (2014). Effects of rainfall on aircraft aerodynamics. Progress in Aerospace Sciences, 71, 85–127. https://doi.org/10.1016/j.paerosci.2014.07.003
         5. Ismail, M., Yihua, C., Wu, Z., & Sohail, M. A. (2014). Numerical Study of Aerodynamic Efficiency of a Wing in Simulated Rain Environment. Journal of Aircraft, 51(6), 2015–2023. https://doi.org/10.2514/1.c032594
+        6. Abdilla, A., Richards, A., & Burrow, S. (2015). Power and endurance modelling of battery-powered rotorcraft. In 2015 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS) (pp. 675–680). IEEE. https://doi.org/10.1109/IROS.2015.7353445
+        7. Chang, K., Rammos, P., Wilkerson, S. A., Bundy, M., & Gadsden, S. A. (2016). LiPo battery energy studies for improved flight performance of unmanned aerial systems. In R. E. Karlsen, D. W. Gage, C. M. Shoemaker, & G. R. Gerhart (Eds.) (Vol. 9837, p. 98370W). International Society for Optics and Photonics. https://doi.org/10.1117/12.2223352
+        8. Di Franco, C., & Buttazzo, G. (2016). Coverage Path Planning for UAVs Photogrammetry with Energy and Resolution Constraints. Journal of Intelligent and Robotic Systems: Theory and Applications, 83(3–4), 445–462. https://doi.org/10.1007/s10846-016-0348-x
+        9. Dorling, K., Heinrichs, J., Messier, G. G., & Magierowski, S. (2017). Vehicle Routing Problems for Drone Delivery. IEEE Transactions on Systems, Man, and Cybernetics: Systems, 47(1), 70–85. https://doi.org/10.1109/TSMC.2016.2582745
+        10. Ostler, J. N., Bowman, W. J., Snyder, D. O., & Mclain, T. W. (2009). Performance Flight Testing of Small, Electric Powered Unmanned Aerial Vehicles (Vol. 1). Retrieved from https://journals.sagepub.com/doi/pdf/10.1260/175682909789996177
+        11. Traub, L. W. (2011). Range and Endurance Estimates for Battery-Powered Aircraft. Journal of Aircraft, 48(2), 703–707. https://doi.org/10.2514/1.c031027
 Platform: UNKNOWN
 Classifier: Programming Language :: Python :: 3
 Classifier: License :: OSI Approved :: MIT License

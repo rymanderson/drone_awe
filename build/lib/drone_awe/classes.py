@@ -42,8 +42,6 @@ class Drone:
         if self.params['wingtype'] == 'rotary':
             self.params['frontalarea']  = self.params['width'] * self.params['height']
             self.params['toparea']      = self.params['width'] * self.params['length']
-        # elif self.params['wingtype'] == 'fixed':
-        #     pass
         if 'rangemax' in self.params and 'rangemaxspeed' in self.params:
             self.params['endurancemaxrange'] = self.params['rangemax'] / self.params['rangemaxspeed']
         if 'endurancemaxhover' not in self.params and 'endurancemax' in self.params:
@@ -51,13 +49,15 @@ class Drone:
             self.__updateLog('WARNING','`endurancemaxhover` not found; assuming 90%% of `endurancemax`.')
             if self.debug:
                 print("Drone.__init__:  'endurancemaxhover' not found; assuming 90%% of 'endurancemax'")
-        if 'rotordiameter' not in self.params:
+        if 'rotordiameter' not in self.params and self.params['wingtype'] == 'rotary':
             self.__updateLog('ERROR','Rotor diameter not found.')
             raise(Exception("DRONE: ~~~~~ ERROR: rotor diameter not found"))
-        if 'rotorarea' not in self.params:
+        if 'rotorarea' not in self.params and self.params['wingtype'] == 'rotary':
             self.params['rotorarea'] = np.pi*self.params['rotordiameter']**2/4
         if self.params['wingtype'] == 'fixed':
             self.params['spanefficiency'] = 0.8 #estimate from Dr. Ning's book (he lists 0.7-0.9). If we want to we could decrease this further based on fuselage diameter, but maybe that's requiring too much detail
+            if 'wingarea' not in self.params:
+                self.params['wingarea'] = self.params['span'] * self.params['chord']
         if 'energyfull' not in self.params['battery']:
             self.params['battery']['energyfull'] = self.params['battery']['batteryvoltage']*self.params['battery']['batterycapacity']
         if 'numbatteries' in self.params['battery']:
@@ -225,6 +225,7 @@ class Power:
             self.params['powerModel'] = self.__setPowerMomentum
         elif drone.params['wingtype'] == 'fixed':
             self.params['powerModel'] = self.__setPowerTraub
+            # self.params['powerModel'] = self.__setPowerFixedWing
         else:
             self.__updateLog('ERROR','No power model defined for ' + drone.params['wingtype'])
             if self.debug:
@@ -234,13 +235,14 @@ class Power:
         if self.debug:
             print("POWER: ===== mission.params = ",mission.params)
         self.__updateWeight(drone.params['takeoffweight'],weather.params['gravitationconstant'],weather.params['weightadjustment'],mission.params['payload'])
-        self.__updateVelocityInducedHover(self.params['effectiveweight'],drone.params['rotorquantity'],drone.params['rotorarea'],weather.params['airdensity'])
-        self.params['velocityinduced']          = self.params['velocityinducedhover']
-        self.params['thrust']                   = self.params['effectiveweight']
-        self.params['alpha']                    = 0.0
-        self.params['alpha_gekko']              = 0.0
-        self.params['drag']                     = 0.0
-        self.params['dragarea']                 = drone.params['frontalarea']
+        if drone.params['wingtype'] == 'rotary':
+            self.__updateVelocityInducedHover(self.params['effectiveweight'],drone.params['rotorquantity'],drone.params['rotorarea'],weather.params['airdensity'])
+            self.params['velocityinduced']          = self.params['velocityinducedhover']
+            self.params['thrust']                   = self.params['effectiveweight']
+            self.params['alpha']                    = 0.0
+            self.params['alpha_gekko']              = 0.0
+            self.params['drag']                     = 0.0
+            self.params['dragarea']                 = drone.params['frontalarea']
         self.__setDragCoefficient()
 
 
@@ -292,7 +294,8 @@ class Power:
 
     def update(self, drone, weather, mission):
         self.__updateWeight(drone.params['takeoffweight'],weather.params['gravitationconstant'],weather.params['weightadjustment'],mission.params['payload'])
-        self.__updateVelocityInducedHover(self.params['effectiveweight'],drone.params['rotorquantity'],drone.params['rotorarea'],weather.params['airdensity'])
+        if drone.params['wingtype'] == 'rotary':
+            self.__updateVelocityInducedHover(self.params['effectiveweight'],drone.params['rotorquantity'],drone.params['rotorarea'],weather.params['airdensity'])
         self.params['powerModel'](drone, weather, mission)
 
     # def update(self, drone, weather, mission):
@@ -337,7 +340,11 @@ class Power:
         # self.__printParameters(drone,weather,mission)
 
     def __setPowerMomentum(self, drone, weather, mission):
-        self.__setupModel(mission.params['missionspeed'],weather.params['airdensity'],drone.params['rotorarea'],drone.params['rotorquantity'],drone.params['frontalarea'],drone.params['toparea'])
+        velocityinfinity = self.__getVelocityInfinity(mission.params['missionspeed'],weather.params['windspeed'],weather.params['winddirection'])
+        # warm if velocity is not zero
+        if velocityinfinity > 1.0:
+            pass
+        self.__setupModel(velocityinfinity,weather.params['airdensity'],drone.params['rotorarea'],drone.params['rotorquantity'],drone.params['frontalarea'],drone.params['toparea'])
         # self.__solveModel()
         # self.__getDrag(drone,weather,mission)
         # self.__getThrust(drone,weather,mission)
@@ -352,47 +359,67 @@ class Power:
         if self.debug:
             self.__printParameters(drone,weather,mission)
 
+    def __getVelocityInfinity(self,missionspeed,windspeed,winddirection):
+        velocitynorth = missionspeed - windspeed * np.cos(winddirection*np.pi/180.0)
+        velocityeast  = -windspeed * np.sin(winddirection*np.pi/180)
+        
+        return np.sqrt(velocitynorth**2 + velocityeast**2)
+
     def __setPowerTraub(self, drone, weather, mission): #fixed-wing power model
         density = weather.params['airdensity']
         cruisespeed = mission.params['missionspeed']
         if 'wingarea' in drone.params:
             wingarea = drone.params['wingarea']
-        elif 'wingspan' in drone.params and 'chord' in drone.params:
-            wingarea = drone.params['wingspan'] * drone.params['chord']
+        elif 'span' in drone.params and 'chord' in drone.params:
+            wingarea = drone.params['span'] * drone.params['chord']
         else:
             self.__updateLog('ERROR','Wing area needed to calculate power')
             raise(Exception("~~~~~ ERROR: wing area needed to calculate power ~~~~~"))
-        if 'wingspan' not in drone.params:
-            self.__updateLog('ERROR','Wingspan needed to calculate power')
-            raise(Exception("~~~~~ ERROR: wingspan needed to calculate power ~~~~~"))
+        if 'span' not in drone.params:
+            self.__updateLog('ERROR','span needed to calculate power')
+            raise(Exception("~~~~~ ERROR: span needed to calculate power ~~~~~"))
         else:
-            span = drone.params['wingspan']
+            span = drone.params['span']
         self.__setDragCoefficient()
         dragcoefficient  = self.params['dragcoefficient']
-        weight           = drone.params['takeoffweight'] * weather.params['gravitationconstant']
+        weight           = self.params['effectiveweight']
         spanefficiency   = drone.params['spanefficiency']
         k                = 1 / (np.pi*span**2 / wingarea * spanefficiency)
+
+        if 'LDadjustment' in weather.params: #this probably can be its own method
+            CLfactor = weather.params['LDadjustment'][0]
+            CDfactor = weather.params['LDadjustment'][1]
+            weight *= CLfactor
+            dragcoefficient += CDfactor
 
         self.params['power'] = 0.5 * density * cruisespeed**3 * wingarea * dragcoefficient \
                                 + 2*weight**2*k \
                                 / (density*cruisespeed*wingarea)
 
-    def getPowerFixedWing(self, drone, weather, mission): #from Dr. Nin's textbook
+    def __setPowerFixedWing(self, drone, weather, mission): #from Dr. Nin's textbook
         
-        LD = 10 #placeholder, this could be a user input
+        L_D = drone.params['L/D'] 
+        propulsiveefficiency = drone.params['propulsiveefficiency'] 
 
         if 'LDadjustment' in weather.params: #this probably can be its own method
-            L = drone.params['effectivetakeoffweight'] * weather.params['gravitationconstant']
-            D = L / LD
+            L = self.params['effectiveweight'] * weather.params['gravitationconstant']
+            D = L / L_D
             CLfactor = weather.params['LDadjustment'][0]
             CDfactor = weather.params['LDadjustment'][1]
             L *= CLfactor
             D += CDfactor
-            LD = L/D
+            L_D = L/D
 
-        propulsiveefficiency = .4 #placeholder
+        gravity = weather.params['gravitationconstant']
+        weight = self.params['effectiveweight']
+        speed = mission.params['missionspeed']
 
-        self.params['power'] = weather.params['gravitationconstant'] * drone.params['effectivetakeoffweight'] * mission.params['missionspeed'] / (propulsiveefficiency * LD)
+        print('gravity:',gravity)
+        print('weight:', weight)
+        print('speed:', speed)
+
+        self.params['power'] = gravity * weight * speed / (propulsiveefficiency * L_D)
+        print("POWER GENERATED IS:", self.params['power'])
 
 
     # def __updateEfficiencyPropulsive(self, drone, weather, mission):
@@ -420,12 +447,13 @@ class Power:
         poweractual     = batteryenergy/endurance
         powerideal      = (thrust)**1.5 / np.sqrt(2*rotorarea*rotorquantity*airdensity)
 
-        print('gEP: poweractual is      ',poweractual)
-        print('gEP: powerideal is       ',powerideal)
-        print('gEP: testmass is         ',testmass)
-        print('gEP: rotorarea is        ',rotorarea)
-        print('gEP: batteryenergy is    ',batteryenergy)
-        print('gEP: endurance is        ',endurance)
+        if self.debug:
+            print('gEP: poweractual is      ',poweractual)
+            print('gEP: powerideal is       ',powerideal)
+            print('gEP: testmass is         ',testmass)
+            print('gEP: rotorarea is        ',rotorarea)
+            print('gEP: batteryenergy is    ',batteryenergy)
+            print('gEP: endurance is        ',endurance)
 
         efficiencypropulsive = powerideal/poweractual
 
@@ -1064,38 +1092,38 @@ class Wind(WeatherType):
     '''
 
     def __init__(self, params):
-        paramnames = ['velocityvector', 'heading',
-                      'downdraftspeed', 'speednortheast']
+        paramnames = ['windspeed', 'winddirection',
+                      'downdraftspeed']
         WeatherType.__init__(self, params, paramnames)
-        if self.params['velocityvector'] == None:
-            if not(self.params['heading'] == None) and not(self.params['speednortheast'] == None):
-                if self.params['downdraftspeed'] == None:
-                    # set downdraftspeed to 0 by default
-                    self.params['downdraftspeed'] = 0.0
-                velocityvector = [self.params['speednortheast'],
-                                  0.0, self.params['downdraftspeed']]
-                theta = self.params['heading'] * \
-                    np.pi/180.0  # convert to radians
-                rotationmatrix = np.array(
-                    [[np.cos(theta), -np.sin(theta), 0.0],
-                     [np.sin(theta), np.cos(theta), 0.0],
-                     [0.0, 0.0, 0.0]]
-                )
-                self.params['velocityvector'] = np.dot(
-                    rotationmatrix, velocityvector).tolist()
-            else:
-                raise(
-                    Exception("~~~~~ ERROR: could not construct wind velocity vector ~~~~~"))
-        if self.params['heading'] == None and not(self.params['velocityvector'] == None):
-            self.params['heading'] = np.arctan2(
-                self.params['velocityvector'][1], self.params['velocityvector'][0])
-            if self.params['heading'] < 0.0:
-                self.params['heading'] = self.params['heading'] + 2*np.pi
-        if self.params['speednortheast'] == None and not(self.params['velocityvector'] == None):
-            self.params['speednortheast'] = np.hypot(
-                self.params['velocityvector'][1], self.params['velocityvector'][0])
-        if self.params['downdraftspeed'] == None and not(self.params['velocityvector'] == None):
-            self.params['downdraftspeed'] = self.params['velocityvector'][2]
+        # if self.params['velocityvector'] == None:
+        #     if not(self.params['heading'] == None) and not(self.params['speednortheast'] == None):
+        #         if self.params['downdraftspeed'] == None:
+        #             # set downdraftspeed to 0 by default
+        #             self.params['downdraftspeed'] = 0.0
+        #         velocityvector = [self.params['speednortheast'],
+        #                           0.0, self.params['downdraftspeed']]
+        #         theta = self.params['heading'] * \
+        #             np.pi/180.0  # convert to radians
+        #         rotationmatrix = np.array(
+        #             [[np.cos(theta), -np.sin(theta), 0.0],
+        #              [np.sin(theta), np.cos(theta), 0.0],
+        #              [0.0, 0.0, 0.0]]
+        #         )
+        #         self.params['velocityvector'] = np.dot(
+        #             rotationmatrix, velocityvector).tolist()
+        #     else:
+        #         raise(
+        #             Exception("~~~~~ ERROR: could not construct wind velocity vector ~~~~~"))
+        # if self.params['heading'] == None and not(self.params['velocityvector'] == None):
+        #     self.params['heading'] = np.arctan2(
+        #         self.params['velocityvector'][1], self.params['velocityvector'][0])
+        #     if self.params['heading'] < 0.0:
+        #         self.params['heading'] = self.params['heading'] + 2*np.pi
+        # if self.params['speednortheast'] == None and not(self.params['velocityvector'] == None):
+        #     self.params['speednortheast'] = np.hypot(
+        #         self.params['velocityvector'][1], self.params['velocityvector'][0])
+        # if self.params['downdraftspeed'] == None and not(self.params['velocityvector'] == None):
+        #     self.params['downdraftspeed'] = self.params['velocityvector'][2]
 
 
 class Gust(WeatherType):
@@ -1306,7 +1334,7 @@ class model:
 
     def __resetParams(self):
         self.params = {
-            "validation":True,
+            "validation":False,
             "validationcase":"DiFranco2016",
             "drone":None,
             "dronename":"dji-Mavic2",
@@ -1317,7 +1345,7 @@ class model:
             "startstateofcharge":100.0,
             "altitude": 5000,
             "dropsize":0.0,
-            "liquidwatercontent":1.0, #one of this and rainfallrate needs to be specified for rain, but not both
+            "liquidwatercontent":0.0, #one of this and rainfallrate needs to be specified for rain, but not both
             "rainfallrate":None,
             "temperature":15.0,
             "wind":False,
@@ -1342,12 +1370,12 @@ class model:
             # "xbegin":0,
             # "xend":1,
             # "xnumber":5,
-            "xvals":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15],
+            "xvals":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15],
             "zlabel":"temperature",
             # "weatherbegin":10,
             # "weatherend":40,
             # "weathernumber":3
-            "zvals":[0,10,20,30,40] # must contain only unique elements
+            "zvals":[0.0, 10.0, 20.0, 30.0, 40.0] # must contain only unique elements
 
             # "voltage"
             # "voltagecharged"
@@ -1460,10 +1488,10 @@ class model:
         weatherlist.append(rain)
 
         # Wind
-        #     speed       = self.params['windspeed']
-        #     direction   = self.params['winddirection']
-        #     wind        = Wind(speed,direction)
-        #     weatherlist.append(wind)
+        speed       = self.params['windspeed']
+        direction   = self.params['winddirection']
+        wind        = Wind({'windspeed':speed,'winddirection':direction})
+        weatherlist.append(wind)
 
         # Icing
         #     weatherlist.append('icing')

@@ -341,6 +341,9 @@ class Power:
 
     def __setPowerMomentum(self, drone, weather, mission):
         velocityinfinity = self.__getVelocityInfinity(mission.params['missionspeed'],weather.params['windspeed'],weather.params['winddirection'])
+        # warm if velocity is not zero
+        if velocityinfinity > 1.0:
+            pass
         self.__setupModel(velocityinfinity,weather.params['airdensity'],drone.params['rotorarea'],drone.params['rotorquantity'],drone.params['frontalarea'],drone.params['toparea'])
         # self.__solveModel()
         # self.__getDrag(drone,weather,mission)
@@ -1331,7 +1334,7 @@ class model:
 
     def __resetParams(self):
         self.params = {
-            "validation":True,
+            "validation":False,
             "validationcase":"DiFranco2016",
             "drone":None,
             "dronename":"dji-Mavic2",
