@@ -340,7 +340,8 @@ class Power:
         # self.__printParameters(drone,weather,mission)
 
     def __setPowerMomentum(self, drone, weather, mission):
-        self.__setupModel(mission.params['missionspeed'],weather.params['airdensity'],drone.params['rotorarea'],drone.params['rotorquantity'],drone.params['frontalarea'],drone.params['toparea'])
+        velocityinfinity = self.__getVelocityInfinity(mission.params['missionspeed'],weather.params['windspeed'],weather.params['winddirection'])
+        self.__setupModel(velocityinfinity,weather.params['airdensity'],drone.params['rotorarea'],drone.params['rotorquantity'],drone.params['frontalarea'],drone.params['toparea'])
         # self.__solveModel()
         # self.__getDrag(drone,weather,mission)
         # self.__getThrust(drone,weather,mission)
@@ -354,6 +355,12 @@ class Power:
 
         if self.debug:
             self.__printParameters(drone,weather,mission)
+
+    def __getVelocityInfinity(self,missionspeed,windspeed,winddirection):
+        velocitynorth = missionspeed - windspeed * np.cos(winddirection*np.pi/180.0)
+        velocityeast  = -windspeed * np.sin(winddirection*np.pi/180)
+        
+        return np.sqrt(velocitynorth**2 + velocityeast**2)
 
     def __setPowerTraub(self, drone, weather, mission): #fixed-wing power model
         density = weather.params['airdensity']
@@ -437,12 +444,13 @@ class Power:
         poweractual     = batteryenergy/endurance
         powerideal      = (thrust)**1.5 / np.sqrt(2*rotorarea*rotorquantity*airdensity)
 
-        print('gEP: poweractual is      ',poweractual)
-        print('gEP: powerideal is       ',powerideal)
-        print('gEP: testmass is         ',testmass)
-        print('gEP: rotorarea is        ',rotorarea)
-        print('gEP: batteryenergy is    ',batteryenergy)
-        print('gEP: endurance is        ',endurance)
+        if self.debug:
+            print('gEP: poweractual is      ',poweractual)
+            print('gEP: powerideal is       ',powerideal)
+            print('gEP: testmass is         ',testmass)
+            print('gEP: rotorarea is        ',rotorarea)
+            print('gEP: batteryenergy is    ',batteryenergy)
+            print('gEP: endurance is        ',endurance)
 
         efficiencypropulsive = powerideal/poweractual
 
@@ -1081,38 +1089,38 @@ class Wind(WeatherType):
     '''
 
     def __init__(self, params):
-        paramnames = ['velocityvector', 'heading',
-                      'downdraftspeed', 'speednortheast']
+        paramnames = ['windspeed', 'winddirection',
+                      'downdraftspeed']
         WeatherType.__init__(self, params, paramnames)
-        if self.params['velocityvector'] == None:
-            if not(self.params['heading'] == None) and not(self.params['speednortheast'] == None):
-                if self.params['downdraftspeed'] == None:
-                    # set downdraftspeed to 0 by default
-                    self.params['downdraftspeed'] = 0.0
-                velocityvector = [self.params['speednortheast'],
-                                  0.0, self.params['downdraftspeed']]
-                theta = self.params['heading'] * \
-                    np.pi/180.0  # convert to radians
-                rotationmatrix = np.array(
-                    [[np.cos(theta), -np.sin(theta), 0.0],
-                     [np.sin(theta), np.cos(theta), 0.0],
-                     [0.0, 0.0, 0.0]]
-                )
-                self.params['velocityvector'] = np.dot(
-                    rotationmatrix, velocityvector).tolist()
-            else:
-                raise(
-                    Exception("~~~~~ ERROR: could not construct wind velocity vector ~~~~~"))
-        if self.params['heading'] == None and not(self.params['velocityvector'] == None):
-            self.params['heading'] = np.arctan2(
-                self.params['velocityvector'][1], self.params['velocityvector'][0])
-            if self.params['heading'] < 0.0:
-                self.params['heading'] = self.params['heading'] + 2*np.pi
-        if self.params['speednortheast'] == None and not(self.params['velocityvector'] == None):
-            self.params['speednortheast'] = np.hypot(
-                self.params['velocityvector'][1], self.params['velocityvector'][0])
-        if self.params['downdraftspeed'] == None and not(self.params['velocityvector'] == None):
-            self.params['downdraftspeed'] = self.params['velocityvector'][2]
+        # if self.params['velocityvector'] == None:
+        #     if not(self.params['heading'] == None) and not(self.params['speednortheast'] == None):
+        #         if self.params['downdraftspeed'] == None:
+        #             # set downdraftspeed to 0 by default
+        #             self.params['downdraftspeed'] = 0.0
+        #         velocityvector = [self.params['speednortheast'],
+        #                           0.0, self.params['downdraftspeed']]
+        #         theta = self.params['heading'] * \
+        #             np.pi/180.0  # convert to radians
+        #         rotationmatrix = np.array(
+        #             [[np.cos(theta), -np.sin(theta), 0.0],
+        #              [np.sin(theta), np.cos(theta), 0.0],
+        #              [0.0, 0.0, 0.0]]
+        #         )
+        #         self.params['velocityvector'] = np.dot(
+        #             rotationmatrix, velocityvector).tolist()
+        #     else:
+        #         raise(
+        #             Exception("~~~~~ ERROR: could not construct wind velocity vector ~~~~~"))
+        # if self.params['heading'] == None and not(self.params['velocityvector'] == None):
+        #     self.params['heading'] = np.arctan2(
+        #         self.params['velocityvector'][1], self.params['velocityvector'][0])
+        #     if self.params['heading'] < 0.0:
+        #         self.params['heading'] = self.params['heading'] + 2*np.pi
+        # if self.params['speednortheast'] == None and not(self.params['velocityvector'] == None):
+        #     self.params['speednortheast'] = np.hypot(
+        #         self.params['velocityvector'][1], self.params['velocityvector'][0])
+        # if self.params['downdraftspeed'] == None and not(self.params['velocityvector'] == None):
+        #     self.params['downdraftspeed'] = self.params['velocityvector'][2]
 
 
 class Gust(WeatherType):
@@ -1477,10 +1485,10 @@ class model:
         weatherlist.append(rain)
 
         # Wind
-        #     speed       = self.params['windspeed']
-        #     direction   = self.params['winddirection']
-        #     wind        = Wind(speed,direction)
-        #     weatherlist.append(wind)
+        speed       = self.params['windspeed']
+        direction   = self.params['winddirection']
+        wind        = Wind({'windspeed':speed,'winddirection':direction})
+        weatherlist.append(wind)
 
         # Icing
         #     weatherlist.append('icing')
